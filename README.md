@@ -10,4 +10,5 @@ This repository contains the citizen facing frontend of the licensing applicatio
 
 ## Set up
 
-This repository uses `uv` to manage packages and dependencies
+This repository uses `uv` to manage packages and dependencies. Run `uv` to install all necessary packages and dependencies needed
+to test and run this project
