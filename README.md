@@ -11,6 +11,7 @@ This repository contains the citizen facing frontend of the licensing applicatio
 ## Set up
 
 This repository uses `uv` to manage packages and dependencies. Run `uv sync` to install all necessary packages and dependencies needed
-to test and run this project
+to test and run this project.
+If a python virtual environment has not been activated for you; run `source .venv/bin/activate`.
 
 This project also uses `pre-commit` run `pre-commit install` to create the correct pre-commit git hooks.
