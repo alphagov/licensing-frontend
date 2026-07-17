@@ -1,0 +1,41 @@
+[project]
+name = "licensing-frontend"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.0",
+    "ruff>=0.15.22",
+]
+
+[tool.ruff]
+line-length = 120
+
+extend-exclude = [
+    "migrations/versions/",
+    "__pycache__",
+    "cache",
+    "migrations",
+]
+
+[tool.ruff.lint]
+extend-select = [
+    "DJ",
+    "E",
+    "F",
+    "W",
+    "I",
+    "UP",
+    "B",
+    "C90",
+    "G",
+    "T20",
+    "C4",
+    "ISC",
+    "RSE",
+    "PIE",
+    "N804",
+    "RUF100",
+]
