@@ -23,6 +23,6 @@ from django.views.generic import RedirectView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("front/", include("citizen_frontend.urls")),
+    path("apply-for-a-licence/", include("citizen_frontend.urls")),
     path("assets/<path:path>", RedirectView.as_view(url="/static/assets/%(path)s", permanent=False)),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -10,6 +10,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pre-commit>=4.6.0",
+    "pytest-playwright>=0.8.0",
     "ruff>=0.15.22",
 ]
 

@@ -1,5 +1,11 @@
 from django.shortcuts import render
 
 
-def index(request):
-    return render(request, "citizen_frontend/base.html")
+def index(request, licence, authority, interaction, interation_sub_id):
+
+    context = {
+        "authority": authority,
+        "licence": licence.replace("-", " "),
+    }
+
+    return render(request, "citizen_frontend/licence_introduction_page.html", context)
