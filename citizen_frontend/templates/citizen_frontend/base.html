@@ -1,21 +1,25 @@
 {% load static %}
 <!doctype html>
 <html lang="en" class="govuk-template">
-  <head>
+<head>
     <title>Example - GOV.UK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <link rel="manifest" href="{% static '/assets/manifest.json' %}">
     <link rel="stylesheet" href="{% static '/stylesheets/govuk-frontend-6.4.0.min.css' %}">
-  </head>
-  <body class="govuk-template__body">
+</head>
+<body class="govuk-template__body">
     <script>document.body.className += ' js-enabled' + ('noModule' in HTMLScriptElement.prototype ? ' govuk-frontend-supported' : '');</script>
-    <!-- component HTML -->
     <script type="module" src="{% static '/javascripts/govuk-frontend-6.4.0.min.js' %}"></script>
     <script type="module">
       import { initAll } from '../../../static/javascripts/govuk-frontend-6.4.0.min.js'
       initAll()
     </script>
-  <div class="govuk-header">
+
+{% block skip_link %}
+    <a href="#main-content" class="govuk-skip-link" data-module="govuk-skip-link" data-govuk-skip-link-init="">Skip to main content</a>
+{% endblock %}
+
+<header class="govuk-header">
   <div class="govuk-header__container govuk-width-container">
     <div class="govuk-header__logo">
       <a href="#" class="govuk-header__homepage-link">
@@ -45,8 +49,16 @@
       </a>
     </div>
   </div>
-</div>
-{% block content %}{% endblock %}
+</header>
+{% block main %}
+    <div class="govuk-width-container">
+        <main class="govuk-main-wrapper" id="main-content" role="main">
+            {% block content %}
+            {% endblock %}
+        </main>
+    </div>
+{% endblock %}
+{% block footer %}
 <div class="govuk-footer">
   <div class="govuk-width-container">
     <svg
@@ -101,5 +113,6 @@
     </div>
   </div>
 </div>
+{% endblock %}
   </body>
 </html>
