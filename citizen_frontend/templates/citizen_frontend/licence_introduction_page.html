@@ -27,5 +27,13 @@
             </li>
         </ul>
     </div>
+    <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
+    {% if fee %}
+        <p class="govuk-body" data-testid="fee-amount">There's a <strong>{{ fee }}</strong> fee.</p>
+        <p class="govuk-body">You'll need a debit or credit card.</p>
+    {% endif %}
+    <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
+    <a href="#" class="govuk-button" data-testid="submit-button">Submit application</a>
+
 
 {% endblock %}
