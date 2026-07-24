@@ -1,7 +1,7 @@
 {% extends "citizen_frontend/base.html" %}
 {% block content %}
     <h1 class="govuk-heading-l" data-testid="licence-heading">{{ licence }} from {{ authority }}</h1>
-    <span class="govuk-caption-m" data-testid="steps">Step 1 of 4</span>
+    <span class="govuk-caption-m" data-testid="steps">Step 1 of {{ steps }}</span>
     <h2 class="govuk-heading-m" data-testid="action-heading">Complete the application form</h2>
     <h3 class="govuk-heading-s" data-testid="download-heading">First, download the form</h3>
     <div class="govuk-inset-text" data-testid="pdf-inset">
