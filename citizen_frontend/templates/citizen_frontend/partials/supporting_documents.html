@@ -1,0 +1,17 @@
+{% if supporting_documents %}
+    <p class="govuk-body">You'll need to provide copies of the following:</p>
+    <ul class="govuk-list govuk-list--bullet" data-testid="supporting-documents">
+    {% for document in supporting_documents %}
+        <li data-testid="support-document-{{ forloop.counter }}">{{ document.name }} {% if not document.is_mandatory %}(optional){% endif %}</li>
+    {% endfor %}
+    </ul>
+    <details class="govuk-details" >
+        <summary class="govuk-details__summary" data-testid="electronic-copies-detail">
+            <span class="govuk-details__summary-text">What if I don't have electronic copies?</span>
+        </summary>
+        <div class="govuk-details__text" data-testid="electronic-copies-detail-text">
+            <p class="govuk-body">Photos or scans of documents are acceptable, providing the relevant information is clear.</p>
+            <p class="govuk-body">If you're unable to provide electronic versions of these documents then you cannot make an online application and you should do so by post.</p>
+        </div>
+    </details>
+{% endif %}

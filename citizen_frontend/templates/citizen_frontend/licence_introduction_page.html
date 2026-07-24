@@ -1,0 +1,35 @@
+{% extends "citizen_frontend/base.html" %}
+{% block content %}
+    <h1 class="govuk-heading-l" data-testid="licence-heading">{{ licence }} from {{ authority }}</h1>
+    <span class="govuk-caption-m" data-testid="steps">Step 1 of {{ steps }}</span>
+    <h2 class="govuk-heading-m" data-testid="action-heading">Complete the application form</h2>
+    <h3 class="govuk-heading-s" data-testid="download-heading">First, download the form</h3>
+    <div class="govuk-inset-text" data-testid="pdf-inset">
+        <p class="govuk-body">Right-click the link below and select the 'Save' option</p>
+        <p class="govuk-body"> Please note this file will not open properly in your web browser,
+            <a href="https://get.adobe.com/uk/reader/" class="govuk-link" rel="noreferrer noopener" target="_blank" data-testid="adobe-download">
+                Adobe Reader (opens in new tab)</a> is required to view it.</p>
+        <p class="govuk-body"><a href="#" class="govuk-link" data-testid="pdf-download">Download the application form (PDF)</a></p>
+    </div>
+    <h3 class="govuk-heading-s" data-testid="fill-in-heading">Next, fill in the form on your computer</h3>
+    <p class="govuk-body">To edit the form you'll need a recent version of  <a href="https://get.adobe.com/uk/reader/" class="govuk-link" rel="noreferrer noopener" target="_blank" data-testid="adobe-download-2">
+                Adobe Reader (opens in new tab).</a></p>
+    <p class="govuk-body">Open the form in Adobe Reader instead of your web browser.</p>
+    <p class="govuk-body">If you can't complete the form right now don't worry, you can edit it in your own time. Once you're ready return to this page to complete the application.</p>
+    <div class="govuk-inset-text" data-testid="additional-information">
+        <p>There is additional information available for this licence that you might find useful</p>
+        <ul class="govuk-list">
+            <li>
+                <a href="#" data-testid="general-information" class="govuk-link" rel="noreferrer noopener" target="_blank">General information from the licensing authority (opens in new tab)</a>
+            </li>
+            <li>
+                <a href="#" data-testid="legislation-information" class="govuk-link" rel="noreferrer noopener" target="_blank">More detailed information on legislation etc. (opens in new tab)</a>
+            </li>
+        </ul>
+    </div>
+    <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
+    {% include "citizen_frontend/partials/supporting_documents.html" %}
+    {% include "citizen_frontend/partials/fee.html" %}
+    <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
+    <a href="#" class="govuk-button" data-testid="submit-button">Submit application</a>
+{% endblock %}
