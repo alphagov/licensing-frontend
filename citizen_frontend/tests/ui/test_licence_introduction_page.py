@@ -85,3 +85,13 @@ def test_page_has_supporting_documents_list_licence_requires_supporting_document
 
     details.click()
     expect(details_text).to_be_visible()
+
+
+def test_page_marks_non_mandatory_supporting_documents_opional(page: Page):
+    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+
+    mandatory_document = page.get_by_test_id("support-document-1")
+    optional_document = page.get_by_test_id("support-document-3")
+
+    expect(mandatory_document).not_to_contain_text("(optional)")
+    expect(optional_document).to_contain_text("(optional)")
