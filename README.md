@@ -15,3 +15,9 @@ to test and run this project.
 If a python virtual environment has not been activated for you; run `source .venv/bin/activate`.
 
 This project also uses `pre-commit` run `pre-commit install` to create the correct pre-commit git hooks.
+
+## Testing
+
+This repository uses `playwright` to test the UI to run the tests you must first run `playwright install` before running the tests for the first time.
+The server must running for the tests to run, run `make start`.
+To run the UI test, run `make test-ui`.
