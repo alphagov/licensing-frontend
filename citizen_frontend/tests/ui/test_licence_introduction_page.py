@@ -71,3 +71,17 @@ def test_page_has_submit_button(page: Page):
     submit_button = page.get_by_test_id("submit-button")
     expect(submit_button).to_be_visible()
     expect(submit_button).to_have_attribute("href", "#")
+
+
+def test_page_has_supporting_documents_list_licence_requires_supporting_documents(page: Page):
+    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+
+    details = page.get_by_test_id("electronic-copies-detail")
+    details_text = page.get_by_test_id("electronic-copies-detail-text")
+
+    expect(page.get_by_test_id("supporting-documents")).to_be_visible()
+    expect(details).to_be_visible()
+    expect(details_text).not_to_be_visible()
+
+    details.click()
+    expect(details_text).to_be_visible()
