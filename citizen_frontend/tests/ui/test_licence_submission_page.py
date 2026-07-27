@@ -1,0 +1,9 @@
+from conftest import BASE_URL
+from playwright.sync_api import Page, expect
+
+
+def test_page_has_correct_headings(page: Page):
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1/form")
+
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Temporary Event Notice")
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Winchester")

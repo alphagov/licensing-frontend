@@ -13,4 +13,9 @@ def index(request, licence, authority, interaction, interation_sub_id):
 
 
 def submit_form(request, licence, authority, interaction, interation_sub_id):
-    pass
+    try:
+        context = get_mocked_context(licence, authority, interaction, interation_sub_id)
+        return render(request, "citizen_frontend/licence_submission_page.html", context)
+
+    except Exception as e:
+        raise Http404("Incorrect licence, or authority does not exist") from e
