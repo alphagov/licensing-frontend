@@ -5,8 +5,8 @@ from playwright.sync_api import Page, expect
 def test_page_has_correct_headings(page: Page):
     page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
-    expect(page.get_by_test_id("licence-heading")).to_contain_text("Temporary Event Notice")
-    expect(page.get_by_test_id("licence-heading")).to_contain_text("Winchester")
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Temporary Event Notice")
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Winchester")
     expect(page.get_by_test_id("action-heading")).to_have_text("Complete the application form")
     expect(page.get_by_test_id("download-heading")).to_have_text("First, download the form")
     expect(page.get_by_test_id("fill-in-heading")).to_have_text("Next, fill in the form on your computer")

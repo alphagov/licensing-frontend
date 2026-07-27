@@ -7,6 +7,7 @@ from citizen_frontend.mocks import get_mocked_context
 def index(request, licence, authority, interaction, interation_sub_id):
     try:
         context = get_mocked_context(licence, authority, interaction, interation_sub_id)
+        context.update({"step": 1})
         return render(request, "citizen_frontend/licence_introduction_page.html", context)
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
@@ -15,6 +16,7 @@ def index(request, licence, authority, interaction, interation_sub_id):
 def submit_form(request, licence, authority, interaction, interation_sub_id):
     try:
         context = get_mocked_context(licence, authority, interaction, interation_sub_id)
+        context.update({"step": 2})
         return render(request, "citizen_frontend/licence_submission_page.html", context)
 
     except Exception as e:
