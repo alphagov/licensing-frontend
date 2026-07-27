@@ -8,7 +8,7 @@ Licensing exists for authorities which can't or don't want to offer their own li
 
 This repository contains the citizen facing frontend of the licensing application
 
-## Set up
+# Set up
 
 This repository uses `uv` to manage packages and dependencies. Run `uv sync` to install all necessary packages and dependencies needed
 to test and run this project.
@@ -16,7 +16,13 @@ If a python virtual environment has not been activated for you; run `source .ven
 
 This project also uses `pre-commit` run `pre-commit install` to create the correct pre-commit git hooks.
 
-## Testing
+## Direnv
+
+Get direnv to load required environment variables automatically by setting up the [direnv hook](https://direnv.net/docs/hook.html) to run when your shell starts up.
+Create a `.envrc` file in the root of this project, and copy the contents of `dev.envrc` into this file.
+Allow direnv to load environment variables from this directory with `direnv allow .`
+
+# Testing
 
 This repository uses `playwright` to test the UI to run the tests you must first run `playwright install` before running the tests for the first time.
 The server must running for the tests to run, run `make start`.

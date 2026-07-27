@@ -1,8 +1,9 @@
+from conftest import BASE_URL
 from playwright.sync_api import Page, expect
 
 
 def test_page_has_correct_headings(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     expect(page.get_by_test_id("licence-heading")).to_contain_text("Temporary Event Notice")
     expect(page.get_by_test_id("licence-heading")).to_contain_text("Winchester")
@@ -14,31 +15,31 @@ def test_page_has_correct_headings(page: Page):
 
 
 def test_page_has_4_steps_licence_has_fee(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 4")
 
 
 def test_page_has_3_steps_licence_has_no_fee(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 3")
 
 
 def test_page_has_fee_amount_licence_has_fee(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     expect(page.get_by_test_id("fee-amount")).to_contain_text("£21.00")
 
 
 def test_page_has_no_fee_amount_licence_has_no_fee(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
 
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
 
 
 def test_page_has_download_pdf_inset(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     adobe_download_link = page.get_by_test_id("adobe-download")
     pdf_download_link = page.get_by_test_id("pdf-download")
@@ -51,7 +52,7 @@ def test_page_has_download_pdf_inset(page: Page):
 
 
 def test_page_has_additional_information_inset(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     general_info_link = page.get_by_test_id("general-information")
     legislation_info_link = page.get_by_test_id("legislation-information")
@@ -66,7 +67,7 @@ def test_page_has_additional_information_inset(page: Page):
 
 
 def test_page_has_submit_button(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1")
 
     submit_button = page.get_by_test_id("submit-button")
     expect(submit_button).to_be_visible()
@@ -74,7 +75,7 @@ def test_page_has_submit_button(page: Page):
 
 
 def test_page_has_supporting_documents_list_licence_requires_supporting_documents(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
 
     details = page.get_by_test_id("electronic-copies-detail")
     details_text = page.get_by_test_id("electronic-copies-detail-text")
@@ -88,7 +89,7 @@ def test_page_has_supporting_documents_list_licence_requires_supporting_document
 
 
 def test_page_marks_non_mandatory_supporting_documents_opional(page: Page):
-    page.goto("127.0.0.1:8000/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
+    page.goto(f"{BASE_URL}/apply-for-a-licence/food-premises-approval-6/winchester/apply-1")
 
     mandatory_document = page.get_by_test_id("support-document-1")
     optional_document = page.get_by_test_id("support-document-3")
