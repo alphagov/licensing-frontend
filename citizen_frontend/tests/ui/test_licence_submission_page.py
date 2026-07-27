@@ -10,8 +10,7 @@ def test_page_has_correct_headings(page: Page):
     expect(page.get_by_test_id("action-heading")).to_have_text("Submit the application")
 
 
-#
-# def test_page_has_emails_fields(page: Page):
-#     page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1/form")
-#
-#     expect(page.get_by_test_id("email-field")).to_be_visible()
+def test_page_has_emails_fields(page: Page):
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/winchester/apply-1/form")
+
+    expect(page.get_by_test_id("email-field")).to_be_visible()

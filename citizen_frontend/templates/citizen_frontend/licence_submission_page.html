@@ -1,5 +1,8 @@
 {% extends "citizen_frontend/base.html" %}
+{% load crispy_forms_tags crispy_forms_gds %}
 {% block content %}
-{% include "citizen_frontend/partials/page_heading.html" %}
+    {% error_summary form %}
+    {% include "citizen_frontend/partials/page_heading.html" %}
     <h2 class="govuk-heading-m" data-testid="action-heading">Submit the application</h2>
+    {% crispy form %}
 {% endblock %}
