@@ -30,5 +30,5 @@
     {% include "citizen_frontend/partials/supporting_documents.html" %}
     {% include "citizen_frontend/partials/fee.html" %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
-    <a href="#" class="govuk-button" data-testid="submit-button">Submit application</a>
+    <a href="{% url 'submit' licence_slug authority_slug interaction interation_sub_id %}" class="govuk-button" data-testid="submit-button">Submit application</a>
 {% endblock %}

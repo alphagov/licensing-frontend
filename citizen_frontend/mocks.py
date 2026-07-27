@@ -20,8 +20,12 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
     context = {
         "authority": authority.capitalize(),
         "licence": licence.replace("-", " ").title(),
+        "interation_sub_id": interation_sub_id,
+        "interaction": interaction,
         "fee": fee,
         "steps": steps,
+        "authority_slug": authority,
+        "licence_slug": licence,
         "supporting_documents": None if licence == "temporary-event-notice" else supporting_documents,
     }
 

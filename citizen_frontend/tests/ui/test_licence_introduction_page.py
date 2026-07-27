@@ -71,7 +71,9 @@ def test_page_has_submit_button(page: Page):
 
     submit_button = page.get_by_test_id("submit-button")
     expect(submit_button).to_be_visible()
-    expect(submit_button).to_have_attribute("href", "#")
+    expect(submit_button).to_have_attribute(
+        "href", "/apply-for-a-licence/temporary-event-notice/winchester/apply-1/form"
+    )
 
 
 def test_page_has_supporting_documents_list_licence_requires_supporting_documents(page: Page):
