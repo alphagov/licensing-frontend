@@ -43,18 +43,32 @@ class SubmissionEmailForm(forms.Form):
         ]
 
         if context.get("supporting_documents"):
-            layout_items.append(HTML(self.render_supporting_documents(context)))
+            layout_items.append(self.render_supporting_documents(context))
 
         self.helper = FormHelper()
         self.helper.layout = Layout(*layout_items)
 
     def render_supporting_documents(self, context):
+        fieldset_additions = [
+            HTML(
+                render_to_string(
+                    "citizen_frontend/partials/supporting_documents_upload_additional_information.html", context=context
+                )
+            ),
+        ]
 
-        return render_to_string(
-            "citizen_frontend/partials/supporting_documents_upload_additional_information.html", context=context
-        )
+        supporting_documents = context["supporting_documents"]
 
-        # for index, supporting_document in enumerate(self.context.supporting_documents):
-        #     supporting_document_upload = forms.FileField(
-        #         label=
-        #     )
+        for index, document in enumerate(supporting_documents):
+            self.fields[f"supporting_document_{index}"] = forms.FileField(
+                label=document["name"],
+                help_text=document.get("description", "add description to test models"),
+                required=document["is_mandatory"],
+                widget=forms.FileInput(
+                    attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
+                ),
+            )
+
+            fieldset_additions.append(f"supporting_document_{index}")
+
+        return Fieldset(*fieldset_additions, legend="Supporting Documents", legend_tag="h2", legend_size="s")

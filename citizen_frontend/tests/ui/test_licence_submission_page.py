@@ -50,3 +50,9 @@ def test_page_has_supporting_documents_details_supporting_documents_required(pag
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
     expect(page.get_by_test_id("supporting-documents-details")).to_be_visible()
+
+
+def test_page_has_additional_file_uploads_supporting_documents_required(page: Page):
+    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
+
+    expect(page.get_by_test_id("supporting-document-upload-0")).to_be_visible()
