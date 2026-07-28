@@ -43,12 +43,12 @@ class ApplicationSubmissionForm(forms.Form):
         ]
 
         if context.get("supporting_documents"):
-            layout_items.append(self.render_supporting_documents(context))
+            layout_items.append(self.build_supporting_documents_fieldset(context))
 
         self.helper = FormHelper()
         self.helper.layout = Layout(*layout_items)
 
-    def render_supporting_documents(self, context):
+    def build_supporting_documents_fieldset(self, context):
         fieldset_additions = [
             HTML(
                 render_to_string(

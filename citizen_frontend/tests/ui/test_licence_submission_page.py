@@ -1,3 +1,4 @@
+import pytest
 from conftest import BASE_URL, TEST_FOOD_PREMISES_APPLY_FORM_URL, TEST_TEMP_EVENT_APPLY_FORM_URL
 from playwright.sync_api import Page, expect
 
@@ -10,22 +11,29 @@ def test_page_has_correct_headings(page: Page):
     expect(page.get_by_test_id("action-heading")).to_have_text("Submit the application")
 
 
-def test_page_has_emails_field(page: Page):
+@pytest.mark.parametrize(
+    "url, expected_total_steps",
+    [
+        (TEST_TEMP_EVENT_APPLY_FORM_URL, "4"),
+        (TEST_FOOD_PREMISES_APPLY_FORM_URL, "3"),
+    ],
+)
+def test_page_has_correct_number_of_steps(page: Page, url, expected_total_steps):
+    page.goto(f"{BASE_URL}{url}")
+
+    expect(page.get_by_test_id("steps")).to_contain_text(f"2 of {expected_total_steps}")
+
+
+def test_page_form_has_correct_elements_no_supporting_documents_required(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
+
+    application_upload = page.get_by_test_id("application-upload")
 
     expect(page.get_by_test_id("email-field")).to_be_visible()
-
-
-def test_page_has_confirmation_email_field(page: Page):
-    page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
-
     expect(page.get_by_test_id("confirmation-email-field")).to_be_visible()
-
-
-def test_page_has_application_form_upload_field(page: Page):
-    page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
-
-    expect(page.get_by_test_id("application-upload")).to_be_visible()
+    expect(application_upload).to_be_visible()
+    expect(application_upload).to_have_role("button")
+    expect(page.get_by_test_id("supporting-documents-statement")).not_to_be_visible()
 
 
 def test_page_has_supporting_document_statement_supporting_documents_required(page: Page):
@@ -55,4 +63,7 @@ def test_page_has_supporting_documents_details_supporting_documents_required(pag
 def test_page_has_additional_file_uploads_supporting_documents_required(page: Page):
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
-    expect(page.get_by_test_id("supporting-document-upload-0")).to_be_visible()
+    supporting_document_upload = page.get_by_test_id("supporting-document-upload-0")
+
+    expect(supporting_document_upload).to_be_visible()
+    expect(supporting_document_upload).to_have_role("button")
