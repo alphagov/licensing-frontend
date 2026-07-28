@@ -32,7 +32,7 @@ def test_page_has_additional_file_upload_fields_supporting_documents_required(pa
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
     (
-        expect(page.get_by_test_id("support-documents-statement")).to_contain_text(
+        expect(page.get_by_test_id("supporting-documents-statement")).to_contain_text(
             "All documents are required, unless stated otherwise. "
             "Photos of documents are acceptable, as long as all the relevant information is clear. "
             "We'll only share these documents with the licensing authority."
