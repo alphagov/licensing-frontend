@@ -6,7 +6,7 @@ from django.core.validators import FileExtensionValidator
 from django.template.loader import render_to_string
 
 
-class SubmissionEmailForm(forms.Form):
+class ApplicationSubmissionForm(forms.Form):
     email = forms.EmailField(
         help_text="Please provide your email address, "
         "so the licensing authority can let you know if your application has been successful or not.",
