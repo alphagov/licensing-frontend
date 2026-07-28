@@ -15,9 +15,19 @@ class SubmissionEmailForm(forms.Form):
         widget=forms.TextInput(attrs={"data-testid": "email-field"}),
     )
 
+    confirmation_email = forms.EmailField(
+        label="Confirmation email address",
+        error_messages={
+            "required": "Please confirm your email address",
+            "invalid": "Enter an email address in the correct format, like name@example.com",
+        },
+        widget=forms.TextInput(attrs={"data-testid": "confirmation-email-field"}),
+    )
+
     def __init__(self, context):
         super().__init__()
         self.helper = FormHelper()
         self.helper.layout = Layout(
             Field.text("email", autocomplete="email"),
+            Field.text("confirmation_email", autocomplete="email"),
         )

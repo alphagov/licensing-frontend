@@ -10,7 +10,13 @@ def test_page_has_correct_headings(page: Page):
     expect(page.get_by_test_id("action-heading")).to_have_text("Submit the application")
 
 
-def test_page_has_emails_fields(page: Page):
+def test_page_has_emails_field(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
 
     expect(page.get_by_test_id("email-field")).to_be_visible()
+
+
+def test_page_has_confirmation_email_field(page: Page):
+    page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
+
+    expect(page.get_by_test_id("confirmation-email-field")).to_be_visible()
