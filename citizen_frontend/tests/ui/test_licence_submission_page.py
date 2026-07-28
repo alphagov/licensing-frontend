@@ -28,7 +28,7 @@ def test_page_has_application_form_upload_field(page: Page):
     expect(page.get_by_test_id("application-upload")).to_be_visible()
 
 
-def test_page_has_additional_file_upload_fields_supporting_documents_required(page: Page):
+def test_page_has_supporting_document_statement_supporting_documents_required(page: Page):
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
     (
@@ -38,3 +38,15 @@ def test_page_has_additional_file_upload_fields_supporting_documents_required(pa
             "We'll only share these documents with the licensing authority."
         )
     )
+
+
+def test_page_has_supporting_documents_inset_supporting_documents_required(page: Page):
+    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
+
+    expect(page.get_by_test_id("supporting-documents-inset")).to_be_visible()
+
+
+def test_page_has_supporting_documents_details_supporting_documents_required(page: Page):
+    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
+
+    expect(page.get_by_test_id("supporting-documents-details")).to_be_visible()

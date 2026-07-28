@@ -50,7 +50,9 @@ class SubmissionEmailForm(forms.Form):
 
     def render_supporting_documents(self, context):
 
-        return render_to_string("citizen_frontend/partials/supporting_documents_form_statement.html", context=context)
+        return render_to_string(
+            "citizen_frontend/partials/supporting_documents_upload_additional_information.html", context=context
+        )
 
         # for index, supporting_document in enumerate(self.context.supporting_documents):
         #     supporting_document_upload = forms.FileField(
