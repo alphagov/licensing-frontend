@@ -45,6 +45,9 @@ class ApplicationSubmissionForm(forms.Form):
         if context.get("supporting_documents"):
             layout_items.append(self.build_supporting_documents_fieldset(context))
 
+        if context.get("default_declarations"):
+            layout_items.append(self.build_declarations_fieldset(context))
+
         self.helper = FormHelper()
         self.helper.layout = Layout(*layout_items)
 
@@ -72,3 +75,17 @@ class ApplicationSubmissionForm(forms.Form):
             fieldset_additions.append(f"supporting_document_{index}")
 
         return Fieldset(*fieldset_additions, legend="Supporting Documents", legend_tag="h2", legend_size="s")
+
+    def build_declarations_fieldset(self, context):
+        fieldset_additions = [HTML(render_to_string("citizen_frontend/partials/declarations.html", context=context))]
+
+        self.fields["declaration"] = forms.BooleanField(
+            label="Ticking this box indicates you have read and understood the above declaration",
+            required=True,
+            error_messages={"required": "Please check the tick box to accept the declaration"},
+            widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "declaration-checkbox"}),
+        )
+
+        fieldset_additions.append("declaration")
+
+        return Fieldset(*fieldset_additions, legend="Declarations", legend_tag="h2", legend_size="s")

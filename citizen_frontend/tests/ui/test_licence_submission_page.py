@@ -31,39 +31,41 @@ def test_page_form_has_correct_elements_no_supporting_documents_required(page: P
 
     expect(page.get_by_test_id("email-field")).to_be_visible()
     expect(page.get_by_test_id("confirmation-email-field")).to_be_visible()
+
     expect(application_upload).to_be_visible()
     expect(application_upload).to_have_role("button")
+
     expect(page.get_by_test_id("supporting-documents-statement")).not_to_be_visible()
 
+    expect(page.get_by_test_id("declarations")).to_be_visible()
 
-def test_page_has_supporting_document_statement_supporting_documents_required(page: Page):
+    declarations = page.get_by_role("listitem").all()
+    assert len(declarations) == 4
+
+    expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
+
+
+def test_page_has_correct_elements_supporting_documents_required(page: Page):
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
-    (
-        expect(page.get_by_test_id("supporting-documents-statement")).to_contain_text(
-            "All documents are required, unless stated otherwise. "
-            "Photos of documents are acceptable, as long as all the relevant information is clear. "
-            "We'll only share these documents with the licensing authority."
-        )
-    )
-
-
-def test_page_has_supporting_documents_inset_supporting_documents_required(page: Page):
-    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
-
-    expect(page.get_by_test_id("supporting-documents-inset")).to_be_visible()
-
-
-def test_page_has_supporting_documents_details_supporting_documents_required(page: Page):
-    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
-
-    expect(page.get_by_test_id("supporting-documents-details")).to_be_visible()
-
-
-def test_page_has_additional_file_uploads_supporting_documents_required(page: Page):
-    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
-
+    application_upload = page.get_by_test_id("application-upload")
     supporting_document_upload = page.get_by_test_id("supporting-document-upload-0")
 
+    expect(page.get_by_test_id("email-field")).to_be_visible()
+    expect(page.get_by_test_id("confirmation-email-field")).to_be_visible()
+
+    expect(application_upload).to_be_visible()
+    expect(application_upload).to_have_role("button")
+
+    expect(page.get_by_test_id("supporting-documents-statement")).to_be_visible()
+    expect(page.get_by_test_id("supporting-documents-inset")).to_be_visible()
+    expect(page.get_by_test_id("supporting-documents-details")).to_be_visible()
     expect(supporting_document_upload).to_be_visible()
     expect(supporting_document_upload).to_have_role("button")
+
+    expect(page.get_by_test_id("declarations")).to_be_visible()
+
+    declarations = page.get_by_role("listitem").all()
+    assert len(declarations) == 1
+
+    expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()

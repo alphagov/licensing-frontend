@@ -1,0 +1,5 @@
+<ul class="govuk-list govuk-list--bullet" data-testid="declarations">
+    {% for declaration in default_declarations %}
+        <li data-testid="declaration-{{ forloop.counter }}">{{ declaration }}</li>
+    {% endfor %}
+</ul>
