@@ -9,11 +9,10 @@ class ApplicationSubmissionForm(forms.Form):
     email = forms.EmailField(
         help_text="Please provide your email address, "
         "so the licensing authority can let you know if your application has been successful or not.",
-        # error_messages={
-        #     "required": "Please provide your email address",
-        #     "invalid": "Enter an email address in the correct format, like name@example.com",
-        # },
-        error_messages={"required": "Enter your name as it appears on your passport"},
+        error_messages={
+            "required": "Please provide your email address",
+            "invalid": "Enter an email address in the correct format, like name@example.com",
+        },
         widget=forms.TextInput(attrs={"data-testid": "email-field", "autocomplete": "email"}),
         label="Email address",
     )
