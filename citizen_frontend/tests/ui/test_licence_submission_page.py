@@ -69,3 +69,11 @@ def test_page_has_correct_elements_supporting_documents_required(page: Page):
     expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
 
     expect(page.get_by_test_id("submit-button")).to_be_visible()
+
+
+def test_optional_supporting_documents_are_marked_optional(page: Page):
+    page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
+
+    optional_upload = page.get_by_label("Additional information for section 9 of the form(optional)")
+    expect(optional_upload).to_be_visible()
+    expect(optional_upload).to_have_role("button")

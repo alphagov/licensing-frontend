@@ -68,13 +68,34 @@ class ApplicationSubmissionForm(forms.Form):
         supporting_documents = context["supporting_documents"]
 
         for index, document in enumerate(supporting_documents):
+            label = document["name"] if document["is_mandatory"] else f"{document['name']}(optional)"
+
             self.fields[f"supporting_document_{index}"] = forms.FileField(
-                label=document["name"],
+                label=label,
                 help_text=document.get("description", "add description to test models"),
                 required=document["is_mandatory"],
                 widget=forms.FileInput(
                     attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
                 ),
+                validators=[
+                    FileExtensionValidator(
+                        allowed_extensions=[
+                            "pdf",
+                            "docx",
+                            "doc",
+                            "gif",
+                            "jpp",
+                            "jpeg",
+                            "png",
+                            "ppt",
+                            "pptx",
+                            "rtf",
+                            "txt",
+                            "xls",
+                            "xlsx",
+                        ]
+                    )
+                ],
             )
 
             fieldset_additions.append(f"supporting_document_{index}")
