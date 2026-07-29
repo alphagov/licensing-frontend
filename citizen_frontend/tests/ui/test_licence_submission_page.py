@@ -38,11 +38,11 @@ def test_page_form_has_correct_elements_no_supporting_documents_required(page: P
     expect(page.get_by_test_id("supporting-documents-statement")).not_to_be_visible()
 
     expect(page.get_by_test_id("declarations")).to_be_visible()
-
     declarations = page.get_by_role("listitem").all()
     assert len(declarations) == 4
-
     expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
+
+    expect(page.get_by_test_id("submit-button")).to_be_visible()
 
 
 def test_page_has_correct_elements_supporting_documents_required(page: Page):
@@ -64,8 +64,8 @@ def test_page_has_correct_elements_supporting_documents_required(page: Page):
     expect(supporting_document_upload).to_have_role("button")
 
     expect(page.get_by_test_id("declarations")).to_be_visible()
-
     declarations = page.get_by_role("listitem").all()
     assert len(declarations) == 1
-
     expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
+
+    expect(page.get_by_test_id("submit-button")).to_be_visible()

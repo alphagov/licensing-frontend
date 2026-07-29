@@ -1,7 +1,7 @@
 from django.http import Http404
 from django.shortcuts import render
 
-from citizen_frontend.forms.submission_email import ApplicationSubmissionForm
+from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.mocks import get_mocked_context
 
 

@@ -1,6 +1,5 @@
-from crispy_forms.layout import HTML
 from crispy_forms_gds.helper import FormHelper
-from crispy_forms_gds.layout import Fieldset, Layout
+from crispy_forms_gds.layout import HTML, Button, Fieldset, Layout
 from django import forms
 from django.core.validators import FileExtensionValidator
 from django.template.loader import render_to_string
@@ -47,6 +46,12 @@ class ApplicationSubmissionForm(forms.Form):
 
         if context.get("default_declarations"):
             layout_items.append(self.build_declarations_fieldset(context))
+
+        layout_items.append(HTML(render_to_string("citizen_frontend/partials/submission_statement.html")))
+
+        submit_button_text = "Continue to pay fee" if context.get("fee") else "Submit Application"
+
+        layout_items.append(Button.primary("submit", submit_button_text, data_testid="submit-button"))
 
         self.helper = FormHelper()
         self.helper.layout = Layout(*layout_items)
