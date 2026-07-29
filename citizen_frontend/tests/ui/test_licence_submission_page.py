@@ -77,3 +77,11 @@ def test_optional_supporting_documents_are_marked_optional(page: Page):
     optional_upload = page.get_by_label("Additional information for section 9 of the form(optional)")
     expect(optional_upload).to_be_visible()
     expect(optional_upload).to_have_role("button")
+
+
+def test_user_notified_required_inputs_missing_on_submission(page: Page):
+    page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
+
+    page.get_by_test_id("submit-button").click()
+
+    expect(page.locator(".govuk-error-summary")).to_be_visible()
