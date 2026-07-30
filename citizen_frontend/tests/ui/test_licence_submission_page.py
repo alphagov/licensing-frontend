@@ -83,5 +83,20 @@ def test_user_notified_required_inputs_missing_on_submission(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
 
     page.get_by_test_id("submit-button").click()
+    error_summary = page.locator(".govuk-error-summary")
 
-    expect(page.locator(".govuk-error-summary")).to_be_visible()
+    expect(error_summary).to_be_visible()
+
+
+def test_email_fields_show_error_email_do_not_match(page: Page):
+    page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
+
+    email_field = page.get_by_test_id("email-field")
+    confirmation_email_field = page.get_by_test_id("confirmation-email-field")
+
+    email_field.fill("example@email.com")
+    confirmation_email_field.fill("not_matching@email.com")
+
+    page.get_by_test_id("submit-button").click()
+
+    expect(email_field).to_have_attribute("class", "govuk-input govuk-input--error")

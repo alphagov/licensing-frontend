@@ -89,6 +89,7 @@ class ApplicationSubmissionForm(forms.Form):
                 label=label,
                 help_text=document.get("description", "add description to test models"),
                 required=document["is_mandatory"],
+                error_messages={"required": "Please submit mandatory supporting document"},
                 widget=forms.FileInput(
                     attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
                 ),
@@ -130,3 +131,13 @@ class ApplicationSubmissionForm(forms.Form):
         fieldset_additions.append("declaration")
 
         return Fieldset(*fieldset_additions, legend="Declarations", legend_tag="h2", legend_size="s")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        emails_match = cleaned_data.get("email") == cleaned_data.get("confirmation_email")
+        if not emails_match:
+            self.add_error(
+                "email",
+                "Email addresses must match",
+            )
+            self.add_error("confirmation_email", "Email addresses must match")
