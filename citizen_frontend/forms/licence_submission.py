@@ -4,6 +4,8 @@ from django import forms
 from django.core.validators import FileExtensionValidator
 from django.template.loader import render_to_string
 
+from citizen_frontend.enums.accepted_file_extension import SupportedDocumentFileExtensions
+
 
 class ApplicationSubmissionForm(forms.Form):
     email = forms.EmailField(
@@ -72,6 +74,9 @@ class ApplicationSubmissionForm(forms.Form):
         self.helper.layout = Layout(*layout_items)
 
     def build_supporting_documents_fieldset(self, context):
+        accepted_file_extensions = SupportedDocumentFileExtensions.list()
+        context.update({"accepted_file_extensions": accepted_file_extensions})
+
         fieldset_additions = [
             HTML(
                 render_to_string(
@@ -87,31 +92,13 @@ class ApplicationSubmissionForm(forms.Form):
 
             self.fields[f"supporting_document_{index}"] = forms.FileField(
                 label=label,
-                help_text=document.get("description", "add description to test models"),
+                help_text=document.get("description"),
                 required=document["is_mandatory"],
                 error_messages={"required": "Please submit mandatory supporting document"},
                 widget=forms.FileInput(
                     attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
                 ),
-                validators=[
-                    FileExtensionValidator(
-                        allowed_extensions=[
-                            "pdf",
-                            "docx",
-                            "doc",
-                            "gif",
-                            "jpp",
-                            "jpeg",
-                            "png",
-                            "ppt",
-                            "pptx",
-                            "rtf",
-                            "txt",
-                            "xls",
-                            "xlsx",
-                        ]
-                    )
-                ],
+                validators=[FileExtensionValidator(allowed_extensions=accepted_file_extensions)],
             )
 
             fieldset_additions.append(f"supporting_document_{index}")
