@@ -21,15 +21,8 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - name: Install browsers
-        run: python -m playwright install --with-deps
-
-      - name: Run server
-        run: make start
-#       may need to make a docker image to run the app detached in the pipeline
-
-      - name: Run tests
-        run: pytest
+      - name: Run UI tests
+        run: make test-ui
 
 #      - uses: actions/upload-artifact@v4
 #        if: ${{ !cancelled() }}
