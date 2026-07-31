@@ -1,0 +1,21 @@
+name: PR_checks.yaml
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  ruff:
+    name: Ruff linting and format
+    uses: ./.github/workflows/format.yaml
+
+  test_ui:
+    name: Playwright Tests
+    uses: ./github/workflows/playright.yaml
+
+
+
+
