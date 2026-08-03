@@ -4,18 +4,18 @@ format:
 prepare:
 	uv sync
 	python manage.py migrate
-
-prepare-tests: prepare
 	playwright install
 
-start: prepare
-	nohup python manage.py runserver 0.0.0.0:8000 &
+start: build-image
+	docker compose up -d
 
-test-ui: prepare-tests
+build-image: prepare
+	docker build -t citizen-frontend .
+
+
+test-ui:
 	make start
-	echo "Waiting for Django to start..."
-	while ! nc -z localhost 8000; do sleep 0.5; done
 	pytest citizen_frontend/tests/ui
 
 kill:
-	lsof -ti :8000 | xargs kill
+	docker compose down

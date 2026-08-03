@@ -1,0 +1,10 @@
+services:
+  citizen_frontend:
+    build: .
+    environment:
+      BASE_URL: ${BASE_URL}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      IS_PRODUCTION: ${IS_PRODUCTION:-False}
+    ports:
+      - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
