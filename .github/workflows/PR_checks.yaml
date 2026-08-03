@@ -18,7 +18,3 @@ jobs:
   test_ui:
     name: Playwright Tests
     uses: ./.github/workflows/playright.yaml
-
-
-
-

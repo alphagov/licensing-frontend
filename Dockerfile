@@ -38,5 +38,5 @@ USER nonroot
 
 WORKDIR /app
 
-CMD ["python", "manage.py", "runserver"]
-#this will change in production to use the wsgi server
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#this will need to change for production
