@@ -7,7 +7,7 @@ prepare:
 	playwright install
 
 start: prepare
-	docker compose up -d
+	docker compose up -d --watch
 
 test-ui: start
 	pytest citizen_frontend/tests/ui

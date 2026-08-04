@@ -11,3 +11,22 @@ services:
     environment: *env
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
+    develop:
+      watch:
+        - action: sync
+          path: ./citizen_frontend
+          target: app/citizen_frontend/
+          ignore:
+            - tests/
+        - action: sync
+          path: ./config
+          target: app/config/
+        - action: sync
+          path: ./static
+          target: app/static/
+        - action: rebuild
+          path: ./uv.lock
+          target: app/uv.lock
+#        - action: rebuild
+#          path: ./pyproject.toml
+#          target: app/pyproject.toml

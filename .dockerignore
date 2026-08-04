@@ -12,3 +12,4 @@ nohup.out
 Makefile
 */tests/
 .DS_Store
+.dockerignore
