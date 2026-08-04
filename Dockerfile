@@ -23,6 +23,13 @@ COPY . /app
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
+ENV PATH="/app/.venv/bin:$PATH"
+ARG DJANGO_SECRET_KEY
+ARG ALLOWED_HOSTS
+
+RUN SECRET_KEY=${DJANGO_SECRET_KEY} python /app/manage.py collectstatic --noinput
+
+
 FROM python:3.14-slim-bookworm@sha256:86f975aca15cf04a40b399eebede9aea7c82eae084d1f1a0a6ef6bcaae871a30
 
 RUN groupadd --system --gid 999 nonroot \
@@ -38,5 +45,6 @@ USER nonroot
 
 WORKDIR /app
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-#this will need to change for production
+EXPOSE ${CITIZEN_FRONTEND_PORT}
+
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "config.wsgi:application"]

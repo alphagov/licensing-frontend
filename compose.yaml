@@ -1,6 +1,13 @@
 services:
   citizen_frontend:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+        ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost}
+        IS_PRODUCTION: ${IS_PRODUCTION:-False}
+        BASE_URL: ${BASE_URL}
     environment:
       BASE_URL: ${BASE_URL}
       ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost}
