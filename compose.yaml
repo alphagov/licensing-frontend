@@ -27,6 +27,3 @@ services:
         - action: rebuild
           path: ./uv.lock
           target: app/uv.lock
-#        - action: rebuild
-#          path: ./pyproject.toml
-#          target: app/pyproject.toml

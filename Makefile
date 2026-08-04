@@ -6,14 +6,20 @@ prepare:
 	python manage.py migrate
 	playwright install
 
-start: prepare
-	docker compose up -d --watch
+start:
+	docker compose up -d
+
+watch:
+	docker compose up --watch
 
 test-ui: start
 	pytest citizen_frontend/tests/ui
 
 kill:
 	docker compose down
+
+remove-image:
+	docker image rm licensing-frontend-citizen_frontend
 
 test-ui-ci:
 	uv sync
