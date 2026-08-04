@@ -24,6 +24,5 @@ Allow direnv to load environment variables from this directory with `direnv allo
 
 # Testing
 
-This repository uses `playwright` to test the UI.
-The server must running for the tests to run, to do this run `make start` in a separate terminal.
-Then, to run the UI tests, run `make test-ui`.
+Run `make test-ui`. This ensures dependencies are installed, starts a docker container with the app running inside,
+and runs the tests against this app.
