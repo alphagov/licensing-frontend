@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       args: &env
-        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:="django-insecure-=nps**-gh4$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^"}
+        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:="django-insecure-=nps**-gh4\$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^"}
         ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost,127.0.0.1}
         IS_PRODUCTION: ${IS_PRODUCTION:-False}
         BASE_URL: ${BASE_URL:-http://127.0.0.1:8000}
