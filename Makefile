@@ -23,6 +23,6 @@ remove-image:
 
 test-ui-ci:
 	uv sync
-	playright install
+	playwright install
 	docker compose up -d
 	pytest citizen_frontend/tests/ui
