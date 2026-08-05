@@ -2,6 +2,11 @@ name: Lint and Format
 
 on:
   workflow_call:
+    inputs:
+      build_branch:
+        required: true
+        type: string
+        description: "Branch to run checks against"
 
 permissions:
   contents: read
@@ -13,6 +18,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: '${{ github.repository }}'
+          ref: ${{ github.event.inputs.build_branch }}
+
 
       - name: Install UV
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
@@ -35,6 +44,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: '${{ github.repository }}'
+          ref: ${{ github.event.inputs.build_branch }}
+
 
       - name: Install UV
         uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0

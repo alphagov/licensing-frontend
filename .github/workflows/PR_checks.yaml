@@ -3,9 +3,6 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
 
 permissions:
   contents: read
@@ -14,7 +11,12 @@ jobs:
   ruff:
     name: Ruff linting and format
     uses: ./.github/workflows/format.yaml
+    with:
+      build_branch: ${{ github.event.pull_request.head.ref }}
+
 
   test_ui:
     name: Playwright Tests
     uses: ./.github/workflows/playright.yaml
+    with:
+      build_branch: ${{ github.event.pull_request.head.ref }}
