@@ -1,4 +1,4 @@
-name: PR_checks.yaml
+name: PR Checks
 on:
   pull_request:
     branches:
@@ -17,6 +17,6 @@ jobs:
 
   test_ui:
     name: Playwright Tests
-    uses: ./.github/workflows/playright.yaml
+    uses: ./.github/workflows/playwright.yaml
     with:
       build_branch: ${{ github.event.pull_request.head.ref }}
