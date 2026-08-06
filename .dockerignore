@@ -1,0 +1,15 @@
+.envrc
+.idea
+.venv
+dev.envrc
+.github
+README.md
+db.sqlite3
+.tool-versions
+.pre-commit-config.yaml
+nohup.out
+.gitignore
+Makefile
+*/tests/
+.DS_Store
+.dockerignore

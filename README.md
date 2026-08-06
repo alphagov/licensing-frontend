@@ -10,7 +10,7 @@ This repository contains the citizen facing frontend of the licensing applicatio
 
 # Set up
 
-This repository uses `uv` to manage packages and dependencies. Run `uv sync` to install all necessary packages and dependencies needed
+This repository uses `uv` to manage packages and dependencies. Run `make prepare` to install all necessary packages and dependencies needed
 to test and run this project.
 If a python virtual environment has not been activated for you; run `source .venv/bin/activate`.
 
@@ -20,10 +20,9 @@ This project also uses `pre-commit` run `pre-commit install` to create the corre
 
 Get direnv to load required environment variables automatically by setting up the [direnv hook](https://direnv.net/docs/hook.html) to run when your shell starts up.
 Create a `.envrc` file in the root of this project, and copy the contents of `dev.envrc` into this file.
-Allow direnv to load environment variables from this directory with `direnv allow .`
+Allow direnv to load environment variables from this directory with `direnv allow .envrc`
 
 # Testing
 
-This repository uses `playwright` to test the UI.
-The server must running for the tests to run, to do this run `make start` in a separate terminal.
-Then, to run the UI tests, run `make test-ui`.
+Run `make test-ui`. This ensures dependencies are installed, starts a docker container with the app running inside,
+and runs the tests against this app.

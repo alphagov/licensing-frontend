@@ -4,12 +4,25 @@ format:
 prepare:
 	uv sync
 	python manage.py migrate
-
-prepare-tests: prepare
 	playwright install
 
-start: prepare
-	python manage.py runserver
+start:
+	docker compose up -d
 
-test-ui: prepare-tests
+watch:
+	docker compose up --watch
+
+test-ui: start
+	pytest citizen_frontend/tests/ui
+
+kill:
+	docker compose down
+
+remove-image:
+	docker image rm licensing-frontend-citizen_frontend
+
+test-ui-ci:
+	uv sync
+	uv run playwright install --with-deps
+	docker compose up -d
 	pytest citizen_frontend/tests/ui
