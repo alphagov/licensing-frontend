@@ -10,17 +10,22 @@ This repository contains the citizen facing frontend of the licensing applicatio
 
 # Set up
 
+## Mise
+
+This repository uses [mise](https://mise.jdx.dev/) to manage tool versions and environment variables.
+
+After installing mise, you should set up your shell to automatically activate mise following [these instructions](https://mise.jdx.dev/installing-mise.html#shell-specific-installation-activation), then run `mise install`.
+
+## UV
+
 This repository uses `uv` to manage packages and dependencies. Run `make prepare` to install all necessary packages and dependencies needed
 to test and run this project.
-If a python virtual environment has not been activated for you; run `source .venv/bin/activate`.
 
-This project also uses `pre-commit` run `pre-commit install` to create the correct pre-commit git hooks.
+The python virtual environment should be automatically activated by mise. If it hasn't, run `source .venv/bin/activate`.
 
-## Direnv
+## Pre-Commit
 
-Get direnv to load required environment variables automatically by setting up the [direnv hook](https://direnv.net/docs/hook.html) to run when your shell starts up.
-Create a `.envrc` file in the root of this project, and copy the contents of `dev.envrc` into this file.
-Allow direnv to load environment variables from this directory with `direnv allow .envrc`
+This project uses `pre-commit`. Run `pre-commit install` to setup the correct pre-commit git hooks.
 
 # Testing
 

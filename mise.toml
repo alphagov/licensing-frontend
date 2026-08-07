@@ -4,3 +4,11 @@ python = "3.14"
 
 [settings]
 python.uv_venv_auto = "source"
+env_shell_expand = false
+
+[env]
+BASE_URL = "http://127.0.0.1:8000"
+ALLOWED_HOSTS = "0.0.0.0,localhost,127.0.0.1"
+DJANGO_SECRET_KEY = "django-insecure-=nps**-gh4$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^"
+IS_PRODUCTION = "False"
+CITIZEN_FRONTEND_PORT = "8000"
