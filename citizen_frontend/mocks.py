@@ -33,7 +33,7 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
     ]
 
     fee = get_fee(licence)
-    steps = 4 if fee else 3
+    steps = 4 if fee[0] else 3
 
     context = {
         "authority": authority.capitalize(),
@@ -49,6 +49,8 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
         "default_declarations": (
             temp_event_declarations if licence == "temporary-event-notice" else food_premises_declarations
         ),
+        "general_info_url": "testurl",
+        "legislation_info_url": "testurl",
     }
 
     return context

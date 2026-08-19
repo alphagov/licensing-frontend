@@ -16,6 +16,25 @@ from playwright.sync_api import Page, expect
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
+@pytest.fixture
+def base_context(mocker):
+    mock_context = mocker.patch(
+        "citizen_frontend.views.get_mocked_context",
+    )
+    mock_context.return_value = {
+        "authority": f"{TEST_AUTH_SLUG}".capitalize(),
+        "licence": f"{TEMP_EVENT_SLUG}".replace("-", " ").title(),
+        "interation_sub_id": f"{TEST_INTERACTION_SUB_ID}",
+        "interaction": f"{TEST_INTERACTION}",
+        "steps": 4,
+        "authority_slug": f"{TEST_AUTH_SLUG}",
+        "licence_slug": f"{TEMP_EVENT_SLUG}",
+        "supporting_documents": None,
+        "default_declarations": None,
+    }
+    yield mock_context
+
+
 def test_page_has_correct_headings(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
@@ -53,22 +72,12 @@ def test_page_has_no_fee_amount_licence_has_no_fee_no_fee_required(page: Page):
 
 
 @pytest.mark.django_db
-def test_page_has_no_fee_amount_licence_fee_required(live_server, page: Page, mocker):
-    mocker.patch(
-        "citizen_frontend.views.get_mocked_context",
-        return_value={
+def test_page_has_no_fee_amount_licence_fee_required(live_server, page: Page, base_context):
+    base_context.return_value.update(
+        {
             "fee_required": True,
             "fee": None,
-            "authority": f"{TEST_AUTH_SLUG}".capitalize(),
-            "licence": f"{TEMP_EVENT_SLUG}".replace("-", " ").title(),
-            "interation_sub_id": f"{TEST_INTERACTION_SUB_ID}",
-            "interaction": f"{TEST_INTERACTION}",
-            "steps": 4,
-            "authority_slug": f"{TEST_AUTH_SLUG}",
-            "licence_slug": f"{TEMP_EVENT_SLUG}",
-            "supporting_documents": None,
-            "default_declarations": None,
-        },
+        }
     )
 
     page.goto(
@@ -92,19 +101,55 @@ def test_page_has_download_pdf_inset(page: Page):
     expect(pdf_download_link).to_have_attribute("href", "#")
 
 
-def test_page_has_additional_information_inset(page: Page):
+def test_page_has_additional_information_inset_both_legislative_and_general_info_available(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     general_info_link = page.get_by_test_id("general-information")
     legislation_info_link = page.get_by_test_id("legislation-information")
 
     expect(page.get_by_test_id("additional-information")).to_contain_text(
-        "There is additional information available for this licence that you might find useful"
+        "There is additional information available for this license that you might find useful"
     )
     expect(general_info_link).to_have_role("link")
     expect(general_info_link).to_have_attribute("href", "#")
     expect(legislation_info_link).to_have_role("link")
     expect(legislation_info_link).to_have_attribute("href", "#")
+
+
+def test_page_has_additional_information_inset_general_info_available(live_server, page: Page, base_context):
+    base_context.return_value.update({"general_info_url": "testurl"})
+
+    page.goto(
+        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    )
+
+    expect(page.get_by_test_id("additional-information")).to_be_visible()
+    expect(page.get_by_test_id("general-information")).to_be_visible()
+    expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
+
+
+def test_page_has_additional_information_inset_legislative_info_available(live_server, page: Page, base_context):
+    base_context.return_value.update({"legislation_info_url": "testurl"})
+
+    page.goto(
+        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    )
+
+    expect(page.get_by_test_id("additional-information")).to_be_visible()
+    expect(page.get_by_test_id("general-information")).not_to_be_visible()
+    expect(page.get_by_test_id("legislation-information")).to_be_visible()
+
+
+def test_page_does_not_have_additional_information_inset_no_general_info_or_legislative_info_url_available(
+    live_server, page: Page, base_context
+):
+    page.goto(
+        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    )
+
+    expect(page.get_by_test_id("additional-information")).not_to_be_visible()
+    expect(page.get_by_test_id("general-information")).not_to_be_visible()
+    expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
 
 
 def test_page_has_submit_button(page: Page):
