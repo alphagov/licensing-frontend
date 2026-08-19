@@ -1,4 +1,4 @@
-    {% if fee %}
-        <p class="govuk-body" data-testid="fee-amount">There's a <strong>{{ fee }}</strong> fee.</p>
+    {% if fee_required %}
+        <p class="govuk-body" data-testid="fee">There's a {% if fee %}<strong data-testid="fee-amount">{{ fee }}</strong>{% endif %} fee.</p>
         <p class="govuk-body">You'll need a debit or credit card.</p>
     {% endif %}

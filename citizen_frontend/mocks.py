@@ -40,7 +40,8 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
         "licence": licence.replace("-", " ").title(),
         "interation_sub_id": interation_sub_id,
         "interaction": interaction,
-        "fee": fee,
+        "fee_required": fee[0],
+        "fee": fee[1],
         "steps": steps,
         "authority_slug": authority,
         "licence_slug": licence,
@@ -55,9 +56,9 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
 
 def get_fee(licence: str):
     if licence == "temporary-event-notice":
-        return pence_to_pounds(2100)
+        return True, pence_to_pounds(2100)
     elif licence == "food-premises-approval-6":
-        return None
+        return False, None
     return None
 
 
