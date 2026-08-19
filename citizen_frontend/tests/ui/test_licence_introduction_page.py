@@ -182,3 +182,45 @@ def test_page_marks_non_mandatory_supporting_documents_optional(page: Page):
 
     expect(mandatory_document).not_to_contain_text("(optional)")
     expect(optional_document).to_contain_text("(optional)")
+
+
+def test_page_handles_conditional_rendering_of_supporting_documents_postal_not_allowed(
+    live_server, page: Page, base_context
+):
+    base_context.return_value.update(
+        {
+            "supporting_documents": [{"name": "test", "is_mandatory": True}],
+            "is_postal_allowed": False,
+        }
+    )
+
+    page.goto(
+        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    )
+
+    details = page.get_by_test_id("electronic-copies-detail")
+    details.click()
+
+    expect(page.get_by_test_id("electronic-copies-detail-text")).to_contain_text(
+        "you cannot make an online application"
+    )
+
+
+def test_page_handles_conditional_rendering_of_supporting_documents_postal_allowed(
+    live_server, page: Page, base_context
+):
+    base_context.return_value.update(
+        {
+            "supporting_documents": [{"name": "test", "is_mandatory": True}],
+            "is_postal_allowed": True,
+        }
+    )
+
+    page.goto(
+        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    )
+
+    details = page.get_by_test_id("electronic-copies-detail")
+    details.click()
+
+    expect(page.get_by_test_id("electronic-copies-detail-text")).to_contain_text("you can still apply online")

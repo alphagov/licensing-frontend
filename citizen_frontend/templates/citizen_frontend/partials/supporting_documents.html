@@ -11,7 +11,12 @@
         </summary>
         <div class="govuk-details__text" data-testid="electronic-copies-detail-text">
             <p class="govuk-body">Photos or scans of documents are acceptable, providing the relevant information is clear.</p>
-            <p class="govuk-body">If you're unable to provide electronic versions of these documents then you cannot make an online application and you should do so by post.</p>
+            {% if is_postal_allowed %}
+                <p class="govuk-body"> If you can't provide electronic versions you can still apply online, but you'll need to send in copies by post.
+                We'll give you the address and reference number once you've completed the application.</p>
+            {% else %}
+                <p class="govuk-body">If you're unable to provide electronic versions of these documents then you cannot make an online application, and you should do so by post.</p>
+            {% endif %}
         </div>
     </details>
 {% endif %}
