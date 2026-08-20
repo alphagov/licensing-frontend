@@ -109,7 +109,7 @@ def test_page_has_additional_information_inset_when_both_legislation_and_general
     legislation_info_link = page.get_by_test_id("legislation-information")
 
     expect(page.get_by_test_id("additional-information")).to_contain_text(
-        "There is additional information available for this license that you might find useful"
+        "There is additional information available for this licence that you might find useful"
     )
     expect(general_info_link).to_have_role("link")
     expect(general_info_link).to_have_attribute("href", "#")
