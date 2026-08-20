@@ -23,6 +23,6 @@ remove-image:
 
 test-ui-ci:
 	uv sync
-	python -m playwright install --with-deps
+	mise exec -- python -m playwright install --with-deps
 	mise exec -- docker compose up -d
 	mise exec -- pytest citizen_frontend/tests/ui
