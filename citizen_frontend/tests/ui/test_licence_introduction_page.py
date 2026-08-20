@@ -47,36 +47,36 @@ def test_page_has_correct_headings(page: Page):
     expect(page.get_by_test_id("submit-heading")).to_have_text("Now, submit the application")
 
 
-def test_page_has_4_steps_licence_has_fee(page: Page):
+def test_page_has_4_steps_when_licence_has_fee(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 4")
 
 
-def test_page_has_3_steps_licence_has_no_fee(page: Page):
+def test_page_has_3_steps_when_licence_has_no_fee(page: Page):
     page.goto(TEST_FOOD_PREMISES_APPLY_URL)
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 3")
 
 
-def test_page_has_fee_amount_licence_has_fixed_fee_fee_required(page: Page):
+def test_page_has_fee_amount_when_licence_has_fixed_fee_required(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     expect(page.get_by_test_id("fee-amount")).to_contain_text("£21.00")
 
 
-def test_page_has_no_fee_amount_licence_has_no_fee_no_fee_required(page: Page):
+def test_page_has_no_fee_amount_when_licence_has_no_fee_required(page: Page):
     page.goto(TEST_FOOD_PREMISES_APPLY_URL)
 
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
 
 
 @pytest.mark.django_db
-def test_page_has_no_fee_amount_licence_fee_required(live_server, page: Page, base_context):
+def test_page_has_no_fee_amount_when_licence_fee_is_required(live_server, page: Page, base_context):
     base_context.return_value.update(
         {
-            "fee_required": True,
-            "fee": None,
+            "is_fee_required": True,
+            "fee_amount": None,
         }
     )
 
@@ -86,6 +86,7 @@ def test_page_has_no_fee_amount_licence_fee_required(live_server, page: Page, ba
 
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
     expect(page.get_by_test_id("fee")).to_be_visible()
+    expect(page.get_by_test_id("fee")).to_contain_text("There's a fee you'll need to pay for this submission.")
 
 
 def test_page_has_download_pdf_inset(page: Page):
@@ -101,7 +102,7 @@ def test_page_has_download_pdf_inset(page: Page):
     expect(pdf_download_link).to_have_attribute("href", "#")
 
 
-def test_page_has_additional_information_inset_both_legislative_and_general_info_available(page: Page):
+def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     general_info_link = page.get_by_test_id("general-information")
@@ -116,7 +117,7 @@ def test_page_has_additional_information_inset_both_legislative_and_general_info
     expect(legislation_info_link).to_have_attribute("href", "#")
 
 
-def test_page_has_additional_information_inset_general_info_available(live_server, page: Page, base_context):
+def test_page_has_additional_information_inset_when_general_info_url_available(live_server, page: Page, base_context):
     base_context.return_value.update({"general_info_url": "testurl"})
 
     page.goto(
@@ -128,7 +129,9 @@ def test_page_has_additional_information_inset_general_info_available(live_serve
     expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
 
 
-def test_page_has_additional_information_inset_legislative_info_available(live_server, page: Page, base_context):
+def test_page_has_additional_information_inset_when_legislation_info_url_available(
+    live_server, page: Page, base_context
+):
     base_context.return_value.update({"legislation_info_url": "testurl"})
 
     page.goto(
@@ -140,7 +143,7 @@ def test_page_has_additional_information_inset_legislative_info_available(live_s
     expect(page.get_by_test_id("legislation-information")).to_be_visible()
 
 
-def test_page_does_not_have_additional_information_inset_no_general_info_or_legislative_info_url_available(
+def test_page_does_not_have_additional_information_inset_when_no_general_info_nor_legislation_info_urls_available(
     live_server, page: Page, base_context
 ):
     page.goto(
@@ -160,7 +163,7 @@ def test_page_has_submit_button(page: Page):
     expect(submit_button).to_have_attribute("href", TEST_TEMP_EVENT_APPLY_FORM_URL)
 
 
-def test_page_has_supporting_documents_list_licence_requires_supporting_documents(page: Page):
+def test_page_has_supporting_documents_list_when_licence_requires_supporting_documents(page: Page):
     page.goto(TEST_FOOD_PREMISES_APPLY_URL)
 
     details = page.get_by_test_id("electronic-copies-detail")
@@ -184,7 +187,7 @@ def test_page_marks_non_mandatory_supporting_documents_optional(page: Page):
     expect(optional_document).to_contain_text("(optional)")
 
 
-def test_page_handles_conditional_rendering_of_supporting_documents_postal_not_allowed(
+def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_not_allowed(
     live_server, page: Page, base_context
 ):
     base_context.return_value.update(
@@ -206,7 +209,7 @@ def test_page_handles_conditional_rendering_of_supporting_documents_postal_not_a
     )
 
 
-def test_page_handles_conditional_rendering_of_supporting_documents_postal_allowed(
+def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_allowed(
     live_server, page: Page, base_context
 ):
     base_context.return_value.update(
