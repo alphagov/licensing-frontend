@@ -15,17 +15,7 @@
                 Adobe Reader (opens in new tab).</a></p>
     <p class="govuk-body">Open the form in Adobe Reader instead of your web browser.</p>
     <p class="govuk-body">If you can't complete the form right now don't worry, you can edit it in your own time. Once you're ready return to this page to complete the application.</p>
-    <div class="govuk-inset-text" data-testid="additional-information">
-        <p>There is additional information available for this licence that you might find useful</p>
-        <ul class="govuk-list">
-            <li>
-                <a href="#" data-testid="general-information" class="govuk-link" rel="noreferrer noopener" target="_blank">General information from the licensing authority (opens in new tab)</a>
-            </li>
-            <li>
-                <a href="#" data-testid="legislation-information" class="govuk-link" rel="noreferrer noopener" target="_blank">More detailed information on legislation etc. (opens in new tab)</a>
-            </li>
-        </ul>
-    </div>
+    {% include "citizen_frontend/partials/additional_information.html" %}
     <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
     {% include "citizen_frontend/partials/supporting_documents.html" %}
     {% include "citizen_frontend/partials/fee.html" %}

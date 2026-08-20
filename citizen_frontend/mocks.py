@@ -32,15 +32,16 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
         "as set out in the relevant Parts of this document."
     ]
 
-    fee = get_fee(licence)
-    steps = 4 if fee else 3
+    is_fee_required, fee_amount = get_fee(licence)
+    steps = 4 if is_fee_required else 3
 
     context = {
         "authority": authority.capitalize(),
         "licence": licence.replace("-", " ").title(),
         "interation_sub_id": interation_sub_id,
         "interaction": interaction,
-        "fee": fee,
+        "is_fee_required": is_fee_required,
+        "fee_amount": fee_amount,
         "steps": steps,
         "authority_slug": authority,
         "licence_slug": licence,
@@ -48,6 +49,8 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
         "default_declarations": (
             temp_event_declarations if licence == "temporary-event-notice" else food_premises_declarations
         ),
+        "general_info_url": "testurl",
+        "legislation_info_url": "testurl",
     }
 
     return context
@@ -55,9 +58,9 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
 
 def get_fee(licence: str):
     if licence == "temporary-event-notice":
-        return pence_to_pounds(2100)
+        return True, pence_to_pounds(2100)
     elif licence == "food-premises-approval-6":
-        return None
+        return False, None
     return None
 
 
