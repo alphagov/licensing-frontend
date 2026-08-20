@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_forms_gds",
     "citizen_frontend",
+    "licensing-common.common",
 ]
 
 MIDDLEWARE = [

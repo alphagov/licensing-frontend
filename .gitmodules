@@ -1,0 +1,3 @@
+[submodule "licensing-common"]
+	path = licensing-common
+	url = https://github.com/alphagov/licensing-common

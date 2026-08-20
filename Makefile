@@ -7,13 +7,14 @@ prepare:
 	playwright install
 
 start:
-	docker compose up -d
+	mise exec -- docker compose up -d
 
 watch:
-	docker compose up --watch
+	mise exec -- docker compose up --watch
 
 test-ui: start
-	pytest citizen_frontend/tests/ui
+	uv sync
+	mise exec -- pytest citizen_frontend/tests/ui
 
 kill:
 	docker compose down
@@ -26,3 +27,8 @@ test-ui-ci:
 	python -m playwright install --with-deps
 	docker compose up -d
 	pytest citizen_frontend/tests/ui
+
+test-common:
+	cd licensing-common && \
+	make prepare-tests && \
+	mise exec -- .venv/bin/pytest
