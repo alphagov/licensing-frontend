@@ -31,6 +31,8 @@ jobs:
         with:
           activate-environment: 'true'
 
+      - name: Setup Mise
+        uses: jdx/mise-action@v4.2.5
 
       - name: Run UI tests
         run: make test-ui-ci
