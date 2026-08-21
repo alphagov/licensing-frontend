@@ -14,7 +14,7 @@ watch:
 
 test-ui: start
 	uv sync
-	mise exec -- pytest citizen_frontend/tests/ui
+	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
 
 kill:
 	docker compose down

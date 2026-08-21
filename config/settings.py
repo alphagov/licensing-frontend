@@ -11,10 +11,12 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR / "licensing-common"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,6 +29,11 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 DEBUG = not bool(os.getenv("IS_PRODUCTION", False))
 
 ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 
 # Application definition
@@ -41,7 +48,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_forms_gds",
     "citizen_frontend",
-    "licensing-common.common",
+    "common",
 ]
 
 MIDDLEWARE = [
@@ -78,13 +85,35 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+IS_TESTING = "pytest" in sys.modules or "test" in sys.argv
+
+DOCUMENTDB_USER = os.getenv("DOCUMENTDB_USER", "docdb")
+DOCUMENTDB_PASSWORD = os.getenv("DOCUMENTDB_PASSWORD", "password")
+DOCUMENTDB_PORT = os.getenv("DOCUMENTDB_PORT", "10260")
+DOCUMENTDB_HOST = os.getenv("DOCUMENTDB_HOST", "localhost")
+DOCUMENTDB_CONN_ARGS = (
+    "tls=true&tlsAllowInvalidCertificates=true" if os.getenv("DOCUMENTDB_ALLOW_INVALID_CERTS") else "tls=true"
+)
+DOCUMENT_DB_CONN = (
+    f"mongodb://{DOCUMENTDB_USER}:{DOCUMENTDB_PASSWORD}@{DOCUMENTDB_HOST}:{DOCUMENTDB_PORT}?{DOCUMENTDB_CONN_ARGS}"
+)
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": "django_mongodb_backend",
+        "NAME": "licensify",
+        "HOST": f"{DOCUMENT_DB_CONN}",
+        "TEST": {
+            "NAME": "licensify",
+        },
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

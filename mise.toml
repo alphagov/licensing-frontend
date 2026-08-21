@@ -8,7 +8,12 @@ env_shell_expand = false
 
 [env]
 BASE_URL = "http://127.0.0.1:8000"
-ALLOWED_HOSTS = "0.0.0.0,localhost,127.0.0.1"
+ALLOWED_HOSTS = "0.0.0.0,localhost,127.0.0.1,citizen_frontend"
 DJANGO_SECRET_KEY = "django-insecure-=nps**-gh4$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^"
 IS_PRODUCTION = "False"
 CITIZEN_FRONTEND_PORT = "8000"
+DOCUMENTDB_USER = "docdb"
+DOCUMENTDB_PASSWORD = "MX78weVPvR7a7wyJ"
+DOCUMENTDB_PORT = "10260" # The port to bind to the documentDB endpoint to on your local machine
+DOCUMENTDB_IMAGE = "ghcr.io/documentdb/documentdb/documentdb-local@sha256:8c8a716e27f398b03c397424c4ddd901bddbc22b9f910b17096b0b246c7c9011" # pg17-0.114.0
+DOCUMENTDB_ALLOW_INVALID_CERTS = "true"
