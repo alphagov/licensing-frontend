@@ -17,7 +17,8 @@ test-ui: start
 	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
 
 kill:
-	docker compose down
+	docker compose down && \
+	cd licensing_common && docker compose down
 
 remove-image:
 	docker image rm licensing-frontend-citizen_frontend
