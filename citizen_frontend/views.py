@@ -47,4 +47,9 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
 
 
 def get_all_licences(request):
+    get_all_licences_from_db()
     return HttpResponse()
+
+
+def get_all_licences_from_db():
+    pass
