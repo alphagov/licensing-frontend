@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.http.response import HttpResponse
 from django.shortcuts import render
 
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
@@ -45,5 +46,5 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
         raise Http404("Incorrect licence, or authority does not exist") from e
 
 
-def get_all_licences():
-    pass
+def get_all_licences(request):
+    return HttpResponse("Hello World")
