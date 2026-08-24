@@ -43,3 +43,7 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
 
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
+
+
+def get_all_licences():
+    pass
