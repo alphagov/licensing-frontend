@@ -26,3 +26,6 @@ test-ui-ci:
 	python -m playwright install --with-deps
 	docker compose up -d
 	pytest citizen_frontend/tests/ui
+
+test-api:
+	pytest citizen_frontend/tests/api
