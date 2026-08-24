@@ -29,6 +29,6 @@ test-ui-ci:
 	pytest citizen_frontend/tests/ui
 
 test-common:
-	cd licensing-common && \
+	cd licensing_common && \
 	make prepare-tests && \
-	mise exec -- .venv/bin/pytest
+	pytest

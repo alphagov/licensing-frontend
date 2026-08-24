@@ -14,9 +14,11 @@ import os
 import sys
 from pathlib import Path
 
+from licensing_common.config.settings import DOCUMENT_DB_CONN
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(BASE_DIR / "licensing-common"))
+sys.path.insert(0, str(BASE_DIR / "licensing_common"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -84,25 +86,6 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.sqlite3",
-#         "NAME": BASE_DIR / "db.sqlite3",
-#     }
-# }
-IS_TESTING = "pytest" in sys.modules or "test" in sys.argv
-
-DOCUMENTDB_USER = os.getenv("DOCUMENTDB_USER", "docdb")
-DOCUMENTDB_PASSWORD = os.getenv("DOCUMENTDB_PASSWORD", "password")
-DOCUMENTDB_PORT = os.getenv("DOCUMENTDB_PORT", "10260")
-DOCUMENTDB_HOST = os.getenv("DOCUMENTDB_HOST", "localhost")
-DOCUMENTDB_CONN_ARGS = (
-    "tls=true&tlsAllowInvalidCertificates=true" if os.getenv("DOCUMENTDB_ALLOW_INVALID_CERTS") else "tls=true"
-)
-DOCUMENT_DB_CONN = (
-    f"mongodb://{DOCUMENTDB_USER}:{DOCUMENTDB_PASSWORD}@{DOCUMENTDB_HOST}:{DOCUMENTDB_PORT}?{DOCUMENTDB_CONN_ARGS}"
-)
 
 DATABASES = {
     "default": {
