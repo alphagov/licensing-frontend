@@ -25,3 +25,33 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
     f"/{SERVICE_SLUG}/{FOOD_PREMISES_APPLICATION_SLUG}/"
     f"{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}/form"
 )
+
+TEST_TEMP_EVENT_LICENCE = {
+    "_id": "50c8520393867870cb0d775f",
+    "name": "Test Licence",
+    "licenceCode": "1234-5-6",
+    "legislationName": ["Licensing Act 2003"],
+    "urlSlug": "test-licence",
+    "lgslId": 1234,
+    "administrativeArea": {"code": "5", "name": "England,Wales", "countries": ["England", "Wales"]},
+    "interactions": [
+        {
+            "lgilId": 0,
+            "lgilSubId": 1,
+            "licenceInteractionName": "Application for a Test Licence",
+            "form": {
+                "name": "Test Licence Form",
+                "subForm": 1,
+                "formRefNo": "123000000",
+                "fileName": "EAF_123000000_LA_TEST",
+                "fileSizeInBytes": 185000,
+                "formVersion": 2,
+            },
+            "subForms": [],
+            "supportingDocuments": [],
+            "fee": {"pence": 2100},
+            "feeCalculationInstructions": [],
+            "tacitConsent": "required",
+        }
+    ],
+}

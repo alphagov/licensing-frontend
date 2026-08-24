@@ -1,6 +1,8 @@
 import pytest
 from django.urls import reverse
 
+from citizen_frontend.tests.conftest import TEST_TEMP_EVENT_LICENCE
+
 
 @pytest.fixture
 def mock_get_all_licences_from_db(mocker):
@@ -14,5 +16,11 @@ def test_get_all_licences_with_descriptions(client):
 
 
 def test_get_all_licences_from_db(client, mock_get_all_licences_from_db):
-    client.get(reverse("get_all_licences"))
+    mock_get_all_licences_from_db.return_value = [TEST_TEMP_EVENT_LICENCE]
+    with open("citizen_frontend/tests/api/mocked_response.json", "rb") as f:
+        expected = f.read()
+
+    response = client.get(reverse("get_all_licences"))
+
     mock_get_all_licences_from_db.assert_called_once()
+    assert response.content == expected
