@@ -46,8 +46,8 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
         raise Http404("Incorrect licence, or authority does not exist") from e
 
 
-def get_all_licences(request):
-    licences = get_all_licences_from_db()
+def list_all_licences(request):
+    licences = get_all_licences_from_database()
     response = [
         {"code": licence["licenceCode"], "name": licence["name"], "legislation": licence["legislationName"]}
         for licence in licences
@@ -55,5 +55,5 @@ def get_all_licences(request):
     return JsonResponse(response, safe=False)
 
 
-def get_all_licences_from_db():
+def get_all_licences_from_database():
     pass
