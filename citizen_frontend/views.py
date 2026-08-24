@@ -1,5 +1,5 @@
 from django.http import Http404
-from django.http.response import HttpResponse
+from django.http.response import JsonResponse
 from django.shortcuts import render
 
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
@@ -47,8 +47,12 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
 
 
 def get_all_licences(request):
-    get_all_licences_from_db()
-    return HttpResponse()
+    licences = get_all_licences_from_db()
+    response = [
+        {"code": licence["licenceCode"], "name": licence["name"], "legislation": licence["legislationName"]}
+        for licence in licences
+    ]
+    return JsonResponse(response, safe=False)
 
 
 def get_all_licences_from_db():

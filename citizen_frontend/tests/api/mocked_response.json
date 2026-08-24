@@ -1,7 +1,5 @@
-{
-  "name": "Test Licence",
-  "licenceCode": "1234-5-6",
-  "legislationName": [
-    "Licensing Act 2003"
-  ]
-}
+[
+  {
+    "code": "1234-5-6", "name": "Test Licence", "legislation": ["Licensing Act 2003"]
+  }
+]
