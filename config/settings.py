@@ -28,9 +28,9 @@ sys.path.insert(0, str(BASE_DIR / "licensing_common"))
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not bool(os.getenv("IS_PRODUCTION", False))
+DEBUG = os.getenv("IS_PRODUCTION", "false").lower() not in ["true", "1"]
 
-ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
