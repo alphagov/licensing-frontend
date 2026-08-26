@@ -1,3 +1,4 @@
+from common.models.licences import Licence
 from django.http import Http404
 from django.http.response import JsonResponse
 from django.shortcuts import render
@@ -55,5 +56,5 @@ def list_all_licences(request):
     return JsonResponse(response, safe=False)
 
 
-def get_all_licences_from_database():
+def get_all_licences_from_database() -> list[Licence]:
     pass
