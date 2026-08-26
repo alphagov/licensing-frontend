@@ -5,6 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "crispy-forms-gds>=2.0.1",
     "licensing_common",
+    "pydantic>=2.13.4",
     "whitenoise>=6.12.0",
 ]
 
