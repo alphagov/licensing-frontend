@@ -49,7 +49,7 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
 def list_all_licences(request):
     licences = get_all_licences_from_database()
     response = [
-        {"code": licence["licenceCode"], "name": licence["name"], "legislation": licence["legislationName"]}
+        {"code": licence.licence_code, "name": licence.name, "legislation": licence.legislation_name}
         for licence in licences
     ]
     return JsonResponse(response, safe=False)
