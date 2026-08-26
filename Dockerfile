@@ -13,22 +13,17 @@ ENV UV_PYTHON_DOWNLOADS=0
 
 WORKDIR /app
 
+COPY . /app
+
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     uv sync --locked --no-install-project
 
-COPY . /app
-
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked
 
 ENV PATH="/app/.venv/bin:$PATH"
-ARG DJANGO_SECRET_KEY
-ARG ALLOWED_HOSTS
-
-RUN SECRET_KEY=${DJANGO_SECRET_KEY} python /app/manage.py collectstatic --noinput
-
 
 FROM python:3.14-slim-bookworm@sha256:86f975aca15cf04a40b399eebede9aea7c82eae084d1f1a0a6ef6bcaae871a30
 
@@ -44,6 +39,8 @@ ENV PYTHONUNBUFFERED=1
 USER nonroot
 
 WORKDIR /app
+
+RUN DJANGO_SECRET_KEY="dummy-key" python /app/manage.py collectstatic --noinput
 
 EXPOSE ${CITIZEN_FRONTEND_PORT}
 

@@ -1,14 +1,27 @@
 services:
+  document_db:
+    image: ${DOCUMENTDB_IMAGE:-ghcr.io/documentdb/documentdb/documentdb-local:latest}
+    environment:
+      - USERNAME=${DOCUMENTDB_USER:-docdb}
+      - PASSWORD=${DOCUMENTDB_PASSWORD:-password}
+    ports:
+      - ${DOCUMENTDB_PORT:-10260}:10260
   citizen_frontend:
+    depends_on:
+      - document_db
     build:
       context: .
       dockerfile: Dockerfile
-      args: &env
-        DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-=nps**-gh4$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^}
-        ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost,127.0.0.1}
-        IS_PRODUCTION: ${IS_PRODUCTION:-False}
-        BASE_URL: ${BASE_URL:-http://127.0.0.1:8000}
-    environment: *env
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-django-insecure-=nps**-gh4$3@&=8_f@+^a&@tsr*x-b3hbzf#o0ec@12i2=np^}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-0.0.0.0,localhost,127.0.0.1}
+      IS_PRODUCTION: ${IS_PRODUCTION:-False}
+      BASE_URL: ${BASE_URL:-http://127.0.0.1:8000}
+      DOCUMENTDB_USER: ${DOCUMENTDB_USER}
+      DOCUMENTDB_PASSWORD: ${DOCUMENTDB_PASSWORD}
+      DOCUMENTDB_PORT: ${DOCUMENTDB_PORT}
+      DOCUMENTDB_HOST: ${DOCUMENTDB_HOST:-document_db}
+      DOCUMENTDB_ALLOW_INVALID_CERTS: ${DOCUMENTDB_ALLOW_INVALID_CERTS}
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:

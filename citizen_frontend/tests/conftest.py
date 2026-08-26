@@ -1,6 +1,8 @@
 import os
 
-BASE_URL = os.getenv("BASE_URL", "http://localhost:8000")
+import pytest
+
+BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
 TEMP_EVENT_SLUG = "temporary-event-notice"
 FOOD_PREMISES_APPLICATION_SLUG = "food-premises-approval-6"
@@ -25,3 +27,8 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
     f"/{SERVICE_SLUG}/{FOOD_PREMISES_APPLICATION_SLUG}/"
     f"{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}/form"
 )
+
+
+@pytest.fixture(scope="session", autouse=True)
+def django_db_setup():
+    pass

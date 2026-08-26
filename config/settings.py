@@ -11,10 +11,14 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+
+from licensing_common.config.settings import DOCUMENT_DB_CONN
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(BASE_DIR / "licensing_common"))
 
 
 # Quick-start development settings - unsuitable for production
@@ -24,9 +28,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not bool(os.getenv("IS_PRODUCTION", False))
+DEBUG = os.getenv("IS_PRODUCTION", "false").lower() not in ["true", "1"]
 
-ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
 
 
 # Application definition
@@ -41,6 +50,7 @@ INSTALLED_APPS = [
     "crispy_forms",
     "crispy_forms_gds",
     "citizen_frontend",
+    "common",
 ]
 
 MIDDLEWARE = [
@@ -79,11 +89,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": "django_mongodb_backend",
+        "NAME": "licensify",
+        "HOST": f"{DOCUMENT_DB_CONN}",
+        "TEST": {
+            "NAME": "licensify",
+        },
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
