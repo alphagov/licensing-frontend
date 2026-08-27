@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
+from citizen_frontend.api.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.api.utils import get_all_licences_from_database
 
 
@@ -28,5 +29,12 @@ def get_all_licences(request):
         return JsonResponse(status=404, data=e.messages, safe=False)
 
 
+@require_GET
 def get_licence_authority_and_interactions_by_licence_code(request, licence_code):
-    return JsonResponse(status=200, data={"body": "hello"})
+
+    licence_lookup_service = LicenceLookupService()
+    licence_authorities_and_interactions = licence_lookup_service.get_licence_authority_and_interactions(
+        licence_code=licence_code
+    )
+
+    return JsonResponse(status=200, data={"body": licence_authorities_and_interactions}, safe=False)
