@@ -26,3 +26,7 @@ def get_all_licences(request):
         # if using pydantic we need to handle these pydantic e too
         #  maybe 500ish response
         return JsonResponse(status=404, data=e.messages, safe=False)
+
+
+def get_licence_authority_and_interactions_by_licence_code(request, licence_code):
+    return JsonResponse(status=200, data={"body": "hello"})
