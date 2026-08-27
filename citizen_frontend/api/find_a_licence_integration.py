@@ -1,10 +1,12 @@
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.views.decorators.http import require_GET
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.api.utils import get_all_licences_from_database
 
 
+@require_GET
 def get_all_licences(request):
     try:
         licences = get_all_licences_from_database()
@@ -22,5 +24,5 @@ def get_all_licences(request):
     except ValidationError as e:
         # is this how we would like to handle this type of error?
         # if using pydantic we need to handle these pydantic e too
-        #  maybe 500 error
+        #  maybe 500ish response
         return JsonResponse(status=404, data=e.messages, safe=False)
