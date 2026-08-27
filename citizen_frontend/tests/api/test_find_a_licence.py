@@ -9,7 +9,7 @@ from citizen_frontend.tests.conftest import TEST_TEMP_EVENT_LICENCE
 
 @pytest.fixture
 def mock_get_all_licences_from_database(mocker):
-    yield mocker.patch("citizen_frontend.views.get_all_licences_from_database")
+    yield mocker.patch("citizen_frontend.api.find_a_licence_integration.get_all_licences_from_database")
 
 
 def test_get_all_licences_from_database_returns_expected_result(client, mock_get_all_licences_from_database):
@@ -36,13 +36,14 @@ def test_get_all_licences_returns_404_db_error(client, mock_get_all_licences_fro
     pass
 
 
+# this is only a test case if we validate everything returned from the db
 def test_get_all_licences_throws_error_incorrect_data_format_from_database(client, mock_get_all_licences_from_database):
     mock_get_all_licences_from_database.side_effect = ValidationError(message="Invalid")
 
     response = client.get(reverse("get_all_licences"))
 
-    assert response.status_code == 404
     assert response.json() == ["Invalid"]
+    assert response.status_code == 404
 
 
 # TODO TEST CASES:

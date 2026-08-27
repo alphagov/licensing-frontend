@@ -1,7 +1,4 @@
-from common.models.licences import Licence
-from django.core.exceptions import ValidationError
 from django.http import Http404
-from django.http.response import JsonResponse
 from django.shortcuts import render
 
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
@@ -46,27 +43,3 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
 
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
-
-
-def list_all_licences(request):
-    try:
-        licences = get_all_licences_from_database()
-
-        if not licences:
-            return JsonResponse(status=404, data="No licences found", safe=False)
-        #     should this be handled in the get_all_licences method, throwing an error and we catch it?
-        response = [
-            {"code": licence.licence_code, "name": licence.name, "legislation": licence.legislation_name}
-            for licence in licences
-        ]
-        return JsonResponse(response, safe=False)
-    except ValidationError as e:
-        # is this how we would like to handle this type of error? if using pydantic too we need to handle these
-        return JsonResponse(status=404, data=e.messages, safe=False)
-
-
-# TODO Do we want response body models, e.g pydantic model_dumps, jsonresponse handles json encoding for us.
-
-
-def get_all_licences_from_database() -> list[Licence]:
-    pass
