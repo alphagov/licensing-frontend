@@ -25,4 +25,5 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("apply-for-a-licence/", include("citizen_frontend.urls")),
     path("assets/<path:path>", RedirectView.as_view(url="/static/assets/%(path)s", permanent=False)),
+    path("api/", include("citizen_frontend.api.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

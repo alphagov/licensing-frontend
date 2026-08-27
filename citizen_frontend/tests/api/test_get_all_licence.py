@@ -16,6 +16,7 @@ def mock_get_all_licences_from_database(mocker):
 #   Other HTTP method requests?
 #   DB Error unhappy path => pymongo error, connection error, operation error...?
 #   Empty result
+#   Bad data structure?
 
 
 def test_get_all_licences_returns_expected_result(client, mock_get_all_licences_from_database):
