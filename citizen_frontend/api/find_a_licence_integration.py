@@ -35,6 +35,6 @@ def get_licence_authority_and_interactions_by_licence_code(request, licence_code
     licence_lookup_service = LicenceLookupService()
     licence_authorities_and_interactions = licence_lookup_service.get_licence_authority_and_interactions(
         licence_code=licence_code
-    )
+    ).model_dump(by_alias=True, exclude_none=True)
 
     return JsonResponse(status=200, data=licence_authorities_and_interactions, safe=False)

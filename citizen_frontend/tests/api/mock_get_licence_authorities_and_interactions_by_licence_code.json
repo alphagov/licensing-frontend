@@ -4,25 +4,27 @@
   "geographicalAvailability": ["England"],
   "issuingAuthorities": [
     {
-      "authorityName": "",
-      "authoritySlug": "",
+      "authorityName": "Test Authority",
+      "authoritySlug": "test-authority",
       "authorityContact": {
-        "website": "",
-        "email": "",
-        "phone": "",
-        "address": ""
+        "website": "https://test-authority.com",
+        "email": "test@test-authority.com",
+        "phone": "12345667801",
+        "address": "Test Address"
       },
-      "authorityInteractions": [
-        {
-          "url": "",
-          "usesLicensify": true,
-          "authoritySlug": "",
-          "description": "",
-          "payment": "",
-          "paymentAmount": "optional",
-          "introductionText": ""
-        }
-      ]
+      "authorityInteractions": {
+        "apply": [
+          {
+            "url": "https://test-authority.com",
+            "usesLicensify": true,
+            "usesAuthorityUrl": true,
+            "description": "Test description",
+            "payment": "Test payment",
+            "paymentAmount": "optional",
+            "introductionText": "Test introduction text"
+          }
+        ]
+      }
     }
   ]
 }

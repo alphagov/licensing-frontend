@@ -3,6 +3,13 @@ import json
 import pytest
 from django.urls import reverse
 
+from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
+    AuthorityInteraction,
+    IssuingAuthority,
+    LicenceAuthoritiesAndInteractionsResponse,
+)
+
 # TODO TEST CASES:
 #   Happy path mocked out
 #   Licence with code not found
@@ -19,7 +26,36 @@ def mock_lookup_service(mocker):
 
 
 def test_get_licence_authorities_and_interactions_by_licence_code_happy_path(client, mock_lookup_service):
-    mock_lookup_service.get_licence_authority_and_interactions.return_value = {}
+    mock_lookup_service.get_licence_authority_and_interactions.return_value = LicenceAuthoritiesAndInteractionsResponse(
+        is_offered_by_county=True,
+        is_location_specific=True,
+        geographical_availability=["England"],
+        issuing_authorities=[
+            IssuingAuthority(
+                authority_name="Test Authority",
+                authority_slug="test-authority",
+                authority_contact=AuthorityContactDetails(
+                    website="https://test-authority.com",
+                    email="test@test-authority.com",
+                    phone="12345667801",
+                    address="Test Address",
+                ),
+                authority_interactions={
+                    "apply": [
+                        AuthorityInteraction(
+                            url="https://test-authority.com",
+                            uses_authority_url=True,
+                            uses_licensify=True,
+                            description="Test description",
+                            payment="Test payment",
+                            introduction_text="Test introduction text",
+                            payment_amount="optional",
+                        )
+                    ]
+                },
+            )
+        ],
+    )
     with open("citizen_frontend/tests/api/mock_get_licence_authorities_and_interactions_by_licence_code.json") as f:
         expected = json.load(f)
 

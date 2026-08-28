@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class LicenceResponse(BaseModel):
@@ -8,4 +9,37 @@ class LicenceResponse(BaseModel):
 
 
 class AuthorityContactDetails(BaseModel):
-    pass
+    website: str
+    email: str
+    phone: str
+    address: str
+
+
+class AuthorityInteraction(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, validate_by_name=True)
+
+    url: str = ""
+    uses_licensify: bool
+    uses_authority_url: bool
+    description: str
+    payment: str
+    payment_amount: str | None = None
+    introduction_text: str
+
+
+class IssuingAuthority(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, validate_by_name=True)
+
+    authority_name: str
+    authority_slug: str
+    authority_contact: AuthorityContactDetails
+    authority_interactions: dict[str, list[AuthorityInteraction]]  # => what does the string key represent here?
+
+
+class LicenceAuthoritiesAndInteractionsResponse(BaseModel):
+    model_config = ConfigDict(alias_generator=to_camel, validate_by_name=True)
+
+    is_location_specific: bool
+    is_offered_by_county: bool
+    geographical_availability: list[str]  # => maybe able to use countries enum here, does ordering matter?
+    issuing_authorities: list[IssuingAuthority]
