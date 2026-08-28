@@ -74,3 +74,16 @@ def test_get_licence_authority_and_interactions_by_licence_code_returns_405_unsu
     )
 
     assert response.status_code == 405
+
+
+@pytest.mark.parametrize("result", [{}, [], ()])
+def test_get_licence_authority_and_interactions_by_licence_code_returns_404_empty_result_from_lookup_service(
+    client, mock_lookup_service, result
+):
+    mock_lookup_service.get_licence_authority_and_interactions.return_value = result
+
+    response = client.get(
+        reverse("get_licence_authority_and_interactions_by_licence_code", kwargs={"licence_code": "1234"})
+    )
+
+    assert response.status_code == 404
