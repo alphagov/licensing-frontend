@@ -31,7 +31,6 @@ def get_all_licences(request):
 
 @require_GET
 def get_licence_authority_and_interactions_by_licence_code(request, licence_code):
-
     licence_lookup_service = LicenceLookupService()
     licence_authorities_and_interactions = licence_lookup_service.get_licence_authority_and_interactions(
         licence_code=licence_code
@@ -41,5 +40,20 @@ def get_licence_authority_and_interactions_by_licence_code(request, licence_code
         return JsonResponse(status=404, data="No licences found", safe=False)
 
     response = licence_authorities_and_interactions.model_dump(by_alias=True, exclude_none=True)
+
+    return JsonResponse(status=200, data=response, safe=False)
+
+
+@require_GET
+def get_licence_authorities_and_interactions_by_licence_code_and_snac_code(request, licence_code: str, snac_code: str):
+    licence_lookup_service = LicenceLookupService()
+    result = licence_lookup_service.licence_authorities_and_interactions_by_snac_code(
+        snac_code=snac_code, licence_code=licence_code
+    )
+
+    if not result:
+        return JsonResponse(status=404, data="No licences found", safe=False)
+
+    response = result.model_dump(by_alias=True, exclude_none=True)
 
     return JsonResponse(status=200, data=response, safe=False)

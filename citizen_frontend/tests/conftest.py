@@ -5,6 +5,13 @@ from bson import ObjectId
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
+from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
+    AuthorityInteraction,
+    IssuingAuthority,
+    LicenceAuthoritiesAndInteractionsResponse,
+)
+
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
 TEMP_EVENT_SLUG = "temporary-event-notice"
@@ -68,32 +75,42 @@ TEST_TEMP_EVENT_LICENCE = Licence(
     ],
 )
 
-# TEST_TEMP_EVENT_LICENCE = {
-#     "_id": "50c8520393867870cb0d775f",
-#     "name": "Test Licence",
-#     "licenceCode": "1234-5-6",
-#     "legislationName": ["Licensing Act 2003"],
-#     "urlSlug": "test-licence",
-#     "lgslId": 1234,
-#     "administrativeArea": {"code": "5", "name": "England,Wales", "countries": ["England", "Wales"]},
-#     "interactions": [
-#         {
-#             "lgilId": 0,
-#             "lgilSubId": 1,
-#             "licenceInteractionName": "Application for a Test Licence",
-#             "form": {
-#                 "name": "Test Licence Form",
-#                 "subForm": 1,
-#                 "formRefNo": "123000000",
-#                 "fileName": "EAF_123000000_LA_TEST",
-#                 "fileSizeInBytes": 185000,
-#                 "formVersion": 2,
-#             },
-#             "subForms": [],
-#             "supportingDocuments": [],
-#             "fee": {"pence": 2100},
-#             "feeCalculationInstructions": [],
-#             "tacitConsent": "required",
-#         }
-#     ],
-# }
+TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
+    is_offered_by_county=True,
+    is_location_specific=True,
+    geographical_availability=["England"],
+    issuing_authorities=[
+        IssuingAuthority(
+            authority_name="Test Authority",
+            authority_slug="test-authority",
+            authority_contact=AuthorityContactDetails(
+                website="https://test-authority.com",
+                email="test@test-authority.com",
+                phone="12345667801",
+                address="Test Address",
+            ),
+            authority_interactions={
+                "apply": [
+                    AuthorityInteraction(
+                        url="https://test-authority.com",
+                        uses_authority_url=True,
+                        uses_licensify=True,
+                        description="Test description",
+                        payment="Test payment",
+                        introduction_text="Test introduction text",
+                        payment_amount="optional",
+                    )
+                ]
+            },
+        )
+    ],
+)
+
+
+@pytest.fixture
+def mock_lookup_service(mocker):
+    mock_look_up_service = mocker.MagicMock()
+    mocker.patch(
+        "citizen_frontend.api.find_a_licence_integration.LicenceLookupService", return_value=mock_look_up_service
+    )
+    yield mock_look_up_service
