@@ -21,7 +21,7 @@ def mock_get_all_licences_from_database(mocker):
 
 def test_get_all_licences_returns_expected_result(client, mock_get_all_licences_from_database):
     mock_get_all_licences_from_database.return_value = [TEST_TEMP_EVENT_LICENCE]
-    with open("citizen_frontend/tests/api/mocked_response.json") as f:
+    with open("citizen_frontend/tests/api/mock_get_all_licences_response.json") as f:
         expected = json.load(f)
 
     response = client.get(reverse("get_all_licences"))

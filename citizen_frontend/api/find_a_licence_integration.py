@@ -37,4 +37,4 @@ def get_licence_authority_and_interactions_by_licence_code(request, licence_code
         licence_code=licence_code
     )
 
-    return JsonResponse(status=200, data={"body": licence_authorities_and_interactions}, safe=False)
+    return JsonResponse(status=200, data=licence_authorities_and_interactions, safe=False)

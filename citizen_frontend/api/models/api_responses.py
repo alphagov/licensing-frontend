@@ -5,3 +5,7 @@ class LicenceResponse(BaseModel):
     code: str
     name: str
     legislation: list[str]
+
+
+class AuthorityContactDetails(BaseModel):
+    pass

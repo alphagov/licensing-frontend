@@ -1,0 +1,28 @@
+{
+  "isLocationSpecific": true,
+  "isOfferedByCounty": true,
+  "geographicalAvailability": ["England"],
+  "issuingAuthorities": [
+    {
+      "authorityName": "",
+      "authoritySlug": "",
+      "authorityContact": {
+        "website": "",
+        "email": "",
+        "phone": "",
+        "address": ""
+      },
+      "authorityInteractions": [
+        {
+          "url": "",
+          "usesLicensify": true,
+          "authoritySlug": "",
+          "description": "",
+          "payment": "",
+          "paymentAmount": "optional",
+          "introductionText": ""
+        }
+      ]
+    }
+  ]
+}
