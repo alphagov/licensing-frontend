@@ -1,0 +1,30 @@
+{
+  "isLocationSpecific": true,
+  "isOfferedByCounty": true,
+  "geographicalAvailability": ["England"],
+  "issuingAuthorities": [
+    {
+      "authorityName": "Test Authority",
+      "authoritySlug": "test-authority",
+      "authorityContact": {
+        "website": "https://test-authority.com",
+        "email": "test@test-authority.com",
+        "phone": "12345667801",
+        "address": "Test Address"
+      },
+      "authorityInteractions": {
+        "apply": [
+          {
+            "url": "https://test-authority.com",
+            "usesLicensify": true,
+            "usesAuthorityUrl": true,
+            "description": "Test description",
+            "payment": "Test payment",
+            "paymentAmount": "optional",
+            "introductionText": "Test introduction text"
+          }
+        ]
+      }
+    }
+  ]
+}

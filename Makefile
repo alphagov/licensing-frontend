@@ -3,7 +3,6 @@ format:
 
 prepare:
 	uv sync
-	python manage.py migrate
 	playwright install
 
 start:
@@ -33,3 +32,7 @@ test-common:
 	cd licensing_common && \
 	make prepare-tests && \
 	pytest
+
+
+test-api: prepare
+	pytest citizen_frontend/tests/api

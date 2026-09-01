@@ -28,7 +28,7 @@ sys.path.insert(0, str(BASE_DIR / "licensing_common"))
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("IS_PRODUCTION", "false").lower() not in ["true", "1"]
+DEBUG = os.getenv("IS_PRODUCTION", "true").lower() not in ["true", "1"]
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
