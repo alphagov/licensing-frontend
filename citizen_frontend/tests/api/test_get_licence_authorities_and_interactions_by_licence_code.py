@@ -5,12 +5,6 @@ from django.urls import reverse
 
 from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION
 
-# TODO TEST CASES:
-#   Happy path mocked out
-#   Licence with code not found
-#   No authorities found => different response => current code sends 404
-#  DB connectivity issues
-
 
 def test_get_licence_authorities_and_interactions_by_licence_code_happy_path(client, mock_lookup_service):
     mock_lookup_service.get_licence_authority_and_interactions.return_value = TEST_LICENCE_AUTH_AND_INTERACTION

@@ -23,9 +23,6 @@ def get_all_licences(request):
         ]
         return JsonResponse(response, safe=False)
     except ValidationError as e:
-        # is this how we would like to handle this type of error?
-        # if using pydantic we need to handle these pydantic e too
-        #  maybe 500ish response
         return JsonResponse(status=404, data=e.messages, safe=False)
 
 

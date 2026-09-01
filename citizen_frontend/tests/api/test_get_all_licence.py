@@ -12,13 +12,6 @@ def mock_get_all_licences_from_database(mocker):
     yield mocker.patch("citizen_frontend.api.find_a_licence_integration.get_all_licences_from_database")
 
 
-# TODO TEST CASES:
-#   Other HTTP method requests?
-#   DB Error unhappy path => pymongo error, connection error, operation error...?
-#   Empty result
-#   Bad data structure?
-
-
 def test_get_all_licences_returns_expected_result(client, mock_get_all_licences_from_database):
     mock_get_all_licences_from_database.return_value = [TEST_TEMP_EVENT_LICENCE]
     with open("citizen_frontend/tests/api/mock_get_all_licences_response.json") as f:
@@ -39,11 +32,6 @@ def test_get_all_licences_returns_404_empty_result(client, mock_get_all_licences
     assert response.status_code == 404
 
 
-def test_get_all_licences_returns_404_db_error(client, mock_get_all_licences_from_database):
-    pass
-
-
-# this is only a test case if we validate everything returned from the db
 def test_get_all_licences_throws_error_incorrect_data_format_from_database(client, mock_get_all_licences_from_database):
     mock_get_all_licences_from_database.side_effect = ValidationError(message="Invalid")
 

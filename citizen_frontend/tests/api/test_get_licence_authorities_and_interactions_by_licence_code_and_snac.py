@@ -5,11 +5,6 @@ from django.urls import reverse
 
 from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION
 
-# TODO TEST CASES:
-#   happy path
-#   other methods
-#   empty response for service
-
 
 def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(client, mock_lookup_service):
     mock_lookup_service.licence_authorities_and_interactions_by_snac_code.return_value = (
