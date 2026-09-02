@@ -33,7 +33,7 @@ class IssuingAuthority(BaseModel):
     authority_name: str
     authority_slug: str
     authority_contact: AuthorityContactDetails
-    authority_interactions: dict[str, list[AuthorityInteraction]]  # => what does the string key represent here?
+    authority_interactions: dict[str, list[AuthorityInteraction]]
 
 
 class LicenceAuthoritiesAndInteractionsResponse(BaseModel):
@@ -41,5 +41,5 @@ class LicenceAuthoritiesAndInteractionsResponse(BaseModel):
 
     is_location_specific: bool
     is_offered_by_county: bool
-    geographical_availability: list[str]  # => maybe able to use countries enum here, does ordering matter?
+    geographical_availability: list[str]
     issuing_authorities: list[IssuingAuthority]
