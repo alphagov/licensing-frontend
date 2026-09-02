@@ -2,6 +2,7 @@ import os
 
 import pytest
 from bson import ObjectId
+from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
@@ -42,6 +43,24 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
     pass
+
+
+TEST_AUTHORITY = Authority(
+    _id=ObjectId("50c8520393867870cb0d775f"),
+    name="Test Authority",
+    url_slug="test-authority",
+    full_name="Test Authority for testing with",
+    countries=["England", "Wales"],
+    licence_details=[
+        LicenceDetails(
+            licence_code="1234-5-6",
+            offered_by_authority=True,
+            using_gov_uk=True,
+            authority_url="https://test-authority.com",
+        )
+    ],
+    contact_details=ContactDetails(),
+)
 
 
 TEST_TEMP_EVENT_LICENCE = Licence(

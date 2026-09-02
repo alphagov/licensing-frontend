@@ -17,11 +17,6 @@ def test_get_country_from_geographical_locator_returns_correct_country_for_snac_
         assert get_country_from_geographical_locator(snac_code) == country
 
 
-def test_get_country_from_geographical_locator_returns_none_for_invalid_snac_code():
-    invalid_geographical_locator = "invalid"
-    assert get_country_from_geographical_locator(invalid_geographical_locator) is None
-
-
 @pytest.mark.parametrize(
     "country,gss_codes",
     [
@@ -34,3 +29,8 @@ def test_get_country_from_geographical_locator_returns_none_for_invalid_snac_cod
 def test_get_country_from_geographical_locator_returns_correct_country_for_gss_code(country, gss_codes):
     for gss_code in gss_codes:
         assert get_country_from_geographical_locator(gss_code) == country
+
+
+def test_get_country_from_geographical_locator_returns_none_for_invalid_locator():
+    invalid_geographical_locator = "invalid"
+    assert get_country_from_geographical_locator(invalid_geographical_locator) is None
