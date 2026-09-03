@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 from common.enums.countries import Countries
 from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE, TEST_SNAC_CODE, TEST_TEMP_EVENT_LICENCE
@@ -63,8 +65,53 @@ def test_get_authorities_with_locator_does_not_get_authorities_licence_admin_are
     mock_service.get_authorities_for_licence.assert_not_called()
 
 
-def test_check_authority_covers_location():
-    pass
+def test_check_authority_covers_location_returns_true_locator_present(mock_service):
+    test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
+    test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
+
+    actual = mock_service.check_authority_covers_location(
+        authority=test_authority_with_snac_codes,
+        locator=TEST_SNAC_CODE,
+        country=Countries.ENGLAND,
+    )
+
+    assert actual
+
+
+def test_check_authority_covers_location_returns_true_country_present(mock_service):
+    test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
+    test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
+
+    actual = mock_service.check_authority_covers_location(
+        authority=test_authority_with_snac_codes,
+        locator=TEST_SNAC_CODE,
+        country=Countries.ENGLAND,
+    )
+
+    assert actual
+
+
+def test_check_authority_covers_location_returns_false_country_not_present(mock_service):
+    test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
+    test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
+
+    actual = mock_service.check_authority_covers_location(
+        authority=test_authority_with_snac_codes,
+        locator=TEST_SNAC_CODE,
+        country=Countries.NORTHERN_IRELAND,
+    )
+
+    assert not actual
+
+
+def test_check_authority_covers_location_returns_true_country_present_snac_codes_empty(mock_service):
+    actual = mock_service.check_authority_covers_location(
+        authority=TEST_AUTHORITY,
+        locator=TEST_SNAC_CODE,
+        country=Countries.ENGLAND,
+    )
+
+    assert actual
 
 
 @pytest.mark.parametrize(

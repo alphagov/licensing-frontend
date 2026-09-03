@@ -1,5 +1,6 @@
 import re
 
+from common.models.authorities import Authority
 from common.models.licences import Licence
 
 from citizen_frontend.api.repository.authority_repository import AuthorityRepository
@@ -30,3 +31,10 @@ class AuthorityService:
                 return key
 
         return None
+
+    @staticmethod
+    def check_authority_covers_location(authority: Authority, locator: str, country: str):
+        is_locator_valid = locator in authority.snac_codes or not authority.snac_codes
+        is_country_present = country in authority.countries
+
+        return is_locator_valid and is_country_present
