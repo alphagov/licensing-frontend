@@ -97,6 +97,25 @@ def test_get_authorities_with_geographical_locator_returns_only_authorities_that
     assert actual == [TEST_AUTHORITY]
 
 
+def test_get_authorities_with_geographical_locator_handles_multiple_valid_authorities_that_cover_geographical_location(
+    mock_service, mocker
+):
+    another_expected_authority = deepcopy(TEST_AUTHORITY)
+
+    mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.ENGLAND)
+    mocker.patch.object(
+        mock_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY, another_expected_authority]
+    )
+
+    actual = mock_service.get_authorities_for_licence_with_geographical_locator(
+        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+    )
+
+    mock_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
+
+    assert actual == [TEST_AUTHORITY, another_expected_authority]
+
+
 def test_check_authority_covers_location_returns_true_locator_and_country_present(mock_service):
     test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
     test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
