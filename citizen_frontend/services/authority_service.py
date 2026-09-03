@@ -41,7 +41,7 @@ class AuthorityService:
 
     @staticmethod
     def get_country_from_geographical_locator(locator: str) -> str | None:
-        logger.info("Retrieving country from geographical locator")
+        logger.info("Retrieving country for geographical locator: %s", locator)
         for key, value in COUNTRY_TO_SNAC_CODE.items():
             if locator in value:
                 return key.value
