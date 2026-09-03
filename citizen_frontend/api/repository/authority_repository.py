@@ -1,5 +1,10 @@
+import logging
+
 from common.models.authorities import Authority
 from django.core.exceptions import ValidationError
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class AuthorityRepository:
@@ -16,7 +21,5 @@ class AuthorityRepository:
                 authority.clean()
 
             return authorities
-        except Authority.DoesNotExist:
-            pass
         except ValidationError:
-            pass
+            logger.error("Authority does not match model")
