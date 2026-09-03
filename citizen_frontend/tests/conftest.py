@@ -2,6 +2,7 @@ import os
 
 import pytest
 from bson import ObjectId
+from common.models.authorities import Authority, ContactDetails
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
@@ -44,7 +45,7 @@ def django_db_setup():
     pass
 
 
-TEST_TEMP_EVENT_LICENCE = Licence(
+TEST_LICENCE = Licence(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Licence",
     licence_code="1234-5-6",
@@ -73,6 +74,19 @@ TEST_TEMP_EVENT_LICENCE = Licence(
             tacit_consent="required",
         )
     ],
+)
+
+TEST_AUTHORITY = Authority(
+    url_slug="test-authority",
+    name="Test Authority",
+    full_name="Test Authority Full Name",
+    agency_id=1,
+    authority_url="",
+    snac_codes=["test"],
+    countries=[],
+    encoded_image="test",
+    licence_details=[],
+    contact_details=ContactDetails(),
 )
 
 TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
