@@ -70,16 +70,29 @@ def test_get_authorities_with_geographical_locator_returns_authorities_geographi
 ):
     mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.ENGLAND)
     mocker.patch.object(mock_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY])
-    mocker.patch.object(mock_service, "check_authority_covers_location", return_value=True)
 
     actual = mock_service.get_authorities_for_licence_with_geographical_locator(
         locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
     )
 
     mock_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
-    mock_service.check_authority_covers_location.assert_called_with(
-        authority=TEST_AUTHORITY, locator=TEST_SNAC_CODE, country=Countries.ENGLAND
+
+    assert actual == [TEST_AUTHORITY]
+
+
+def test_get_authorities_with_geographical_locator_returns_only_authorities_that_cover_geographical_location(
+    mock_service, mocker
+):
+    invalid_authority = deepcopy(TEST_AUTHORITY)
+    invalid_authority.snac_codes = ["OTHER_SNAC"]
+    mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.ENGLAND)
+    mocker.patch.object(mock_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY, invalid_authority])
+
+    actual = mock_service.get_authorities_for_licence_with_geographical_locator(
+        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
     )
+
+    mock_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
 
     assert actual == [TEST_AUTHORITY]
 
