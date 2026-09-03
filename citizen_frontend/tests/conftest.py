@@ -2,6 +2,7 @@ import os
 
 import pytest
 from bson import ObjectId
+from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
@@ -45,15 +46,18 @@ def django_db_setup():
     pass
 
 
+TEST_LICENCE_CODE = "1234-5-6"
+
+
 TEST_AUTHORITY = Authority(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Authority",
     url_slug="test-authority",
     full_name="Test Authority for testing with",
-    countries=["England", "Wales"],
+    countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[
         LicenceDetails(
-            licence_code="1234-5-6",
+            licence_code=TEST_LICENCE_CODE,
             offered_by_authority=True,
             using_gov_uk=True,
             authority_url="https://test-authority.com",
@@ -66,11 +70,13 @@ TEST_AUTHORITY = Authority(
 TEST_TEMP_EVENT_LICENCE = Licence(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Licence",
-    licence_code="1234-5-6",
+    licence_code=TEST_LICENCE_CODE,
     legislation_name=["Licensing Act 2003"],
     url_slug="test-licence",
     local_government_service_list_id=1234,
-    administrative_area=AdministrativeArea(code="5", name="England,Wales", countries=["England", "Wales"]),
+    administrative_area=AdministrativeArea(
+        code="5", name=f"{Countries.ENGLAND},{Countries.WALES}", countries=[Countries.ENGLAND, Countries.WALES]
+    ),
     is_offered_by_county=False,
     licence_interactions=[
         LicenceInteraction(
@@ -97,7 +103,7 @@ TEST_TEMP_EVENT_LICENCE = Licence(
 TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
     is_offered_by_county=True,
     is_location_specific=True,
-    geographical_availability=["England"],
+    geographical_availability=[Countries.ENGLAND],
     issuing_authorities=[
         IssuingAuthority(
             authority_name="Test Authority",

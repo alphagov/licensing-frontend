@@ -13,7 +13,7 @@ def test_get_offering_authorities_by_licence_code_calls_database_with_correct_me
     mock_authority_model_filter,
 ):
     repo = AuthorityRepository()
-    repo.get_offering_authorities_by_licence_code(licence_code="1234-5-6")
+    repo.get_licence_offering_authorities_by_licence_code(licence_code="1234-5-6")
 
     mock_authority_model_filter.assert_called_with(
         licence_details__licence_code="1234-5-6", licence_details__offered_by_authority=True
