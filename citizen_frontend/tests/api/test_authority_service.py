@@ -84,6 +84,7 @@ def test_get_authorities_with_geographical_locator_returns_only_authorities_that
     mock_service, mocker
 ):
     invalid_authority = deepcopy(TEST_AUTHORITY)
+    invalid_authority.name = "invalid_authority"
     invalid_authority.snac_codes = ["OTHER_SNAC"]
     mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.ENGLAND)
     mocker.patch.object(mock_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY, invalid_authority])
