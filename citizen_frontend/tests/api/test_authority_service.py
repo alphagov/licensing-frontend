@@ -4,7 +4,7 @@ import pytest
 from common.enums.countries import Countries
 from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE, TEST_SNAC_CODE, TEST_TEMP_EVENT_LICENCE
 
-from citizen_frontend.api.services.authority_service import AuthorityService
+from citizen_frontend.services.authority_service import AuthorityService
 
 
 @pytest.fixture
