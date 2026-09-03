@@ -36,3 +36,6 @@ test-common:
 
 test-api: prepare
 	pytest citizen_frontend/tests/api
+
+test-services: prepare
+	pytest citizen_frontend/tests/services
