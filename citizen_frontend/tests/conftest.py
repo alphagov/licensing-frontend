@@ -47,6 +47,7 @@ def django_db_setup():
 
 
 TEST_LICENCE_CODE = "1234-5-6"
+TEST_SNAC_CODE = "SNAC"
 
 
 TEST_AUTHORITY = Authority(

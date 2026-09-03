@@ -1,5 +1,3 @@
-import re
-
 from common.enums.countries import Countries
 from common.enums.snac_codes import SnacCodes
 from common.models.licences import Licence
@@ -29,15 +27,3 @@ def get_all_licences_from_database() -> list[Licence]:
         licence.clean()
 
     return list(licences)
-
-
-def get_country_from_geographical_locator(locator: str):
-    for key, value in COUNTRY_TO_SNAC_CODE.items():
-        if locator in value:
-            return key
-
-    for key, value in COUNTRY_TO_GSS_CODE.items():
-        if re.match(value, locator):
-            return key
-
-    return None
