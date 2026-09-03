@@ -47,25 +47,44 @@ def test_get_authorities_for_licence_with_locator_calls_get_authorities_for_lice
     mocker.patch.object(mock_service, "get_authorities_for_licence")
 
     mock_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_LICENCE_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
     )
 
     mock_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
 
 
-def test_get_authorities_with_locator_does_not_get_authorities_licence_admin_area_does_not_contain_country(
-    mock_service, mocker
-):
+def test_get_authorities_with_geographical_locator_returns_none_licence_does_not_cover_location(mock_service, mocker):
     mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.NORTHERN_IRELAND)
     mocker.patch.object(mock_service, "get_authorities_for_licence")
 
-    mock_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_LICENCE_CODE, licence=TEST_TEMP_EVENT_LICENCE
+    actual = mock_service.get_authorities_for_licence_with_geographical_locator(
+        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
     )
     mock_service.get_authorities_for_licence.assert_not_called()
 
+    assert not actual
 
-def test_check_authority_covers_location_returns_true_locator_present(mock_service):
+
+def test_get_authorities_with_geographical_locator_returns_authorities_geographical_location_covered(
+    mock_service, mocker
+):
+    mocker.patch.object(mock_service, "get_country_from_geographical_locator", return_value=Countries.ENGLAND)
+    mocker.patch.object(mock_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY])
+    mocker.patch.object(mock_service, "check_authority_covers_location", return_value=True)
+
+    actual = mock_service.get_authorities_for_licence_with_geographical_locator(
+        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+    )
+
+    mock_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
+    mock_service.check_authority_covers_location.assert_called_with(
+        authority=TEST_AUTHORITY, locator=TEST_SNAC_CODE, country=Countries.ENGLAND
+    )
+
+    assert actual == [TEST_AUTHORITY]
+
+
+def test_check_authority_covers_location_returns_true_locator_and_country_present(mock_service):
     test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
     test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
 
@@ -78,20 +97,7 @@ def test_check_authority_covers_location_returns_true_locator_present(mock_servi
     assert actual
 
 
-def test_check_authority_covers_location_returns_true_country_present(mock_service):
-    test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
-    test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
-
-    actual = mock_service.check_authority_covers_location(
-        authority=test_authority_with_snac_codes,
-        locator=TEST_SNAC_CODE,
-        country=Countries.ENGLAND,
-    )
-
-    assert actual
-
-
-def test_check_authority_covers_location_returns_false_country_not_present(mock_service):
+def test_check_authority_covers_location_returns_false_locator_present_country_not_present(mock_service):
     test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
     test_authority_with_snac_codes.snac_codes = [TEST_SNAC_CODE]
 
@@ -99,6 +105,19 @@ def test_check_authority_covers_location_returns_false_country_not_present(mock_
         authority=test_authority_with_snac_codes,
         locator=TEST_SNAC_CODE,
         country=Countries.NORTHERN_IRELAND,
+    )
+
+    assert not actual
+
+
+def test_check_authority_covers_location_returns_false_locator_not_present_country_present(mock_service):
+    test_authority_with_snac_codes = deepcopy(TEST_AUTHORITY)
+    test_authority_with_snac_codes.snac_codes = ["OTHER_SNAC"]
+
+    actual = mock_service.check_authority_covers_location(
+        authority=test_authority_with_snac_codes,
+        locator=TEST_SNAC_CODE,
+        country=Countries.ENGLAND,
     )
 
     assert not actual
