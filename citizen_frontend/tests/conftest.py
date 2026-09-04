@@ -2,7 +2,7 @@ import os
 
 import pytest
 from bson import ObjectId
-from common.models.authorities import Authority, ContactDetails
+from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
@@ -85,7 +85,14 @@ TEST_AUTHORITY = Authority(
     snac_codes=["test"],
     countries=[],
     encoded_image="test",
-    licence_details=[],
+    licence_details=[
+        LicenceDetails(
+            licence_code="Test",
+            offered_by_authority=True,
+            using_gov_uk=True,
+            authority_url="",
+        )
+    ],
     contact_details=ContactDetails(),
 )
 
