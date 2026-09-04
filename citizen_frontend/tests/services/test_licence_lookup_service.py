@@ -30,3 +30,20 @@ def test_get_licence_url_when_authority_does_not_use_gov_uk():
     )
 
     assert result == test_authority_not_using_gov_uk.licence_details[0].authority_url
+
+
+def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_found():
+    test_authority_with_non_matching_licence_details = deepcopy(TEST_AUTHORITY)
+    test_authority_with_non_matching_licence_details.licence_details[0].using_gov_uk = False
+    test_authority_with_non_matching_licence_details.licence_details[0].authority_url = "test-authority.gov.uk"
+    test_authority_with_non_matching_licence_details.licence_details[0].licence_code = "345-6-7"
+    licence_lookup_service = LicenceLookupService()
+
+    result = licence_lookup_service.get_licence_url(
+        licence_interaction=TEST_LICENCE.licence_interactions[0],
+        licence=TEST_LICENCE,
+        authority=test_authority_with_non_matching_licence_details,
+        uses_gov_uk=False,
+    )
+
+    assert result == ""

@@ -27,4 +27,6 @@ class LicenceLookupService:
             for licence_detail in authority.licence_details
             if licence_detail.licence_code == licence.licence_code
         ]
+        if not matched_licence_details:
+            return ""
         return matched_licence_details[0].authority_url
