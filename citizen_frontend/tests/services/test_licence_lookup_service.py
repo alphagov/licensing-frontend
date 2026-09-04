@@ -47,3 +47,18 @@ def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_fo
     )
 
     assert result == ""
+
+
+def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
+    test_authority_with_empty_authority_url = deepcopy(TEST_AUTHORITY)
+    test_authority_with_empty_authority_url.licence_details[0].using_gov_uk = False
+    licence_lookup_service = LicenceLookupService()
+
+    result = licence_lookup_service.get_licence_url(
+        licence_interaction=TEST_LICENCE.licence_interactions[0],
+        licence=TEST_LICENCE,
+        authority=test_authority_with_empty_authority_url,
+        uses_gov_uk=False,
+    )
+
+    assert result == ""
