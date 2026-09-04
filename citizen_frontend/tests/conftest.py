@@ -87,7 +87,7 @@ TEST_AUTHORITY = Authority(
     encoded_image="test",
     licence_details=[
         LicenceDetails(
-            licence_code="Test",
+            licence_code="1234-5-6",
             offered_by_authority=True,
             using_gov_uk=True,
             authority_url="",

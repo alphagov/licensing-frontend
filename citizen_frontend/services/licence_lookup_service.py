@@ -12,4 +12,11 @@ class LicenceLookupService:
         pass
 
     def get_base_licence_url(self, licence: Licence, authority: Authority, uses_gov_uk: bool):
-        return f"{os.getenv('BASE_URL', '')}/apply-for-a-licence/{licence.url_slug}/{authority.url_slug}"
+        if uses_gov_uk:
+            return f"{os.getenv('BASE_URL', '')}/apply-for-a-licence/{licence.url_slug}/{authority.url_slug}"
+        matched_licence_details = [
+            licence_detail
+            for licence_detail in authority.licence_details
+            if licence_detail.licence_code == licence.licence_code
+        ]
+        return matched_licence_details[0].authority_url
