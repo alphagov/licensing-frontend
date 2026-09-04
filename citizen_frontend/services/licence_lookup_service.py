@@ -1,5 +1,5 @@
-from citizen_frontend.models.authority import Authority
-from citizen_frontend.models.licence import Licence
+from common.models.authorities import Authority
+from common.models.licences import Licence
 
 
 class LicenceLookupService:
