@@ -17,7 +17,6 @@ def get_authorities_for_licence(licence_code):
 
 def get_authorities_for_licence_with_geographical_locator(locator: str, licence: Licence) -> list[Authority] | None:
     country = get_country_from_geographical_locator(locator=locator)
-    # need to check what happens if no country => snac or gss incorrect..
     if not country:
         return None
 
@@ -50,14 +49,10 @@ def get_country_from_geographical_locator(locator: str) -> str | None:
 
 
 def check_authority_covers_location(authority: Authority, locator: str, country: str) -> bool:
-    logger.info("Checking authority: %s covers location: %s and country: %s", authority.name, locator, country)
-
     is_locator_valid = locator in authority.snac_codes or not authority.snac_codes
     is_country_present = country in authority.countries
 
     if not is_locator_valid or not is_country_present:
-        logger.info("%s does not cover location: %s and country: %s", authority.name, locator, country)
         return False
 
-    logger.info("%s covers location: %s and country: %s", authority.name, locator, country)
     return True
