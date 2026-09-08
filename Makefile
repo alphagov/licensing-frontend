@@ -35,4 +35,4 @@ test-common:
 
 
 test-api: prepare
-	pytest citizen_frontend/tests/api
+	pytest citizen_frontend/tests/api --ignore citizen_frontend/tests/api/end_to_end

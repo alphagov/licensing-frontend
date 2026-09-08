@@ -1,0 +1,58 @@
+import logging
+import re
+
+from common.models.authorities import Authority
+from common.models.licences import Licence
+
+import citizen_frontend.api.repository.authority_repository as authority_repository
+from citizen_frontend.api.utils import COUNTRY_TO_GSS_CODE, COUNTRY_TO_SNAC_CODE
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+
+def get_authorities_for_licence(licence_code: str) -> list[Authority]:
+    return authority_repository.get_licence_offering_authorities_by_licence_code(licence_code=licence_code)
+
+
+def get_authorities_for_licence_with_geographical_locator(locator: str, licence: Licence) -> list[Authority] | None:
+    country = get_country_from_geographical_locator(locator=locator)
+    if not country:
+        return None
+
+    if country not in licence.administrative_area.countries:
+        logger.info("%s not present in licence administrative area for licence: %s", country, licence.licence_code)
+        return None
+
+    logger.info("Retrieving authorities that offer licence for licence code: %s", licence.licence_code)
+    authorities = get_authorities_for_licence(licence_code=licence.licence_code)
+
+    return [
+        authority
+        for authority in authorities
+        if check_authority_covers_location(authority=authority, locator=locator, country=country)
+    ]
+
+
+def get_country_from_geographical_locator(locator: str) -> str | None:
+    logger.info("Retrieving country for geographical locator: %s", locator)
+    for key, value in COUNTRY_TO_SNAC_CODE.items():
+        if locator in value:
+            return key.value
+
+    for key, value in COUNTRY_TO_GSS_CODE.items():
+        if re.match(value, locator):
+            return key.value
+
+    logger.info("No country found for locator: %s", locator)
+    return None
+
+
+def check_authority_covers_location(authority: Authority, locator: str, country: str) -> bool:
+    is_locator_valid = locator in authority.snac_codes or not authority.snac_codes
+    is_country_present = country in authority.countries
+
+    if not is_locator_valid or not is_country_present:
+        return False
+
+    return True

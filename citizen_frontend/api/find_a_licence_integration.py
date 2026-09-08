@@ -3,8 +3,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
-from citizen_frontend.api.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.api.utils import get_all_licences_from_database
+from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 
 
 @require_GET
