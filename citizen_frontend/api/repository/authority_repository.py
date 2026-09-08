@@ -7,19 +7,17 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class AuthorityRepository:
-    @staticmethod
-    def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[Authority]:
-        try:
-            authorities = list(
-                Authority.objects.filter(
-                    licence_details__licence_code=licence_code, licence_details__offered_by_authority=True
-                )
+def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[Authority]:
+    try:
+        authorities = list(
+            Authority.objects.filter(
+                licence_details__licence_code=licence_code, licence_details__offered_by_authority=True
             )
+        )
 
-            for authority in authorities:
-                authority.clean()
+        for authority in authorities:
+            authority.clean()
 
-            return authorities
-        except ValidationError:
-            logger.error("Authority does not match model")
+        return authorities
+    except ValidationError:
+        logger.error("Authority does not match model")
