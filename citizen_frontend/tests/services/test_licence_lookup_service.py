@@ -1,7 +1,10 @@
 from copy import deepcopy
 
+import bson
+from common.models.interaction_customisations import Customisation
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION
+from django.utils import timezone
 
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services.licence_lookup_service import LicenceLookupService
@@ -81,8 +84,20 @@ def test_get_payment_type_from_customisation_when_no_fee_required():
 
 
 def test_get_payment_type_from_customisation_when_fixed_fee_required():
-    customisation_fixed_fee_required = deepcopy(TEST_CUSTOMISATION)
-    customisation_fixed_fee_required.fixed_fee_amount = PaymentAmount(500)
+    customisation_fixed_fee_required = Customisation(
+        is_postal_allowed=False,
+        number_of_days_to_process=30,
+        is_processing_days_working_days=True,
+        has_tacit_consent=False,
+        created_at=timezone.now(),
+        fixed_fee_amount=PaymentAmount(pence=500),
+        is_fee_required=True,
+        legislation_name="test-legislation",
+        introduction_text="test-introduction",
+        declarations=["test-declaration1", "test-declaration2"],
+        department=bson.ObjectId(),
+    )
+
     licence_lookup_service = LicenceLookupService()
 
     actual = licence_lookup_service.get_payment_type_from_customisation(customisation_fixed_fee_required)
@@ -94,5 +109,27 @@ def test_get_payment_type_from_customisation_returns_variable_fee_when_no_fixed_
     licence_lookup_service = LicenceLookupService()
 
     actual = licence_lookup_service.get_payment_type_from_customisation(TEST_CUSTOMISATION)
+
+    assert actual == PaymentType.VARIABLE_FEE
+
+
+def test_get_payment_type_from_customisation_returns_variable_fee_when_fixed_fee_amount_is_0_and_fee_required():
+    customisation_fixed_fee_zero_pence = Customisation(
+        is_postal_allowed=False,
+        number_of_days_to_process=30,
+        is_processing_days_working_days=True,
+        has_tacit_consent=False,
+        created_at=timezone.now(),
+        fixed_fee_amount=PaymentAmount(),
+        is_fee_required=True,
+        legislation_name="test-legislation",
+        introduction_text="test-introduction",
+        declarations=["test-declaration1", "test-declaration2"],
+        department=bson.ObjectId(),
+    )
+
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_type_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == PaymentType.VARIABLE_FEE

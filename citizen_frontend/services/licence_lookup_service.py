@@ -37,7 +37,7 @@ class LicenceLookupService:
         if not customisation.is_fee_required:
             return PaymentType.NONE
 
-        if customisation.fixed_fee_amount:
+        if customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0:
             return PaymentType.FIXED_FEE
 
         return PaymentType.VARIABLE_FEE
