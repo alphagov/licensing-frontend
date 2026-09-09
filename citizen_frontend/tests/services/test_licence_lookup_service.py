@@ -1,10 +1,7 @@
 from copy import deepcopy
 
-import bson
-from common.models.interaction_customisations import Customisation
 from common.models.shared_models import PaymentAmount
-from conftest import TEST_CUSTOMISATION_VARIABLE_FEE
-from django.utils import timezone
+from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_VARIABLE_FEE
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.enums.payment_type import PaymentType
@@ -78,23 +75,9 @@ def test_get_payment_info_from_customisation_returns_none_and_none_when_no_fee_r
 
 
 def test_get_payment_info_from_customisation_returns_fixed_fee_and_amount_when_fixed_fee_required():
-    customisation_fixed_fee_required = Customisation(
-        is_postal_allowed=False,
-        number_of_days_to_process=30,
-        is_processing_days_working_days=True,
-        has_tacit_consent=False,
-        created_at=timezone.now(),
-        fixed_fee_amount=PaymentAmount(pence=500),
-        is_fee_required=True,
-        legislation_name="test-legislation",
-        introduction_text="test-introduction",
-        declarations=["test-declaration1", "test-declaration2"],
-        department=bson.ObjectId(),
-    )
+    actual = licence_lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_FIXED_FEE)
 
-    actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_required)
-
-    assert actual == (PaymentType.FIXED_FEE, customisation_fixed_fee_required.fixed_fee_amount)
+    assert actual == (PaymentType.FIXED_FEE, TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount)
 
 
 def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_but_no_fixed_fee():
@@ -104,19 +87,8 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
 
 
 def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_and_fixed_fee_amount_0():
-    customisation_fixed_fee_zero_pence = Customisation(
-        is_postal_allowed=False,
-        number_of_days_to_process=30,
-        is_processing_days_working_days=True,
-        has_tacit_consent=False,
-        created_at=timezone.now(),
-        fixed_fee_amount=PaymentAmount(),
-        is_fee_required=True,
-        legislation_name="test-legislation",
-        introduction_text="test-introduction",
-        declarations=["test-declaration1", "test-declaration2"],
-        department=bson.ObjectId(),
-    )
+    customisation_fixed_fee_zero_pence = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
+    customisation_fixed_fee_zero_pence.fixed_fee_amount = PaymentAmount(pence=0)
 
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
