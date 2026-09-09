@@ -3,6 +3,7 @@ import os
 from common.models.authorities import Authority
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
+from common.models.shared_models import PaymentAmount
 
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
@@ -41,3 +42,6 @@ class LicenceLookupService:
             return PaymentType.FIXED_FEE
 
         return PaymentType.VARIABLE_FEE
+
+    def get_payment_amount_from_customisation(self, customisation: Customisation) -> PaymentAmount | None:
+        return customisation.fixed_fee_amount if customisation.is_fee_required else None

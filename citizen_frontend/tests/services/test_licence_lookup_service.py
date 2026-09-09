@@ -133,3 +133,55 @@ def test_get_payment_type_from_customisation_returns_variable_fee_when_fixed_fee
     actual = licence_lookup_service.get_payment_type_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == PaymentType.VARIABLE_FEE
+
+
+def test_get_payment_amount_from_customisation_returns_fee_amount_when_fixed_fee_is_required():
+    customisation_fixed_fee_required = Customisation(
+        is_postal_allowed=False,
+        number_of_days_to_process=30,
+        is_processing_days_working_days=True,
+        has_tacit_consent=False,
+        created_at=timezone.now(),
+        fixed_fee_amount=PaymentAmount(pence=500),
+        is_fee_required=True,
+        legislation_name="test-legislation",
+        introduction_text="test-introduction",
+        declarations=["test-declaration1", "test-declaration2"],
+        department=bson.ObjectId(),
+    )
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_amount_from_customisation(customisation_fixed_fee_required)
+
+    assert actual == customisation_fixed_fee_required.fixed_fee_amount
+
+
+def test_get_payment_amount_from_customisation_returns_none_when_no_fee_required():
+    customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION)
+    customisation_no_fee_required.is_fee_required = False
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_amount_from_customisation(customisation_no_fee_required)
+
+    assert actual is None
+
+
+def test_get_payment_amount_from_customisation_returns_none_when_no_fee_required_but_fixed_fee_exists():
+    customisation_fixed_fee_not_required = Customisation(
+        is_postal_allowed=False,
+        number_of_days_to_process=30,
+        is_processing_days_working_days=True,
+        has_tacit_consent=False,
+        created_at=timezone.now(),
+        fixed_fee_amount=PaymentAmount(pence=500),
+        is_fee_required=False,
+        legislation_name="test-legislation",
+        introduction_text="test-introduction",
+        declarations=["test-declaration1", "test-declaration2"],
+        department=bson.ObjectId(),
+    )
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_amount_from_customisation(customisation_fixed_fee_not_required)
+
+    assert actual is None
