@@ -167,8 +167,5 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
 
 @pytest.fixture
 def mock_lookup_service(mocker):
-    mock_look_up_service = mocker.MagicMock()
-    mocker.patch(
-        "citizen_frontend.api.find_a_licence_integration.LicenceLookupService", return_value=mock_look_up_service
-    )
+    mock_look_up_service = mocker.patch("citizen_frontend.api.find_a_licence_integration.licence_lookup_service")
     yield mock_look_up_service

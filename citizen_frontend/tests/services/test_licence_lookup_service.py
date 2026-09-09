@@ -6,13 +6,12 @@ from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION_VARIABLE_FEE
 from django.utils import timezone
 
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
-    licence_lookup_service = LicenceLookupService()
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
         licence=TEST_LICENCE,
@@ -27,7 +26,6 @@ def test_get_licence_url_when_authority_does_not_use_gov_uk():
     test_authority_not_using_gov_uk = deepcopy(TEST_AUTHORITY)
     test_authority_not_using_gov_uk.licence_details[0].using_gov_uk = False
     test_authority_not_using_gov_uk.licence_details[0].authority_url = "test-authority.gov.uk"
-    licence_lookup_service = LicenceLookupService()
 
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
@@ -44,7 +42,6 @@ def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_fo
     test_authority_with_non_matching_licence_details.licence_details[0].using_gov_uk = False
     test_authority_with_non_matching_licence_details.licence_details[0].authority_url = "test-authority.gov.uk"
     test_authority_with_non_matching_licence_details.licence_details[0].licence_code = "345-6-7"
-    licence_lookup_service = LicenceLookupService()
 
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
@@ -60,7 +57,6 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
     test_authority_with_empty_authority_url = deepcopy(TEST_AUTHORITY)
     test_authority_with_empty_authority_url.licence_details[0].using_gov_uk = False
     test_authority_with_empty_authority_url.licence_details[0].authority_url = ""
-    licence_lookup_service = LicenceLookupService()
 
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
@@ -75,8 +71,6 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
 def test_get_payment_info_from_customisation_returns_none_and_none_when_no_fee_required():
     customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
     customisation_no_fee_required.is_fee_required = False
-
-    licence_lookup_service = LicenceLookupService()
 
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_no_fee_required)
 
@@ -98,16 +92,12 @@ def test_get_payment_info_from_customisation_returns_fixed_fee_and_amount_when_f
         department=bson.ObjectId(),
     )
 
-    licence_lookup_service = LicenceLookupService()
-
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_required)
 
     assert actual == (PaymentType.FIXED_FEE, customisation_fixed_fee_required.fixed_fee_amount)
 
 
 def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_but_no_fixed_fee():
-    licence_lookup_service = LicenceLookupService()
-
     actual = licence_lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_VARIABLE_FEE)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
@@ -127,8 +117,6 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
         declarations=["test-declaration1", "test-declaration2"],
         department=bson.ObjectId(),
     )
-
-    licence_lookup_service = LicenceLookupService()
 
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
