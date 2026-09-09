@@ -3,6 +3,7 @@ from copy import deepcopy
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION
 
+from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
@@ -76,7 +77,7 @@ def test_get_payment_type_from_customisation_when_no_fee_required():
 
     actual = licence_lookup_service.get_payment_type_from_customisation(customisation_no_fee_required)
 
-    assert actual == "none"
+    assert actual == PaymentType.NONE
 
 
 def test_get_payment_type_from_customisation_when_fixed_fee_required():
@@ -86,4 +87,12 @@ def test_get_payment_type_from_customisation_when_fixed_fee_required():
 
     actual = licence_lookup_service.get_payment_type_from_customisation(customisation_fixed_fee_required)
 
-    assert actual == "fixed"
+    assert actual == PaymentType.FIXED_FEE
+
+
+def test_get_payment_type_from_customisation_returns_variable_fee_when_no_fixed_fee_but_fee_required():
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_type_from_customisation(TEST_CUSTOMISATION)
+
+    assert actual == PaymentType.VARIABLE_FEE
