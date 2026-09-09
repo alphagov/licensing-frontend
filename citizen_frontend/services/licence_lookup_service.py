@@ -34,4 +34,7 @@ class LicenceLookupService:
         return matched_licence_details[0].authority_url
 
     def get_payment_type_from_customisation(self, customisation: Customisation) -> str:
+        if customisation.fixed_fee_amount:
+            return PaymentType.FIXED_FEE
+
         return PaymentType.NONE

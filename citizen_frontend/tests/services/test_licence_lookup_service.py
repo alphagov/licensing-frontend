@@ -70,9 +70,18 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
 def test_get_payment_type_from_customisation_when_no_fee_required():
     customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION)
     customisation_no_fee_required.is_fee_required = False
+    customisation_no_fee_required.fixed_fee_amount = None
 
     licence_lookup_service = LicenceLookupService()
 
     actual = licence_lookup_service.get_payment_type_from_customisation(customisation_no_fee_required)
 
     assert actual == "none"
+
+
+def test_get_payment_type_from_customisation_when_fixed_fee_required():
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_type_from_customisation(TEST_CUSTOMISATION)
+
+    assert actual == "fixed"
