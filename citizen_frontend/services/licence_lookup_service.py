@@ -9,11 +9,11 @@ from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
 
 
-def get_licence_authority_and_interactions(self, licence_code: str):
+def get_licence_authority_and_interactions(licence_code: str):
     pass
 
 
-def licence_authorities_and_interactions_by_snac_code(self, licence_code: str, snac_code: str):
+def licence_authorities_and_interactions_by_snac_code(licence_code: str, snac_code: str):
     pass
 
 
