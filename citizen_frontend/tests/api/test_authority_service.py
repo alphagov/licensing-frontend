@@ -2,16 +2,20 @@ from copy import deepcopy
 
 import pytest
 from common.enums.countries import Countries
-from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE, TEST_SNAC_CODE, TEST_TEMP_EVENT_LICENCE
+from conftest import TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE_CODE, TEST_SNAC_CODE
 
 import citizen_frontend.services.authority_service as authority_service
 
 
 def test_get_authorities_for_licence_calls_authority_repository(mocker):
-    spy = mocker.spy(authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code")
+    mock_repository = mocker.patch.object(
+        authority_service.authority_repository,
+        "get_licence_offering_authorities_by_licence_code",
+        return_value=[TEST_AUTHORITY],
+    )
     authority_service.get_authorities_for_licence(TEST_LICENCE_CODE)
 
-    spy.assert_called_with(licence_code=TEST_LICENCE_CODE)
+    mock_repository.assert_called_with(licence_code=TEST_LICENCE_CODE)
 
 
 def test_get_authorities_for_licence_returns_list_of_authorities(mocker):
@@ -30,7 +34,7 @@ def test_get_authorities_for_licence_with_geographical_locator_calls_get_country
     mocker.patch.object(authority_service, "get_country_from_geographical_locator")
 
     authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
 
     authority_service.get_country_from_geographical_locator.assert_called_with(locator=TEST_SNAC_CODE)
@@ -43,7 +47,7 @@ def test_get_authorities_for_licence_with_locator_calls_get_authorities_for_lice
     mocker.patch.object(authority_service, "get_authorities_for_licence")
 
     authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
 
     authority_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
@@ -56,7 +60,7 @@ def test_get_authorities_with_geographical_locator_returns_none_licence_does_not
     mocker.patch.object(authority_service, "get_authorities_for_licence")
 
     actual = authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
     authority_service.get_authorities_for_licence.assert_not_called()
 
@@ -68,7 +72,7 @@ def test_get_authorities_with_geographical_locator_returns_authorities_geographi
     mocker.patch.object(authority_service, "get_authorities_for_licence", return_value=[TEST_AUTHORITY])
 
     actual = authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
 
     authority_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
@@ -86,7 +90,7 @@ def test_get_authorities_with_geographical_locator_returns_only_authorities_that
     )
 
     actual = authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
 
     authority_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)
@@ -105,7 +109,7 @@ def test_get_authorities_with_geographical_locator_handles_multiple_valid_author
     )
 
     actual = authority_service.get_authorities_for_licence_with_geographical_locator(
-        locator=TEST_SNAC_CODE, licence=TEST_TEMP_EVENT_LICENCE
+        locator=TEST_SNAC_CODE, licence=TEST_LICENCE
     )
 
     authority_service.get_authorities_for_licence.assert_called_with(licence_code=TEST_LICENCE_CODE)

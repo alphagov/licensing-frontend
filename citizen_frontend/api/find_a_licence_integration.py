@@ -2,9 +2,9 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.api.utils import get_all_licences_from_database
-from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 
 
 @require_GET
@@ -28,7 +28,6 @@ def get_all_licences(request):
 
 @require_GET
 def get_licence_authority_and_interactions_by_licence_code(request, licence_code):
-    licence_lookup_service = LicenceLookupService()
     licence_authorities_and_interactions = licence_lookup_service.get_licence_authority_and_interactions(
         licence_code=licence_code
     )
@@ -43,7 +42,6 @@ def get_licence_authority_and_interactions_by_licence_code(request, licence_code
 
 @require_GET
 def get_licence_authorities_and_interactions_by_licence_code_and_snac_code(request, licence_code: str, snac_code: str):
-    licence_lookup_service = LicenceLookupService()
     result = licence_lookup_service.licence_authorities_and_interactions_by_snac_code(
         snac_code=snac_code, licence_code=licence_code
     )

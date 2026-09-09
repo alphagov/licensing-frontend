@@ -4,7 +4,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
-from citizen_frontend.tests.conftest import TEST_TEMP_EVENT_LICENCE
+from citizen_frontend.tests.conftest import TEST_LICENCE
 
 
 @pytest.fixture
@@ -13,7 +13,7 @@ def mock_get_all_licences_from_database(mocker):
 
 
 def test_get_all_licences_returns_expected_result(client, mock_get_all_licences_from_database):
-    mock_get_all_licences_from_database.return_value = [TEST_TEMP_EVENT_LICENCE]
+    mock_get_all_licences_from_database.return_value = [TEST_LICENCE]
     with open("citizen_frontend/tests/api/mock_get_all_licences_response.json") as f:
         expected = json.load(f)
 
@@ -42,7 +42,7 @@ def test_get_all_licences_throws_error_incorrect_data_format_from_database(clien
 
 
 def test_get_all_licences_returns_405_non_get_request_call(client, mock_get_all_licences_from_database):
-    mock_get_all_licences_from_database.return_value = [TEST_TEMP_EVENT_LICENCE]
+    mock_get_all_licences_from_database.return_value = [TEST_LICENCE]
 
     response = client.post(reverse("get_all_licences"))
 
