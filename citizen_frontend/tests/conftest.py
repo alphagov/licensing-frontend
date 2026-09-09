@@ -1,11 +1,14 @@
 import os
 
+import bson
 import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
+from common.models.interaction_customisations import Customisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
+from django.utils import timezone
 
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
@@ -131,6 +134,20 @@ TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
             },
         )
     ],
+)
+
+TEST_CUSTOMISATION = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    is_fee_required=True,
+    fixed_fee_amount=PaymentAmount(pence=500),
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
 )
 
 

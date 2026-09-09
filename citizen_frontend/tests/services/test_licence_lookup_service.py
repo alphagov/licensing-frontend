@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from conftest import TEST_CUSTOMISATION
+
 from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
@@ -63,3 +65,14 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
     )
 
     assert result == ""
+
+
+def test_get_payment_type_from_customisation_when_no_fee_required():
+    customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION)
+    customisation_no_fee_required.is_fee_required = False
+
+    licence_lookup_service = LicenceLookupService()
+
+    actual = licence_lookup_service.get_payment_type_from_customisation(customisation_no_fee_required)
+
+    assert actual == "none"

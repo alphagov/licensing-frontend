@@ -1,9 +1,11 @@
 import os
 
 from common.models.authorities import Authority
+from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
+from citizen_frontend.enums.payment_type import PaymentType
 
 
 class LicenceLookupService:
@@ -30,3 +32,6 @@ class LicenceLookupService:
         if not matched_licence_details:
             return ""
         return matched_licence_details[0].authority_url
+
+    def get_payment_type_from_customisation(self, customisation: Customisation) -> str:
+        return PaymentType.NONE
