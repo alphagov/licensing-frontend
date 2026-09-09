@@ -136,12 +136,27 @@ TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
     ],
 )
 
-TEST_CUSTOMISATION = Customisation(
+TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
     is_postal_allowed=False,
     number_of_days_to_process=30,
     is_processing_days_working_days=True,
     has_tacit_consent=False,
     created_at=timezone.now(),
+    is_fee_required=True,
+    fee_calculation_instructions=["fee calculation 1", "fee calculation 2"],
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+TEST_CUSTOMISATION_FIXED_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    fixed_fee_amount=PaymentAmount(pence=500),
     is_fee_required=True,
     legislation_name="test-legislation",
     introduction_text="test-introduction",
