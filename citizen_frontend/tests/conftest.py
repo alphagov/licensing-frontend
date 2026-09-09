@@ -143,7 +143,6 @@ TEST_CUSTOMISATION = Customisation(
     has_tacit_consent=False,
     created_at=timezone.now(),
     is_fee_required=True,
-    fixed_fee_amount=PaymentAmount(pence=500),
     legislation_name="test-legislation",
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],

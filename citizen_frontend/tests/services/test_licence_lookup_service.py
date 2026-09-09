@@ -1,5 +1,6 @@
 from copy import deepcopy
 
+from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION
 
 from citizen_frontend.services.licence_lookup_service import LicenceLookupService
@@ -70,7 +71,6 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
 def test_get_payment_type_from_customisation_when_no_fee_required():
     customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION)
     customisation_no_fee_required.is_fee_required = False
-    customisation_no_fee_required.fixed_fee_amount = None
 
     licence_lookup_service = LicenceLookupService()
 
@@ -80,8 +80,10 @@ def test_get_payment_type_from_customisation_when_no_fee_required():
 
 
 def test_get_payment_type_from_customisation_when_fixed_fee_required():
+    customisation_fixed_fee_required = deepcopy(TEST_CUSTOMISATION)
+    customisation_fixed_fee_required.fixed_fee_amount = PaymentAmount(500)
     licence_lookup_service = LicenceLookupService()
 
-    actual = licence_lookup_service.get_payment_type_from_customisation(TEST_CUSTOMISATION)
+    actual = licence_lookup_service.get_payment_type_from_customisation(customisation_fixed_fee_required)
 
     assert actual == "fixed"
