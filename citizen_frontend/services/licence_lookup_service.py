@@ -34,14 +34,13 @@ class LicenceLookupService:
             return ""
         return matched_licence_details[0].authority_url
 
-    def get_payment_type_from_customisation(self, customisation: Customisation) -> str:
+    def get_payment_info_from_customisation(
+        self, customisation: Customisation
+    ) -> tuple[PaymentType, PaymentAmount | None]:
         if not customisation.is_fee_required:
-            return PaymentType.NONE
+            return PaymentType.NONE, None
 
         if customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0:
-            return PaymentType.FIXED_FEE
+            return PaymentType.FIXED_FEE, customisation.fixed_fee_amount
 
-        return PaymentType.VARIABLE_FEE
-
-    def get_payment_amount_from_customisation(self, customisation: Customisation) -> PaymentAmount | None:
-        return customisation.fixed_fee_amount if customisation.is_fee_required else None
+        return PaymentType.VARIABLE_FEE, None
