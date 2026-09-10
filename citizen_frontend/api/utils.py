@@ -1,8 +1,10 @@
 from common.enums.countries import Countries
+from common.enums.interaction_id_codes import InteractionIdCodes
 from common.enums.snac_codes import SnacCodes
 from common.models.licences import Licence
 
-# Should these exist in common/go into separate file
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
+
 COUNTRY_TO_SNAC_CODE = {
     Countries.ENGLAND: SnacCodes.ENGLAND.value,
     Countries.WALES: SnacCodes.WALES.value,
@@ -10,8 +12,6 @@ COUNTRY_TO_SNAC_CODE = {
     Countries.SCOTLAND: SnacCodes.SCOTLAND.value,
 }
 
-# should we be doing an external call rather than relying on a regex...
-# How do we even know this is a valid code that exists...
 COUNTRY_TO_GSS_CODE = {
     Countries.ENGLAND: r"^E\d{8}$",
     Countries.WALES: r"^W\d{8}$",
@@ -27,3 +27,6 @@ def get_all_licences_from_database() -> list[Licence]:
         licence.clean()
 
     return list(licences)
+
+
+INTERACTION_ID_WORD_MAPPING = {InteractionIdCodes.APPLY: LicenceInteractions.APPLY}

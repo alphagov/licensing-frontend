@@ -1,12 +1,16 @@
 import os
 
+import bson
 import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
-from common.models.interaction_customisations import InteractionCustomisation
+
+from common.models.interaction_customisations import InteractionCustomisation, Customisation
+
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
+from django.utils import timezone
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.api.models.api_responses import (
@@ -70,6 +74,7 @@ TEST_AUTHORITY = Authority(
     name="Test Authority",
     url_slug="test-authority",
     full_name="Test Authority for testing with",
+    agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[
         LicenceDetails(
@@ -83,7 +88,7 @@ TEST_AUTHORITY = Authority(
 )
 
 
-TEST_TEMP_EVENT_LICENCE = Licence(
+TEST_LICENCE = Licence(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Licence",
     licence_code=TEST_LICENCE_CODE,
@@ -147,11 +152,36 @@ TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
     ],
 )
 
+TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    is_fee_required=True,
+    fee_calculation_instructions=["fee calculation 1", "fee calculation 2"],
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+TEST_CUSTOMISATION_FIXED_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    fixed_fee_amount=PaymentAmount(pence=500),
+    is_fee_required=True,
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
 
 @pytest.fixture
 def mock_lookup_service(mocker):
-    mock_look_up_service = mocker.MagicMock()
-    mocker.patch(
-        "citizen_frontend.api.find_a_licence_integration.LicenceLookupService", return_value=mock_look_up_service
-    )
+    mock_look_up_service = mocker.patch("citizen_frontend.api.find_a_licence_integration.licence_lookup_service")
     yield mock_look_up_service
