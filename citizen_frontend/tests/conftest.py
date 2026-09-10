@@ -4,9 +4,11 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
+from common.models.interaction_customisations import InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
+import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
     AuthorityInteraction,
@@ -21,6 +23,7 @@ FOOD_PREMISES_APPLICATION_SLUG = "food-premises-approval-6"
 TEST_AUTH_SLUG = "winchester"
 TEST_INTERACTION = "apply"
 TEST_INTERACTION_SUB_ID = "1"
+TEST_INTERACTION_ID = 14
 
 TEST_TEMP_EVENT_APPLY_URL = (
     f"{BASE_URL}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
@@ -44,6 +47,18 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
     pass
+
+
+@pytest.fixture
+def mock_interaction_customisation_filter(mocker):
+    mock_model = mocker.patch.object(InteractionCustomisation.objects, "filter")
+    yield mock_model
+
+
+@pytest.fixture
+def mock_find_interaction_customisations(mocker):
+    mock_model = mocker.patch.object(interaction_customisation_repository, "find_interaction_customisations")
+    yield mock_model
 
 
 TEST_LICENCE_CODE = "1234-5-6"

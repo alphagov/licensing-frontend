@@ -1,35 +1,32 @@
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 
 
-def _base_find_interaction_customisation(
-    authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-):
-    return InteractionCustomisation.objects.filter(
-        authority_url_slug=authority_url_slug,
-        licence_code=licence_code,
-        interaction_id=interaction_id,
-        interaction_sub_id=interaction_sub_id,
-    )
-
-
 def find_published_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> Customisation | None:
-    interaction_with_published_customisation_query = _base_find_interaction_customisation(
+) -> list[Customisation]:
+    interaction_customisations = find_interaction_customisations(
         authority_url_slug, licence_code, interaction_id, interaction_sub_id
-    ).filter(published_customisation__isnull=False)
-    interaction_with_published_customisation = interaction_with_published_customisation_query.first()
-    return (
-        interaction_with_published_customisation.published_customisation
-        if interaction_with_published_customisation
-        else None
     )
+    published_customisations = [
+        interaction_customisation.published_customisation
+        for interaction_customisation in interaction_customisations
+        if interaction_customisation.published_customisation
+        and not interaction_customisation.published_customisation.suspended_at
+    ]
+    # TODO should this ever be more than one?
+
+    return published_customisations
 
 
-def find_interaction_customisation(
+def find_interaction_customisations(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> InteractionCustomisation | None:
-    customisation = _base_find_interaction_customisation(
-        authority_url_slug, licence_code, interaction_id, interaction_sub_id
-    ).first()
-    return customisation
+) -> list[InteractionCustomisation]:
+    customisations = list(
+        InteractionCustomisation.objects.filter(
+            authority_url_slug=authority_url_slug,
+            licence_code=licence_code,
+            interaction_id=interaction_id,
+            interaction_sub_id=interaction_sub_id,
+        )
+    )
+    return customisations
