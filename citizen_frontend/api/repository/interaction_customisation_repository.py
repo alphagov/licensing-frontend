@@ -13,7 +13,7 @@ def find_published_customisation(
         if interaction_customisation.published_customisation
         and not interaction_customisation.published_customisation.suspended_at
     ]
-    # TODO should this ever be more than one?
+    # TODO should this ever be more than one
 
     return published_customisations
 

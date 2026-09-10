@@ -5,9 +5,7 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
-
-from common.models.interaction_customisations import InteractionCustomisation, Customisation
-
+from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 from django.utils import timezone
@@ -27,6 +25,7 @@ FOOD_PREMISES_APPLICATION_SLUG = "food-premises-approval-6"
 TEST_AUTH_SLUG = "winchester"
 TEST_INTERACTION = "apply"
 TEST_INTERACTION_SUB_ID = "1"
+TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
 
 TEST_TEMP_EVENT_APPLY_URL = (
