@@ -4,6 +4,7 @@ from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_VARIABLE_FEE
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+from citizen_frontend.api.repository.licence_repository import LicenceRepository
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
@@ -93,3 +94,12 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
+
+
+def test_authority_licence_and_interactions_returns_string_when_no_licence_found(mocker):
+    mocked_licence_repository = mocker.patch.object(LicenceRepository, "get_licence_by_licence_code")
+    mocked_licence_repository.get_licence_by_licence_code.return_value = None
+
+    result = licence_lookup_service.get_authority_licence_and_interactions(TEST_LICENCE.licence_code)
+
+    assert result == "Licence " + TEST_LICENCE.licence_code + " doesn't exist"
