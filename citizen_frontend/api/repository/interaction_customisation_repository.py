@@ -7,8 +7,6 @@ def find_published_customisation(
     interaction_customisation = find_interaction_customisation(
         authority_url_slug, licence_code, interaction_id, interaction_sub_id
     )
-
-    # TODO should this
     if (
         interaction_customisation
         and interaction_customisation.published_customisation
