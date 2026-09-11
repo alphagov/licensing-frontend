@@ -42,3 +42,7 @@ def get_payment_info_from_customisation(customisation: Customisation) -> tuple[P
         return PaymentType.FIXED_FEE, customisation.fixed_fee_amount
 
     return PaymentType.VARIABLE_FEE, None
+
+
+def get_authority_licence_and_interactions(licence_code: str, snac_code: str | None = None):
+    return "Licence " + licence_code + " doesn't exist"
