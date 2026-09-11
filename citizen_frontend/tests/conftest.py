@@ -59,8 +59,8 @@ def mock_interaction_customisation_filter(mocker):
 
 
 @pytest.fixture
-def mock_find_interaction_customisations(mocker):
-    mock_model = mocker.patch.object(interaction_customisation_repository, "find_interaction_customisations")
+def mock_find_interaction_customisation(mocker):
+    mock_model = mocker.patch.object(interaction_customisation_repository, "find_interaction_customisation")
     yield mock_model
 
 

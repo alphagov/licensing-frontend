@@ -3,24 +3,24 @@ from common.models.interaction_customisations import Customisation, InteractionC
 
 def find_published_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> list[Customisation]:
-    interaction_customisations = find_interaction_customisations(
+) -> Customisation | None:
+    interaction_customisation = find_interaction_customisation(
         authority_url_slug, licence_code, interaction_id, interaction_sub_id
     )
-    published_customisations = [
-        interaction_customisation.published_customisation
-        for interaction_customisation in interaction_customisations
-        if interaction_customisation.published_customisation
+
+    # TODO should this
+    if (
+        interaction_customisation
+        and interaction_customisation.published_customisation
         and not interaction_customisation.published_customisation.suspended_at
-    ]
-    # TODO should this ever be more than one
+    ):
+        return interaction_customisation.published_customisation
+    return None
 
-    return published_customisations
 
-
-def find_interaction_customisations(
+def find_interaction_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> list[InteractionCustomisation]:
+) -> InteractionCustomisation | None:
     customisations = list(
         InteractionCustomisation.objects.filter(
             authority_url_slug=authority_url_slug,
@@ -29,4 +29,7 @@ def find_interaction_customisations(
             interaction_sub_id=interaction_sub_id,
         )
     )
-    return customisations
+    # TODO error handle when more than one or verify there's never more than one
+    if customisations:
+        return customisations[0]
+    return None
