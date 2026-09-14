@@ -5,6 +5,7 @@ from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
+from citizen_frontend.api.repository import licence_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
 
@@ -45,4 +46,7 @@ def get_payment_info_from_customisation(customisation: Customisation) -> tuple[P
 
 
 def get_authority_licence_and_interactions(licence_code: str, snac_code: str | None = None):
-    return "Licence " + licence_code + " doesn't exist"
+    licence = licence_repository.get_licence_by_licence_code(licence_code)
+    if not licence:
+        return "Licence " + licence_code + " doesn't exist"
+    return licence

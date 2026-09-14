@@ -96,10 +96,19 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
+def test_authority_licence_and_interactions_calls_licence_repository(mocker):
+    mocked_licence_repository = mocker.patch.object(
+        licence_repository, "get_licence_by_licence_code", return_value=None
+    )
+
+    licence_lookup_service.get_authority_licence_and_interactions("unmatched-licence-code")
+
+    mocked_licence_repository.assert_called_with("unmatched-licence-code")
+
+
 def test_authority_licence_and_interactions_returns_string_when_no_licence_found(mocker):
-    mocked_licence_repository = mocker.patch.object(licence_repository, "get_licence_by_licence_code")
-    mocked_licence_repository.get_licence_by_licence_code.return_value = None
+    mocker.patch.object(licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=None)
 
-    result = licence_lookup_service.get_authority_licence_and_interactions(TEST_LICENCE.licence_code)
+    result = licence_lookup_service.get_authority_licence_and_interactions("unmatched-licence-code")
 
-    assert result == "Licence " + TEST_LICENCE.licence_code + " doesn't exist"
+    assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
