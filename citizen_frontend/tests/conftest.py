@@ -64,6 +64,12 @@ def mock_find_interaction_customisation(mocker):
     yield mock_model
 
 
+@pytest.fixture
+def mock_licence_filter(mocker):
+    mock_model = mocker.patch.object(Licence.objects, "filter")
+    yield mock_model
+
+
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
