@@ -1,12 +1,19 @@
 from copy import deepcopy
 
 from common.models.shared_models import PaymentAmount
-from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_VARIABLE_FEE
 
 import citizen_frontend.api.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
+from citizen_frontend.services import authority_service
+from citizen_frontend.tests.conftest import (
+    BASE_URL,
+    TEST_AUTHORITY,
+    TEST_CUSTOMISATION_FIXED_FEE,
+    TEST_CUSTOMISATION_VARIABLE_FEE,
+    TEST_LICENCE,
+    TEST_LICENCE_CODE,
+)
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
@@ -112,3 +119,16 @@ def test_authority_licence_and_interactions_returns_string_when_no_licence_found
     result = licence_lookup_service.get_authority_licence_and_interactions("unmatched-licence-code")
 
     assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
+
+
+def test_authority_licence_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(mocker):
+    mocker.patch.object(
+        licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
+    )
+    mocker.patch.object(
+        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code", return_value=None
+    )
+
+    result = licence_lookup_service.get_authority_licence_and_interactions(TEST_LICENCE_CODE)
+
+    assert result == "No authorities found for the licence " + TEST_LICENCE_CODE

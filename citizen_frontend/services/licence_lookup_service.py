@@ -8,6 +8,7 @@ from common.models.shared_models import PaymentAmount
 from citizen_frontend.api.repository import licence_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.services import authority_service
 
 
 def get_licence_authority_and_interactions(licence_code: str):
@@ -49,4 +50,7 @@ def get_authority_licence_and_interactions(licence_code: str, snac_code: str | N
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
         return "Licence " + licence_code + " doesn't exist"
-    return licence
+    authorities = authority_service.get_authorities_for_licence(licence_code)
+    if not authorities:
+        return "No authorities found for the licence " + licence_code
+    return authorities
