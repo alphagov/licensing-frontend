@@ -38,4 +38,4 @@ test-api: prepare
 	pytest citizen_frontend/tests/api --ignore citizen_frontend/tests/api/end_to_end
 
 test-services: prepare
-	pytest citizen_frontend/tests/services
+	pytest citizen_frontend/tests/api/services
