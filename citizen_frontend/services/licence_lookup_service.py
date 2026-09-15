@@ -5,6 +5,7 @@ from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
+from citizen_frontend.api.models.api_responses import LicenceAuthoritiesAndInteractionsResponse
 from citizen_frontend.api.repository import licence_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
@@ -58,4 +59,15 @@ def get_authority_licence_and_interactions(licence_code: str, snac_code: str | N
         return f"No authorities found for the licence {licence.licence_code}" + (
             f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
         )
-    return authorities
+    is_location_specific = any(
+        authority.snac_codes or not set(licence.administrative_area.countries).issubset(authority.countries)
+        for authority in authorities
+    )
+    issuing_authorities = []
+
+    return LicenceAuthoritiesAndInteractionsResponse(
+        is_location_specific=is_location_specific,
+        is_offered_by_county=licence.is_offered_by_county,
+        geographical_availability=licence.administrative_area.countries,
+        issuing_authorities=issuing_authorities,
+    )
