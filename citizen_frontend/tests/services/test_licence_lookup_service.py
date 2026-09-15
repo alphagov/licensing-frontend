@@ -13,6 +13,7 @@ from citizen_frontend.tests.conftest import (
     TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_LICENCE,
     TEST_LICENCE_CODE,
+    TEST_SNAC_CODE,
 )
 
 
@@ -132,3 +133,19 @@ def test_authority_licence_and_interactions_returns_string_when_no_authorities_f
     result = licence_lookup_service.get_authority_licence_and_interactions(TEST_LICENCE_CODE)
 
     assert result == "No authorities found for the licence " + TEST_LICENCE_CODE
+
+
+def test_authority_licence_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(mocker):
+    mocker.patch.object(
+        licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
+    )
+    mocker.patch.object(
+        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code", return_value=None
+    )
+
+    result = licence_lookup_service.get_authority_licence_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+
+    assert (
+        result
+        == "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
+    )

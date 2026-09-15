@@ -50,7 +50,12 @@ def get_authority_licence_and_interactions(licence_code: str, snac_code: str | N
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
         return "Licence " + licence_code + " doesn't exist"
-    authorities = authority_service.get_authorities_for_licence(licence_code)
+    if snac_code:
+        authorities = authority_service.get_authorities_for_licence_with_geographical_locator(snac_code, licence)
+    else:
+        authorities = authority_service.get_authorities_for_licence(licence_code)
     if not authorities:
-        return "No authorities found for the licence " + licence_code
+        return f"No authorities found for the licence {licence.licence_code}" + (
+            f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
+        )
     return authorities
