@@ -51,18 +51,18 @@ def get_authority_licence_and_interactions(licence_code: str, snac_code: str | N
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
         return "Licence " + licence_code + " doesn't exist"
-    if snac_code:
-        authorities = authority_service.get_authorities_for_licence_with_geographical_locator(snac_code, licence)
-    else:
-        authorities = authority_service.get_authorities_for_licence(licence_code)
+
+    authorities = get_authorities(licence, snac_code)
     if not authorities:
         return f"No authorities found for the licence {licence.licence_code}" + (
             f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
         )
+
     is_location_specific = any(
         authority.snac_codes or not set(licence.administrative_area.countries).issubset(authority.countries)
         for authority in authorities
     )
+
     issuing_authorities = []
 
     return LicenceAuthoritiesAndInteractionsResponse(
@@ -71,3 +71,11 @@ def get_authority_licence_and_interactions(licence_code: str, snac_code: str | N
         geographical_availability=licence.administrative_area.countries,
         issuing_authorities=issuing_authorities,
     )
+
+
+def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] | None:
+    if snac_code:
+        authorities = authority_service.get_authorities_for_licence_with_geographical_locator(snac_code, licence)
+    else:
+        authorities = authority_service.get_authorities_for_licence(licence.licence_code)
+    return authorities
