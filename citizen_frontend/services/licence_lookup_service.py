@@ -47,7 +47,7 @@ def get_payment_info_from_customisation(customisation: Customisation) -> tuple[P
     return PaymentType.VARIABLE_FEE, None
 
 
-def get_authority_licence_and_interactions(licence_code: str, snac_code: str | None = None):
+def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
         return "Licence " + licence_code + " doesn't exist"
