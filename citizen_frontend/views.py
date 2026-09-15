@@ -22,6 +22,7 @@ def submit_form(request, licence, authority, interaction, interation_sub_id):
         if request.method == "POST":
             form = ApplicationSubmissionForm(
                 request.POST,
+                request.FILES,
                 fee=context.get("fee_amount"),
                 supporting_documents=context.get("supporting_documents"),
                 default_declarations=context.get("default_declarations"),
