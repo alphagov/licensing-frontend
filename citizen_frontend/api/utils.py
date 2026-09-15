@@ -29,4 +29,19 @@ def get_all_licences_from_database() -> list[Licence]:
     return list(licences)
 
 
-INTERACTION_ID_WORD_MAPPING = {InteractionIdCodes.APPLY: LicenceInteractions.APPLY}
+INTERACTION_ID_WORD_MAPPING = {
+    InteractionIdCodes.APPLY: LicenceInteractions.APPLY,
+    InteractionIdCodes.PAY_FOR: LicenceInteractions.PAY_FOR,
+    InteractionIdCodes.INFORMATION: LicenceInteractions.INFORMATION,
+    InteractionIdCodes.REGULATION: LicenceInteractions.REGULATION,
+    InteractionIdCodes.CHANGE: LicenceInteractions.CHANGE,
+    InteractionIdCodes.RENEW: LicenceInteractions.RENEW,
+    InteractionIdCodes.APPLY_FOR_EXEMPTION: LicenceInteractions.APPLY_FOR_EXEMPTION,
+    InteractionIdCodes.TELL_US_ONCE: LicenceInteractions.TELL_US_ONCE,
+    InteractionIdCodes.NOTIFY_OF_INCIDENT_OR_INSTANCES: LicenceInteractions.NOTIFY_OF_INCIDENT_OR_INSTANCES,
+}
+
+# inverse of INTERACTION_ID_WORD_MAPPING
+INTERACTION_WORD_MAPPING: dict[str, InteractionIdCodes] = {
+    word.value: code for code, word in INTERACTION_ID_WORD_MAPPING.items()
+}

@@ -1,12 +1,45 @@
 import os
+from dataclasses import dataclass
 
-from common.models.authorities import Authority
+from api.repository import licence_repository
+from common.models.authorities import Authority, LicenceDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from common.models.shared_models import PaymentAmount
 
-from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
+import citizen_frontend.api.repository.authority_repository as authority_repository
+import citizen_frontend.api.repository.licence_repository as licence_repository
+from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_WORD_MAPPING
 from citizen_frontend.enums.payment_type import PaymentType
+
+
+@dataclass(frozen=True)
+class LicenceContext:
+    authority: Authority
+    licence: Licence
+    interaction: LicenceInteraction
+    licence_detail: LicenceDetails
+
+
+# previously lookupLicence
+def get_licence_interaction_context(
+    authority_url_slug: str, licence_url_slug: str, interaction: str, interaction_sub_id: int
+) -> LicenceContext | None:
+
+    authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
+    licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
+    if authority is None or licence is None:
+        return None
+    interaction_id = INTERACTION_WORD_MAPPING.get(interaction)
+    if interaction_id is None:
+        return None
+    interaction_object = licence.find_interaction(interaction_id, interaction_sub_id)
+    licence_detail = authority.find_licence_detail(licence.licence_code)
+    if licence_detail is None or interaction_object is None:
+        return None
+    licence_context = LicenceContext(authority, licence, interaction_object, licence_detail)
+
+    return licence_context
 
 
 def get_licence_authority_and_interactions(licence_code: str):

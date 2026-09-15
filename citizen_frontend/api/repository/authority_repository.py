@@ -21,3 +21,16 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
         return authorities
     except ValidationError:
         logger.error("Authority does not match model")
+
+
+def find_authority_by_url_slug(url_slug: str) -> Authority | None:
+    try:
+        authority = Authority.objects.get(url_slug=url_slug)
+        authority.clean()
+        return authority
+    except ValidationError:
+        logger.error("Authority does not match model")
+        # TODO return a custom error
+        raise FileNotFoundError("Temporary authority does not exist") from None
+    except Authority.DoesNotExist:
+        return None
