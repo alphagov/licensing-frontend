@@ -105,7 +105,7 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_licence_authorities_and_interactions_calls_licence_repository(mocker):
+def test_get_licence_authorities_and_interactions_calls_licence_repository(mocker):
     mocked_licence_repository = mocker.patch.object(
         licence_repository, "get_licence_by_licence_code", return_value=None
     )
@@ -115,7 +115,7 @@ def test_licence_authorities_and_interactions_calls_licence_repository(mocker):
     mocked_licence_repository.assert_called_with("unmatched-licence-code")
 
 
-def test_licence_authorities_and_interactions_returns_string_when_no_licence_found(mocker):
+def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(mocker):
     mocker.patch.object(licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=None)
 
     result = licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
@@ -123,7 +123,9 @@ def test_licence_authorities_and_interactions_returns_string_when_no_licence_fou
     assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
 
 
-def test_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(mocker):
+def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(
+    mocker,
+):
     mocker.patch.object(
         licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
     )
@@ -136,7 +138,9 @@ def test_licence_authorities_and_interactions_returns_string_when_no_authorities
     assert result == "No authorities found for the licence " + TEST_LICENCE_CODE
 
 
-def test_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(mocker):
+def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(
+    mocker,
+):
     mocker.patch.object(
         licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
     )
@@ -152,7 +156,7 @@ def test_licence_authorities_and_interactions_returns_string_when_no_authorities
     )
 
 
-def test_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(mocker):
+def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(mocker):
     mocker.patch.object(
         licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
     )
