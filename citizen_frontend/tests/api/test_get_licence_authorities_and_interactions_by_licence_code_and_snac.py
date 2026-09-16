@@ -7,9 +7,7 @@ from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION
 
 
 def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(client, mock_lookup_service):
-    mock_lookup_service.licence_authorities_and_interactions_by_snac_code.return_value = (
-        TEST_LICENCE_AUTH_AND_INTERACTION
-    )
+    mock_lookup_service.get_licence_authorities_and_interactions.return_value = TEST_LICENCE_AUTH_AND_INTERACTION
 
     with open("citizen_frontend/tests/api/mock_get_licence_authorities_and_interactions_by_licence_code.json") as f:
         expected = json.load(f)
@@ -21,7 +19,7 @@ def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(clien
         )
     )
 
-    mock_lookup_service.licence_authorities_and_interactions_by_snac_code.assert_called_with(
+    mock_lookup_service.get_licence_authorities_and_interactions.assert_called_with(
         snac_code="56789", licence_code="12345"
     )
 
@@ -33,7 +31,7 @@ def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(clien
 def test_get_licence_authorities_and_interactions_by_licence_code_and_snac_returns_404_empty_results(
     client, mock_lookup_service, empty_result
 ):
-    mock_lookup_service.licence_authorities_and_interactions_by_snac_code.return_value = empty_result
+    mock_lookup_service.get_licence_authorities_and_interactions.return_value = empty_result
 
     response = client.get(
         reverse(

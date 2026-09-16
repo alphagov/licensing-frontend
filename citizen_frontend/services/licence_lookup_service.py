@@ -12,14 +12,6 @@ from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
 
 
-def get_licence_authority_and_interactions(licence_code: str):
-    pass
-
-
-def licence_authorities_and_interactions_by_snac_code(licence_code: str, snac_code: str):
-    pass
-
-
 def get_licence_url(licence_interaction: LicenceInteraction, licence: Licence, authority: Authority, uses_gov_uk: bool):
     if uses_gov_uk:
         interaction = INTERACTION_ID_WORD_MAPPING.get(licence_interaction.interaction_id, "")

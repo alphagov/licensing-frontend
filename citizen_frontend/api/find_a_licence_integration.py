@@ -26,9 +26,11 @@ def get_all_licences(request):
         return JsonResponse(status=404, data=e.messages, safe=False)
 
 
+# TODO do we need two separate calls if they use the same function with different args,
+#  or can this be refactored to one?
 @require_GET
-def get_licence_authority_and_interactions_by_licence_code(request, licence_code):
-    licence_authorities_and_interactions = licence_lookup_service.get_licence_authority_and_interactions(
+def get_licence_authorities_and_interactions_by_licence_code(request, licence_code):
+    licence_authorities_and_interactions = licence_lookup_service.get_licence_authorities_and_interactions(
         licence_code=licence_code
     )
 
@@ -42,7 +44,7 @@ def get_licence_authority_and_interactions_by_licence_code(request, licence_code
 
 @require_GET
 def get_licence_authorities_and_interactions_by_licence_code_and_snac_code(request, licence_code: str, snac_code: str):
-    result = licence_lookup_service.licence_authorities_and_interactions_by_snac_code(
+    result = licence_lookup_service.get_licence_authorities_and_interactions(
         snac_code=snac_code, licence_code=licence_code
     )
 
