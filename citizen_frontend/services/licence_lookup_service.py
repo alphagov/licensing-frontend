@@ -1,7 +1,6 @@
 import os
 from dataclasses import dataclass
 
-from api.repository import licence_repository
 from common.models.authorities import Authority, LicenceDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction

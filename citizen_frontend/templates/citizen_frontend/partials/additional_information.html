@@ -4,12 +4,12 @@
     <ul class="govuk-list">
         {% if general_info_url %}
         <li>
-            <a href="#" data-testid="general-information" class="govuk-link" rel="noreferrer noopener" target="_blank">General information from the licensing authority (opens in new tab)</a>
+            <a href="{{   general_info_url }}" data-testid="general-information" class="govuk-link" rel="noreferrer noopener" target="_blank">General information from the licensing authority (opens in new tab)</a>
         </li>
         {% endif %}
         {% if legislation_info_url %}
         <li>
-            <a href="#" data-testid="legislation-information" class="govuk-link" rel="noreferrer noopener" target="_blank">More detailed information on legislation etc. (opens in new tab)</a>
+            <a href="{{ legislation_info_url }}" data-testid="legislation-information" class="govuk-link" rel="noreferrer noopener" target="_blank">More detailed information on legislation etc. (opens in new tab)</a>
         </li>
         {% endif %}
     </ul>
