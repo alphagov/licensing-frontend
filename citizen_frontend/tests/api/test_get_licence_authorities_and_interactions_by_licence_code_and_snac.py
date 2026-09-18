@@ -20,7 +20,7 @@ def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(clien
     )
 
     mock_lookup_service.get_licence_authorities_and_interactions.assert_called_with(
-        snac_code="56789", licence_code="12345"
+        licence_code="12345", snac_code="56789"
     )
 
     assert response.status_code == 200

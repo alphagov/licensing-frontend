@@ -15,7 +15,7 @@ def test_get_licence_authorities_and_interactions_by_licence_code_happy_path(cli
         reverse("get_licence_authorities_and_interactions_by_licence_code", kwargs={"licence_code": "1234"})
     )
 
-    mock_lookup_service.get_licence_authorities_and_interactions.assert_called_with(licence_code="1234")
+    mock_lookup_service.get_licence_authorities_and_interactions.assert_called_with(licence_code="1234", snac_code=None)
     assert response.status_code == 200
     assert response.json() == expected
 
