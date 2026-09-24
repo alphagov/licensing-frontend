@@ -20,7 +20,9 @@ from citizen_frontend.services import licence_lookup_service
 #     if not (len(matching_authority_licence) == 1 and matching_authority_licence[0].using_gov_uk):
 #         # TODO return not found
 #         pass
-def index(request, licence_slug: str, authority_slug: str, interaction_id: str, interation_sub_id: int):
+def begin_application_steps(
+    request, licence_slug: str, authority_slug: str, interaction_id: str, interation_sub_id: int
+):
     try:
         full_licence_interaction_context = licence_lookup_service.get_licence_interaction_context(
             authority_slug, licence_slug, interaction_id, interation_sub_id

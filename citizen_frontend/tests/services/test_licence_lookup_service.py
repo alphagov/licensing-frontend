@@ -144,8 +144,7 @@ def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
     mock_licence_repository, mock_authority_repository, mocker
 ):
     mock_authority = mocker.MagicMock()
-    mock_authority.url_slug.return_value = "url_slug"
-    
+    mock_authority.url_slug = "url_slug"
 
     mock_licence = mocker.MagicMock()
     mock_licence.licence_code = "licence_code"
