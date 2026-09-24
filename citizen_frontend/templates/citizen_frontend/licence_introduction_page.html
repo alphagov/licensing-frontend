@@ -16,9 +16,7 @@
     <p class="govuk-body">Open the form using Adobe Reader instead of your web browser.</p>
     <p class="govuk-body">If you can't complete the form right now don't worry, you can edit it in your own time. Once you're ready, return to this page to complete the application.</p>
     {% if legislation_info_url or general_info_url %}
-        {% if authority_slug != "barnet" %}
-            {% include "citizen_frontend/partials/additional_information.html" %}
-        {% endif %}
+        {% include "citizen_frontend/partials/additional_information.html" %}
     {% endif %}
     {% if is_fee_required or supporting_documents|length > 0 %}
         <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>

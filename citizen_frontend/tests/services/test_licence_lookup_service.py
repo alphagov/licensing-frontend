@@ -4,6 +4,7 @@ from common.models.shared_models import PaymentAmount
 from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_VARIABLE_FEE
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.tests.conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
@@ -93,3 +94,69 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
+
+
+def test_get_licence_interaction_context_returns_none_when_no_licence_found(
+    mock_licence_repository, mock_authority_repository
+):
+    mock_licence_repository.get_licence_by_url_slug.return_value = None
+    actual = licence_lookup_service.get_licence_interaction_context(
+        "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+    )
+    assert actual is None
+
+
+def test_get_licence_interaction_context_returns_none_when_no_authority_found(
+    mock_licence_repository, mock_authority_repository
+):
+    mock_authority_repository.find_authority_by_url_slug.return_value = None
+    actual = licence_lookup_service.get_licence_interaction_context(
+        "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+    )
+    assert actual is None
+
+
+def test_get_licence_interaction_context_returns_none_when_no_licence_interaction_found(
+    mock_licence_repository, mock_authority_repository, mocker
+):
+    mock_licence = mocker.MagicMock()
+    mock_licence.find_interaction.return_value = None
+    mock_licence_repository.get_licence_by_url_slug.return_value = mock_licence
+    actual = licence_lookup_service.get_licence_interaction_context(
+        "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+    )
+    assert actual is None
+
+
+def test_get_licence_interaction_context_returns_none_when_no_licence_details_found(
+    mock_licence_repository, mock_authority_repository, mocker
+):
+    mock_authority = mocker.MagicMock()
+    mock_authority.find_licence_detail.return_value = None
+    mock_authority_repository.find_authority_by_url_slug.return_value = mock_authority
+    actual = licence_lookup_service.get_licence_interaction_context(
+        "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+    )
+    assert actual is None
+
+
+def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
+    mock_licence_repository, mock_authority_repository, mocker
+):
+    mock_authority = mocker.MagicMock()
+    mock_authority.url_slug.return_value = "url_slug"
+    
+
+    mock_licence = mocker.MagicMock()
+    mock_licence.licence_code = "licence_code"
+
+    mock_authority_repository.find_authority_by_url_slug.return_value = mock_authority
+    mock_licence_repository.get_licence_by_url_slug.return_value = mock_licence
+    actual = licence_lookup_service.get_licence_interaction_context(
+        "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+    )
+    assert actual is not None
+    assert actual.authority.url_slug == "url_slug"
+    assert actual.licence.licence_code == "licence_code"
+    assert actual.interaction is not None
+    assert actual.licence_detail is not None
