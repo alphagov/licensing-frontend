@@ -1,6 +1,6 @@
 import os
 
-from common.models.authorities import Authority
+from common.models.authorities import Authority, ContactDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from common.models.shared_models import PaymentAmount
@@ -37,6 +37,17 @@ def get_payment_info_from_customisation(customisation: Customisation) -> tuple[P
         return PaymentType.FIXED_FEE, customisation.fixed_fee_amount
 
     return PaymentType.VARIABLE_FEE, None
+
+
+def format_postal_address(contact_details: ContactDetails) -> str:
+    address_lines = [
+        contact_details.line_one,
+        contact_details.line_two,
+        contact_details.line_three,
+        contact_details.city,
+        contact_details.post_code,
+    ]
+    return "\n".join(line for line in address_lines if line)
 
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
