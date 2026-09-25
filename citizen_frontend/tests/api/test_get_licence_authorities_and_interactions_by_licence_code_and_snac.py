@@ -3,11 +3,13 @@ import json
 import pytest
 from django.urls import reverse
 
-from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION
+from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
 
 
 def test_get_licence_authorities_and_interactions_by_licence_code_and_snac(client, mock_lookup_service):
-    mock_lookup_service.get_licence_authorities_and_interactions.return_value = TEST_LICENCE_AUTH_AND_INTERACTION
+    mock_lookup_service.get_licence_authorities_and_interactions.return_value = (
+        TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
+    )
 
     with open("citizen_frontend/tests/api/mock_get_licence_authorities_and_interactions_by_licence_code.json") as f:
         expected = json.load(f)

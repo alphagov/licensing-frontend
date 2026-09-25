@@ -17,13 +17,15 @@ from citizen_frontend.api.models.api_responses import (
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
+from citizen_frontend.enums.payment_type import PaymentType
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
 TEMP_EVENT_SLUG = "temporary-event-notice"
 FOOD_PREMISES_APPLICATION_SLUG = "food-premises-approval-6"
 TEST_AUTH_SLUG = "winchester"
-TEST_INTERACTION = "apply"
+TEST_INTERACTION = LicenceInteractions.APPLY
 TEST_INTERACTION_SUB_ID = "1"
 TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
@@ -126,7 +128,61 @@ TEST_LICENCE = Licence(
     ],
 )
 
-TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
+
+TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    is_fee_required=True,
+    fee_calculation_instructions=["fee calculation 1", "fee calculation 2"],
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+TEST_CUSTOMISATION_FIXED_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    fixed_fee_amount=PaymentAmount(pence=500),
+    is_fee_required=True,
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+
+TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
+    url=TEST_AUTHORITY.authority_url,
+    uses_licensify=TEST_AUTHORITY.licence_details[0].using_gov_uk,
+    uses_authority_url=False,
+    description=TEST_LICENCE.licence_interactions[0].licence_interaction_name,
+    payment=PaymentType.FIXED_FEE,
+    payment_amount="5.00",
+    introduction_text=TEST_CUSTOMISATION_FIXED_FEE.introduction_text,
+)
+
+
+TEST_ISSUING_AUTHORITY = IssuingAuthority(
+    authority_name=TEST_AUTHORITY.full_name,
+    authority_slug=TEST_AUTHORITY.url_slug,
+    authority_contact=AuthorityContactDetails(
+        website=TEST_AUTHORITY.authority_url,
+        email=TEST_AUTHORITY.contact_details.email,
+        phone=TEST_AUTHORITY.contact_details.phone_number,
+        address="postal address",
+    ),
+    authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
+)
+
+
+TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsResponse(
     is_offered_by_county=True,
     is_location_specific=True,
     geographical_availability=[Countries.ENGLAND],
