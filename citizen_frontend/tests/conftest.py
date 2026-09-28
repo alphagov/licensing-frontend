@@ -54,7 +54,7 @@ def django_db_setup():
 
 
 @pytest.fixture
-def mock_interaction_customisation_filter(mocker):
+def mock_interaction_customisation_filter(mock_interaction_customisation_filter):
     mock_model = mocker.patch.object(InteractionCustomisation.objects, "filter")
     yield mock_model
 
