@@ -87,7 +87,7 @@ def test_get_payment_info_from_customisation_returns_none_and_none_when_no_fee_r
 def test_get_payment_info_from_customisation_returns_fixed_fee_and_amount_when_fixed_fee_required():
     actual = licence_lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_FIXED_FEE)
 
-    assert actual == (PaymentType.FIXED_FEE, TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.to_string_in_pounds())
+    assert actual == (PaymentType.FIXED_FEE, TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds)
 
 
 def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_but_no_fixed_fee():

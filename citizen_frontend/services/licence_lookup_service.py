@@ -37,7 +37,7 @@ def get_payment_info_from_customisation(customisation: Customisation | None) -> 
         return PaymentType.NONE, None
 
     if customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0:
-        return PaymentType.FIXED_FEE, customisation.fixed_fee_amount.to_string_in_pounds()
+        return PaymentType.FIXED_FEE, customisation.fixed_fee_amount.format_to_string_in_pounds
 
     return PaymentType.VARIABLE_FEE, None
 
