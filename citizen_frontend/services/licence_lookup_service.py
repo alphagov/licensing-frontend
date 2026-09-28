@@ -6,7 +6,9 @@ from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 
 from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
     AuthorityInteraction,
+    IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
 from citizen_frontend.api.repository import interaction_customisation_repository, licence_repository
@@ -90,6 +92,25 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
     return result
 
 
+def get_authority_licence_interaction_details(authority: Authority, licence: Licence) -> IssuingAuthority:
+    interactions = build_authority_interactions(authority, licence)
+
+    contact_details = authority.contact_details
+    postal_address = format_postal_address(contact_details)
+
+    return IssuingAuthority(
+        authority_name=authority.full_name,
+        authority_slug=authority.url_slug,
+        authority_contact=AuthorityContactDetails(
+            website=authority.authority_url,
+            email=contact_details.email,
+            phone=contact_details.phone_number,
+            address=postal_address,
+        ),
+        authority_interactions=interactions,
+    )
+
+
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
@@ -107,6 +128,10 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
     )
 
     issuing_authorities = []
+    #     (
+    #     [] if is_location_specific and not snac_code
+    #     else [get_authority_licence_interaction_details(authority, licence) for authority in authorities]
+    # )
 
     return LicenceAuthoritiesAndInteractionsResponse(
         is_location_specific=is_location_specific,

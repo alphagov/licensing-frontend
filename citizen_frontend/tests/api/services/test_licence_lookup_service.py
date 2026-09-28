@@ -169,3 +169,24 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
+
+
+# def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
+#     mocker.patch.object(
+#         licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
+#     )
+#     mocker.patch.object(
+#         authority_service.authority_repository,
+#         "get_licence_offering_authorities_by_licence_code",
+#         return_value=[TEST_AUTHORITY],
+#     )
+#     mocker.patch.object(
+#         licence_lookup_service, "get_authority_licence_interaction_details", return_value=[TEST_AUTHORITY_INTERACTION]
+#     )
+#
+#     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+#
+#     assert isinstance(result.issuing_authorities[0], IssuingAuthority)
+
+# def test_build_authority_interactions_groups_interactions_by_type(mocker):
+#     mocker.patch.object()
