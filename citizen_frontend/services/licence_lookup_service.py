@@ -60,10 +60,7 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
     uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
     offered_by_auth = getattr(licence_details, "offered_by_authority", False)
 
-    grouped_interactions = defaultdict(list)
-    for interaction in licence.licence_interactions:
-        interaction_type = INTERACTION_ID_WORD_MAPPING.get(interaction.interaction_id, "Unknown_Interaction")
-        grouped_interactions[interaction_type].append(interaction)
+    grouped_interactions = group_interactions(licence)
 
     result = {}
     for interaction_type, interactions in grouped_interactions.items():
@@ -147,3 +144,11 @@ def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] 
     else:
         authorities = authority_service.get_authorities_for_licence(licence.licence_code)
     return authorities
+
+
+def group_interactions(licence: Licence):
+    grouped_interactions = defaultdict(list)
+    for interaction in licence.licence_interactions:
+        interaction_type = INTERACTION_ID_WORD_MAPPING.get(interaction.interaction_id, "Unknown_Interaction")
+        grouped_interactions[interaction_type].append(interaction)
+    return grouped_interactions
