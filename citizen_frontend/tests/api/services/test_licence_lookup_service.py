@@ -5,6 +5,7 @@ from common.models.shared_models import PaymentAmount
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceAuthoritiesAndInteractionsResponse
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
 from citizen_frontend.tests.conftest import (
@@ -174,19 +175,12 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
     assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
 
 
-#
-# def test_build_authority_interactions_groups_interactions_by_type(mocker):
-#     mocker.patch.object(
-#         licence_lookup_service.interaction_customisation_repository,
-#         "find_published_customisation",
-#         return_value=
-#     )
-#
-#     result = licence_lookup_service.build_authority_interactions(TEST_AUTHORITY, TEST_LICENCE)
-#
-#     assert result.keys() == {"apply", "renew"}
-#     assert len(result["apply"]) == 2
-#     assert len(result["renew"]) == 1
+def test_group_interactions(mocker):
+    result = licence_lookup_service.group_interactions(TEST_LICENCE)
+
+    assert result.keys() == {LicenceInteractions.APPLY, LicenceInteractions.RENEW}
+    assert len(result[LicenceInteractions.APPLY]) == 2
+    assert len(result[LicenceInteractions.RENEW]) == 1
 
 
 # def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):

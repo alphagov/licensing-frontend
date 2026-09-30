@@ -4,6 +4,7 @@ import bson
 import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
+from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
@@ -108,7 +109,7 @@ TEST_LICENCE = Licence(
     is_offered_by_county=False,
     licence_interactions=[
         LicenceInteraction(
-            interaction_id=0,
+            interaction_id=InteractionIdCodes.APPLY.value,
             interaction_sub_id=1,
             licence_interaction_name="Application for a Test Licence",
             form=LicenceForm(
@@ -126,7 +127,7 @@ TEST_LICENCE = Licence(
             tacit_consent="required",
         ),
         LicenceInteraction(
-            interaction_id=0,
+            interaction_id=InteractionIdCodes.APPLY.value,
             interaction_sub_id=1,
             licence_interaction_name="Application for a Test Licence",
             form=LicenceForm(
@@ -144,7 +145,7 @@ TEST_LICENCE = Licence(
             tacit_consent="required",
         ),
         LicenceInteraction(
-            interaction_id=14,
+            interaction_id=InteractionIdCodes.RENEW.value,
             interaction_sub_id=1,
             licence_interaction_name="Renewal for a Test Licence",
             form=LicenceForm(
