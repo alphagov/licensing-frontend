@@ -11,8 +11,7 @@ start:
 watch:
 	mise exec -- docker compose up --watch
 
-test-ui: start
-	uv sync
+test-ui: start prepare
 	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
 
 kill:
