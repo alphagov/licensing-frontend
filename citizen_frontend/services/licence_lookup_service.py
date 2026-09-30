@@ -13,7 +13,7 @@ from citizen_frontend.enums.payment_type import PaymentType
 
 
 @dataclass(frozen=True)
-class LicenceContext:
+class LicenceInteractionContext:
     authority: Authority
     licence: Licence
     interaction: LicenceInteraction
@@ -23,7 +23,7 @@ class LicenceContext:
 # previously lookupLicence
 def get_licence_interaction_context(
     authority_url_slug: str, licence_url_slug: str, interaction: str, interaction_sub_id: int
-) -> LicenceContext | None:
+) -> LicenceInteractionContext | None:
 
     authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
@@ -36,7 +36,7 @@ def get_licence_interaction_context(
     licence_detail = authority.find_licence_detail(licence.licence_code)
     if licence_detail is None or interaction_object is None:
         return None
-    licence_context = LicenceContext(authority, licence, interaction_object, licence_detail)
+    licence_context = LicenceInteractionContext(authority, licence, interaction_object, licence_detail)
 
     return licence_context
 

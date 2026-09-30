@@ -24,7 +24,7 @@ def base_context(mocker):
     mock_context.return_value = {
         "authority": f"{TEST_AUTH_SLUG}".capitalize(),
         "licence": f"{TEMP_EVENT_SLUG}".replace("-", " ").title(),
-        "interation_sub_id": f"{TEST_INTERACTION_SUB_ID}",
+        "interaction_sub_id": f"{TEST_INTERACTION_SUB_ID}",
         "interaction": f"{TEST_INTERACTION}",
         "steps": 4,
         "authority_slug": f"{TEST_AUTH_SLUG}",

@@ -11,6 +11,7 @@ from common.models.shared_models import PaymentAmount
 from django.utils import timezone
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.views
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
     AuthorityInteraction,
@@ -18,6 +19,7 @@ from citizen_frontend.api.models.api_responses import (
     LicenceAuthoritiesAndInteractionsResponse,
 )
 from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -54,7 +56,7 @@ def django_db_setup():
 
 
 @pytest.fixture
-def mock_interaction_customisation_filter(mock_interaction_customisation_filter):
+def mock_interaction_customisation_filter(mocker):
     mock_model = mocker.patch.object(InteractionCustomisation.objects, "filter")
     yield mock_model
 
@@ -68,6 +70,13 @@ def mock_find_interaction_customisation(mocker):
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
+TEST_LICENCE_DETAIL = LicenceDetails(
+    licence_code=TEST_LICENCE_CODE,
+    offered_by_authority=True,
+    using_gov_uk=True,
+    authority_url="https://test-authority.com",
+)
+
 
 TEST_AUTHORITY = Authority(
     _id=ObjectId("50c8520393867870cb0d775f"),
@@ -76,17 +85,28 @@ TEST_AUTHORITY = Authority(
     full_name="Test Authority for testing with",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
-    licence_details=[
-        LicenceDetails(
-            licence_code=TEST_LICENCE_CODE,
-            offered_by_authority=True,
-            using_gov_uk=True,
-            authority_url="https://test-authority.com",
-        )
-    ],
+    licence_details=[TEST_LICENCE_DETAIL],
     contact_details=ContactDetails(),
 )
 
+TEST_LICENCE_INTERACTION = LicenceInteraction(
+    interaction_id=0,
+    interaction_sub_id=1,
+    licence_interaction_name="Application for a Test Licence",
+    form=LicenceForm(
+        name="Test Licence Form",
+        sub_form=1,
+        form_ref_number="123000000",
+        file_name="EAF_123000000_LA_TEST",
+        file_size=185000,
+        form_version=2,
+    ),
+    sub_forms=[],
+    supporting_documents=[],
+    fee=PaymentAmount(pence=2100),
+    fee_calculation_instructions=[],
+    tacit_consent="required",
+)
 
 TEST_LICENCE = Licence(
     _id=ObjectId("50c8520393867870cb0d775f"),
@@ -99,26 +119,7 @@ TEST_LICENCE = Licence(
         code="5", name=f"{Countries.ENGLAND},{Countries.WALES}", countries=[Countries.ENGLAND, Countries.WALES]
     ),
     is_offered_by_county=False,
-    licence_interactions=[
-        LicenceInteraction(
-            interaction_id=0,
-            interaction_sub_id=1,
-            licence_interaction_name="Application for a Test Licence",
-            form=LicenceForm(
-                name="Test Licence Form",
-                sub_form=1,
-                form_ref_number="123000000",
-                file_name="EAF_123000000_LA_TEST",
-                file_size=185000,
-                form_version=2,
-            ),
-            sub_forms=[],
-            supporting_documents=[],
-            fee=PaymentAmount(pence=2100),
-            fee_calculation_instructions=[],
-            tacit_consent="required",
-        )
-    ],
+    licence_interactions=[TEST_LICENCE_DETAIL],
 )
 
 TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
@@ -195,3 +196,45 @@ def mock_licence_repository(mocker):
 @pytest.fixture
 def mock_authority_repository(mocker):
     return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
+
+
+@pytest.fixture
+def mock_authority():
+    return TEST_AUTHORITY
+
+
+@pytest.fixture
+def mock_licence():
+    return TEST_LICENCE
+
+
+@pytest.fixture
+def licence_interaction_context(mock_licence, mock_authority):
+    return LicenceInteractionContext(
+        licence=mock_licence,
+        authority=mock_authority,
+        licence_detail=TEST_LICENCE_DETAIL,
+        interaction=TEST_LICENCE_INTERACTION,
+    )
+
+
+@pytest.fixture
+def mock_get_licence_interaction_context(mocker, licence_interaction_context):
+    mock_get_context = mocker.patch.object(
+        citizen_frontend.views.licence_lookup_service,
+        "get_licence_interaction_context",
+        autospec=True,
+    )
+    mock_get_context.return_value = licence_interaction_context
+    return mock_get_context
+
+
+@pytest.fixture
+def mock_find_published_customisation(mocker):
+    mock_find_published_customisation = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation.return_value = None
+    return mock_find_published_customisation

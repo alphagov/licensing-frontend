@@ -1,7 +1,7 @@
 from django.http import Http404
 
 
-def get_mocked_context(licence, authority, interaction, interation_sub_id):
+def get_mocked_context(licence, authority, interaction, interaction_sub_id):
     if authority != "winchester":
         raise Http404
 
@@ -38,7 +38,7 @@ def get_mocked_context(licence, authority, interaction, interation_sub_id):
     context = {
         "authority": authority.capitalize(),
         "licence": licence.replace("-", " ").title(),
-        "interation_sub_id": interation_sub_id,
+        "interaction_sub_id": interaction_sub_id,
         "interaction": interaction,
         "is_fee_required": is_fee_required,
         "fee_amount": fee_amount,
