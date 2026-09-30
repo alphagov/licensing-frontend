@@ -13,6 +13,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.api.repository import interaction_customisation_repository, licence_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
 
@@ -70,7 +71,7 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
             customisation = interaction_customisation_repository.find_published_customisation(
                 authority.url_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id
             )
-            interaction_url = get_licence_url(interaction, licence, authority.url_slug, uses_gov_uk)
+            interaction_url = get_licence_url(interaction, licence, authority, uses_gov_uk)
             uses_auth_url = bool(not uses_gov_uk and offered_by_auth and interaction_url)
 
             payment_type, payment_amount = get_payment_info_from_customisation(customisation)
@@ -149,6 +150,8 @@ def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] 
 def group_interactions(licence: Licence):
     grouped_interactions = defaultdict(list)
     for interaction in licence.licence_interactions:
-        interaction_type = INTERACTION_ID_WORD_MAPPING.get(interaction.interaction_id, "Unknown_Interaction")
+        interaction_type = INTERACTION_ID_WORD_MAPPING.get(
+            interaction.interaction_id, LicenceInteractions.UNKNOWN
+        ).value
         grouped_interactions[interaction_type].append(interaction)
     return grouped_interactions

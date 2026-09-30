@@ -4,7 +4,7 @@ import pytest
 from common.models.shared_models import PaymentAmount
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
-from citizen_frontend.api.models.api_responses import LicenceAuthoritiesAndInteractionsResponse
+from citizen_frontend.api.models.api_responses import AuthorityInteraction, LicenceAuthoritiesAndInteractionsResponse
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
@@ -181,6 +181,37 @@ def test_group_interactions(mocker):
     assert result.keys() == {LicenceInteractions.APPLY, LicenceInteractions.RENEW}
     assert len(result[LicenceInteractions.APPLY]) == 2
     assert len(result[LicenceInteractions.RENEW]) == 1
+
+
+def test_build_authority_interactions(mocker):
+    test_customisation = mocker.patch.object(
+        licence_lookup_service.interaction_customisation_repository,
+        "find_published_customisation",
+        return_value=TEST_CUSTOMISATION_FIXED_FEE,
+    )
+    mock_group_interactions = mocker.patch.object(
+        licence_lookup_service,
+        "group_interactions",
+        return_value={LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0]]},
+    )
+
+    expected = {
+        LicenceInteractions.APPLY.value: [
+            AuthorityInteraction(
+                url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
+                uses_licensify=True,
+                uses_authority_url=False,
+                description=mock_group_interactions.return_value["apply"][0].licence_interaction_name,
+                payment=PaymentType.FIXED_FEE.value,
+                payment_amount=test_customisation.return_value.fixed_fee_amount.format_to_string_in_pounds,
+                introduction_text=test_customisation.return_value.introduction_text,
+            )
+        ]
+    }
+
+    actual = licence_lookup_service.build_authority_interactions(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert actual == expected
 
 
 # def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
