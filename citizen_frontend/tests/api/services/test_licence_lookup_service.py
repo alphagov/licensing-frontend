@@ -1,8 +1,8 @@
 from copy import deepcopy
 
+import pytest
 from common.models.shared_models import PaymentAmount
 
-import citizen_frontend.api.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceAuthoritiesAndInteractionsResponse
 from citizen_frontend.enums.payment_type import PaymentType
@@ -16,6 +16,18 @@ from citizen_frontend.tests.conftest import (
     TEST_LICENCE_CODE,
     TEST_SNAC_CODE,
 )
+
+
+@pytest.fixture
+def mock_get_licence_by_licence_code(mocker):
+    yield mocker.patch.object(licence_lookup_service.licence_repository, "get_licence_by_licence_code")
+
+
+@pytest.fixture
+def mock_get_authorities_by_licence_code(mocker):
+    yield mocker.patch.object(
+        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code"
+    )
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
@@ -105,18 +117,18 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_get_licence_authorities_and_interactions_calls_licence_repository(mocker):
-    mocked_licence_repository = mocker.patch.object(
-        licence_repository, "get_licence_by_licence_code", return_value=None
-    )
+def test_get_licence_authorities_and_interactions_calls_licence_repository(mock_get_licence_by_licence_code):
+    mock_get_licence_by_licence_code.return_value = None
 
     licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
 
-    mocked_licence_repository.assert_called_with("unmatched-licence-code")
+    mock_get_licence_by_licence_code.assert_called_with("unmatched-licence-code")
 
 
-def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(mocker):
-    mocker.patch.object(licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=None)
+def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(
+    mock_get_licence_by_licence_code,
+):
+    mock_get_licence_by_licence_code.return_value = None
 
     result = licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
 
@@ -124,14 +136,11 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_licence
 
 
 def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(
-    mocker,
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
 ):
-    mocker.patch.object(
-        licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
-    )
-    mocker.patch.object(
-        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code", return_value=None
-    )
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = None
 
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
@@ -139,14 +148,11 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_authori
 
 
 def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(
-    mocker,
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
 ):
-    mocker.patch.object(
-        licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
-    )
-    mocker.patch.object(
-        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code", return_value=None
-    )
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = None
 
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
@@ -156,19 +162,31 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_authori
     )
 
 
-def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(mocker):
-    mocker.patch.object(
-        licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
-    )
-    mocker.patch.object(
-        authority_service.authority_repository,
-        "get_licence_offering_authorities_by_licence_code",
-        return_value=[TEST_AUTHORITY],
-    )
+def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
 
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
+
+
+#
+# def test_build_authority_interactions_groups_interactions_by_type(mocker):
+#     mocker.patch.object(
+#         licence_lookup_service.interaction_customisation_repository,
+#         "find_published_customisation",
+#         return_value=
+#     )
+#
+#     result = licence_lookup_service.build_authority_interactions(TEST_AUTHORITY, TEST_LICENCE)
+#
+#     assert result.keys() == {"apply", "renew"}
+#     assert len(result["apply"]) == 2
+#     assert len(result["renew"]) == 1
 
 
 # def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
@@ -187,6 +205,3 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
 #     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 #
 #     assert isinstance(result.issuing_authorities[0], IssuingAuthority)
-
-# def test_build_authority_interactions_groups_interactions_by_type(mocker):
-#     mocker.patch.object()
