@@ -38,6 +38,16 @@ def mock_get_authorities_by_licence_code(mocker):
     )
 
 
+@pytest.fixture
+def mock_get_authority_licence_interaction_details(mocker):
+    yield mocker.patch.object(licence_lookup_service, "get_authority_licence_interaction_details")
+
+
+@pytest.fixture
+def mock_check_if_location_specific(mocker):
+    yield mocker.patch.object(licence_lookup_service, "check_if_location_specific")
+
+
 def test_get_licence_authorities_and_interactions_calls_licence_repository(mock_get_licence_by_licence_code):
     mock_get_licence_by_licence_code.return_value = None
 
@@ -84,38 +94,92 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_authori
 
 
 def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code, mocker
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
-
-    mock_get_authority_licence_interaction_details = mocker.patch.object(
-        licence_lookup_service, "get_authority_licence_interaction_details", return_value=TEST_ISSUING_AUTHORITY
-    )
-
-    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
-
-    assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
-    mock_get_authority_licence_interaction_details.assert_called()
-
-
-def test_get_licence_authorities_and_interactions_is_location_specific_is_true(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code, mocker
+    mock_get_licence_by_licence_code,
+    mock_get_authorities_by_licence_code,
+    mock_get_authority_licence_interaction_details,
 ):
     mock_get_licence_by_licence_code.return_value = TEST_LICENCE
     mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
-    mock_get_authority_licence_interaction_details = mocker.patch.object(
-        licence_lookup_service, "get_authority_licence_interaction_details", return_value=TEST_ISSUING_AUTHORITY
+    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+
+    expected = LicenceAuthoritiesAndInteractionsResponse(
+        is_location_specific=False,
+        is_offered_by_county=TEST_LICENCE.is_offered_by_county,
+        geographical_availability=TEST_LICENCE.administrative_area.countries,
+        issuing_authorities=[TEST_ISSUING_AUTHORITY],
     )
-    mock_check_if_location_specific_is_true = mocker.patch.object(
-        licence_lookup_service, "check_if_location_specific", return_value=True
-    )
+
+    actual = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    assert actual == expected
+
+
+def test_get_licence_authorities_and_interactions_is_location_specific_is_true_snac_code_not_present(
+    mock_get_licence_by_licence_code,
+    mock_get_authorities_by_licence_code,
+    mock_get_authority_licence_interaction_details,
+    mock_check_if_location_specific,
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
+    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    mock_check_if_location_specific.return_value = True
 
     licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
-    mock_check_if_location_specific_is_true.assert_called()
+    mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_not_called()
+
+
+def test_get_licence_authorities_and_interactions_is_location_specific_is_false_snac_code_not_present(
+    mock_get_licence_by_licence_code,
+    mock_get_authorities_by_licence_code,
+    mock_get_authority_licence_interaction_details,
+    mock_check_if_location_specific,
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
+    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    mock_check_if_location_specific.return_value = False
+
+    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    mock_check_if_location_specific.assert_called()
+    mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
+
+
+def test_get_licence_authorities_and_interactions_is_location_specific_is_false_snac_code_present(
+    mocker,
+    mock_get_authority_licence_interaction_details,
+    mock_check_if_location_specific,
+    mock_get_licence_by_licence_code,
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mocker.patch.object(licence_lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    mock_check_if_location_specific.return_value = False
+
+    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+
+    mock_check_if_location_specific.assert_called()
+    mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
+
+
+def test_get_licence_authorities_and_interactions_is_location_specific_is_true_snac_code_present(
+    mocker,
+    mock_get_authority_licence_interaction_details,
+    mock_check_if_location_specific,
+    mock_get_licence_by_licence_code,
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mocker.patch.object(licence_lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    mock_check_if_location_specific.return_value = True
+
+    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+
+    mock_check_if_location_specific.assert_called()
+    mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
