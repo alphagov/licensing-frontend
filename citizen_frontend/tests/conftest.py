@@ -197,12 +197,12 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
 
 
 TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
-    url=TEST_AUTHORITY.authority_url,
+    url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
     uses_licensify=TEST_AUTHORITY.licence_details[0].using_gov_uk,
     uses_authority_url=False,
     description=TEST_LICENCE.licence_interactions[0].licence_interaction_name,
-    payment=PaymentType.FIXED_FEE,
-    payment_amount="5.00",
+    payment=PaymentType.FIXED_FEE.value,
+    payment_amount=TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds,
     introduction_text=TEST_CUSTOMISATION_FIXED_FEE.introduction_text,
 )
 
@@ -214,7 +214,7 @@ TEST_ISSUING_AUTHORITY = IssuingAuthority(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
-        address="postal address",
+        address="",
     ),
     authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
 )

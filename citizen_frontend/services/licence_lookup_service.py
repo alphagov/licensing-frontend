@@ -123,7 +123,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
         for authority in authorities
     )
 
-    issuing_authorities = []
+    issuing_authorities = [get_authority_licence_interaction_details(authority, licence) for authority in authorities]
     #     (
     #     [] if is_location_specific and not snac_code
     #     else [get_authority_licence_interaction_details(authority, licence) for authority in authorities]

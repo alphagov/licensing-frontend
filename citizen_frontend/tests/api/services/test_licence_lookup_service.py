@@ -2,12 +2,11 @@ from copy import deepcopy
 
 import pytest
 from common.models.shared_models import PaymentAmount
+from conftest import TEST_ISSUING_AUTHORITY
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
     AuthorityInteraction,
-    IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
@@ -16,12 +15,15 @@ from citizen_frontend.services import authority_service
 from citizen_frontend.tests.conftest import (
     BASE_URL,
     TEST_AUTHORITY,
+    TEST_AUTHORITY_INTERACTION,
     TEST_CUSTOMISATION_FIXED_FEE,
     TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_LICENCE,
     TEST_LICENCE_CODE,
     TEST_SNAC_CODE,
 )
+
+TEST_AUTHORITY_INTERACTIONS_FOR_APPLY = {LicenceInteractions.APPLY.value: [TEST_AUTHORITY_INTERACTION]}
 
 
 @pytest.fixture
@@ -34,6 +36,68 @@ def mock_get_authorities_by_licence_code(mocker):
     yield mocker.patch.object(
         authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code"
     )
+
+
+def test_get_licence_authorities_and_interactions_calls_licence_repository(mock_get_licence_by_licence_code):
+    mock_get_licence_by_licence_code.return_value = None
+
+    licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
+
+    mock_get_licence_by_licence_code.assert_called_with("unmatched-licence-code")
+
+
+def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(
+    mock_get_licence_by_licence_code,
+):
+    mock_get_licence_by_licence_code.return_value = None
+
+    result = licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
+
+    assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
+
+
+def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = None
+
+    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    assert result == "No authorities found for the licence " + TEST_LICENCE_CODE
+
+
+def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = None
+
+    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+
+    assert (
+        result
+        == "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
+    )
+
+
+def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code, mocker
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
+
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        licence_lookup_service, "get_authority_licence_interaction_details", return_value=TEST_ISSUING_AUTHORITY
+    )
+
+    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
+    mock_get_authority_licence_interaction_details.assert_called()
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
@@ -123,63 +187,6 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_get_licence_authorities_and_interactions_calls_licence_repository(mock_get_licence_by_licence_code):
-    mock_get_licence_by_licence_code.return_value = None
-
-    licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
-
-    mock_get_licence_by_licence_code.assert_called_with("unmatched-licence-code")
-
-
-def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(
-    mock_get_licence_by_licence_code,
-):
-    mock_get_licence_by_licence_code.return_value = None
-
-    result = licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
-
-    assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
-
-
-def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = None
-
-    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
-
-    assert result == "No authorities found for the licence " + TEST_LICENCE_CODE
-
-
-def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = None
-
-    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
-
-    assert (
-        result
-        == "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
-    )
-
-
-def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
-
-    result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
-
-    assert isinstance(result, LicenceAuthoritiesAndInteractionsResponse)
-
-
 def test_group_interactions(mocker):
     result = licence_lookup_service.group_interactions(TEST_LICENCE)
 
@@ -220,35 +227,11 @@ def test_build_authority_interactions(mocker):
 
 
 def test_get_authority_licence_interaction_details_returns_expected_issuing_authority(mocker):
-    mock_interactions = mocker.patch.object(
-        licence_lookup_service,
-        "build_authority_interactions",
-        return_value={
-            LicenceInteractions.APPLY.value: [
-                AuthorityInteraction(
-                    url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
-                    uses_licensify=True,
-                    uses_authority_url=False,
-                    description=TEST_LICENCE.licence_interactions[0].licence_interaction_name,
-                    payment=PaymentType.FIXED_FEE.value,
-                    payment_amount=TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds,
-                    introduction_text=TEST_CUSTOMISATION_FIXED_FEE.introduction_text,
-                )
-            ]
-        },
+    mocker.patch.object(
+        licence_lookup_service, "build_authority_interactions", return_value=TEST_AUTHORITY_INTERACTIONS_FOR_APPLY
     )
 
-    expected = IssuingAuthority(
-        authority_name=TEST_AUTHORITY.full_name,
-        authority_slug=TEST_AUTHORITY.url_slug,
-        authority_contact=AuthorityContactDetails(
-            website=TEST_AUTHORITY.authority_url,
-            email=TEST_AUTHORITY.contact_details.email,
-            phone=TEST_AUTHORITY.contact_details.phone_number,
-            address=licence_lookup_service.format_postal_address(TEST_AUTHORITY.contact_details),
-        ),
-        authority_interactions=mock_interactions.return_value,
-    )
+    expected = TEST_ISSUING_AUTHORITY
 
     actual = licence_lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
 
