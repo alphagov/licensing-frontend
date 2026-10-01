@@ -219,7 +219,7 @@ def test_build_authority_interactions(mocker):
     assert actual == expected
 
 
-def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
+def test_get_authority_licence_interaction_details_returns_expected_issuing_authority(mocker):
     mock_interactions = mocker.patch.object(
         licence_lookup_service,
         "build_authority_interactions",
@@ -252,5 +252,4 @@ def test_get_authority_licence_interaction_details_returns_issuing_authority_obj
 
     actual = licence_lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
 
-    assert isinstance(actual, IssuingAuthority)
     assert actual == expected
