@@ -100,6 +100,24 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
     mock_get_authority_licence_interaction_details.assert_called()
 
 
+def test_get_licence_authorities_and_interactions_is_location_specific_is_true(
+    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code, mocker
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        licence_lookup_service, "get_authority_licence_interaction_details", return_value=TEST_ISSUING_AUTHORITY
+    )
+    mock_check_if_location_specific_is_true = mocker.patch.object(
+        licence_lookup_service, "check_if_location_specific", return_value=True
+    )
+
+    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    mock_check_if_location_specific_is_true.assert_called()
+    mock_get_authority_licence_interaction_details.assert_not_called()
+
+
 def test_get_licence_url_when_authority_uses_gov_uk():
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
