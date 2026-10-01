@@ -63,10 +63,8 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
 
     grouped_interactions = group_interactions(licence)
 
-    result = {}
+    result = defaultdict(list)
     for interaction_type, interactions in grouped_interactions.items():
-        result[interaction_type] = []
-
         for interaction in interactions:
             customisation = interaction_customisation_repository.find_published_customisation(
                 authority.url_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id

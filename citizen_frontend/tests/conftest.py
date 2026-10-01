@@ -84,6 +84,7 @@ TEST_AUTHORITY = Authority(
     full_name="Test Authority for testing with",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
+    authority_url="https://test-authority.com",
     licence_details=[
         LicenceDetails(
             licence_code=TEST_LICENCE_CODE,

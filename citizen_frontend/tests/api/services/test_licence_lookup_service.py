@@ -4,7 +4,12 @@ import pytest
 from common.models.shared_models import PaymentAmount
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
-from citizen_frontend.api.models.api_responses import AuthorityInteraction, LicenceAuthoritiesAndInteractionsResponse
+from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
+    AuthorityInteraction,
+    IssuingAuthority,
+    LicenceAuthoritiesAndInteractionsResponse,
+)
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
@@ -214,19 +219,38 @@ def test_build_authority_interactions(mocker):
     assert actual == expected
 
 
-# def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
-#     mocker.patch.object(
-#         licence_lookup_service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE
-#     )
-#     mocker.patch.object(
-#         authority_service.authority_repository,
-#         "get_licence_offering_authorities_by_licence_code",
-#         return_value=[TEST_AUTHORITY],
-#     )
-#     mocker.patch.object(
-#         licence_lookup_service, "get_authority_licence_interaction_details", return_value=[TEST_AUTHORITY_INTERACTION]
-#     )
-#
-#     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
-#
-#     assert isinstance(result.issuing_authorities[0], IssuingAuthority)
+def test_get_authority_licence_interaction_details_returns_issuing_authority_object(mocker):
+    mock_interactions = mocker.patch.object(
+        licence_lookup_service,
+        "build_authority_interactions",
+        return_value={
+            LicenceInteractions.APPLY.value: [
+                AuthorityInteraction(
+                    url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
+                    uses_licensify=True,
+                    uses_authority_url=False,
+                    description=TEST_LICENCE.licence_interactions[0].licence_interaction_name,
+                    payment=PaymentType.FIXED_FEE.value,
+                    payment_amount=TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds,
+                    introduction_text=TEST_CUSTOMISATION_FIXED_FEE.introduction_text,
+                )
+            ]
+        },
+    )
+
+    expected = IssuingAuthority(
+        authority_name=TEST_AUTHORITY.full_name,
+        authority_slug=TEST_AUTHORITY.url_slug,
+        authority_contact=AuthorityContactDetails(
+            website=TEST_AUTHORITY.authority_url,
+            email=TEST_AUTHORITY.contact_details.email,
+            phone=TEST_AUTHORITY.contact_details.phone_number,
+            address=licence_lookup_service.format_postal_address(TEST_AUTHORITY.contact_details),
+        ),
+        authority_interactions=mock_interactions.return_value,
+    )
+
+    actual = licence_lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert isinstance(actual, IssuingAuthority)
+    assert actual == expected
