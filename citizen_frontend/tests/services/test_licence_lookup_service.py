@@ -182,6 +182,10 @@ def test_get_licence_authorities_and_interactions_is_location_specific_is_true_s
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
 
 
+def test_get_licence_authorities_and_interactions_multiple_authorities():
+    pass
+
+
 def test_get_licence_url_when_authority_uses_gov_uk():
     result = licence_lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
