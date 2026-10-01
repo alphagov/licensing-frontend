@@ -36,8 +36,8 @@ def get_mocked_context(licence, authority, interaction, interaction_sub_id):
     steps = 4 if is_fee_required else 3
 
     context = {
-        "authority": authority.capitalize(),
-        "licence": licence.replace("-", " ").title(),
+        "authority_name": authority.capitalize(),
+        "licence_name": licence.replace("-", " ").title(),
         "interaction_sub_id": interaction_sub_id,
         "interaction": interaction,
         "is_fee_required": is_fee_required,

@@ -7,7 +7,7 @@ from common.enums.countries import Countries
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
-from common.models.shared_models import PaymentAmount
+from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
@@ -165,6 +165,7 @@ TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
     department=bson.ObjectId(),
+    supporting_document_definitions=[SupportingDocumentDefinition(name="test", is_mandatory=True)],
 )
 
 TEST_CUSTOMISATION_FIXED_FEE = Customisation(
@@ -236,5 +237,5 @@ def mock_find_published_customisation(mocker):
         "find_published_customisation",
         autospec=True,
     )
-    mock_find_published_customisation.return_value = None
+    mock_find_published_customisation.return_value = TEST_CUSTOMISATION_VARIABLE_FEE
     return mock_find_published_customisation

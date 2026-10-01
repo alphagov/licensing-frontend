@@ -68,7 +68,8 @@ def begin_application_steps(
             "licence_slug": full_licence_interaction_context.licence.url_slug,
             "supporting_documents": published_customisation.supporting_document_definitions,
             "general_info_url": published_customisation.guidance_url,
-            "legislation_info_url": "testurl",
+            "legislation_info_url": licence_info_url,
+            "is_postal_allowed": published_customisation.is_postal_allowed,
         }
         context.update({"step": 1})
         return render(request, "citizen_frontend/licence_introduction_page.html", context)
@@ -78,9 +79,9 @@ def begin_application_steps(
         raise Http404("Incorrect licence, or authority does not exist") from e
 
 
-def submit_form(request, licence, authority, interaction, interaction_sub_id):
+def submit_form(request, licence_slug: str, authority_slug: str, interaction_id: str, interaction_sub_id: int):
     try:
-        context = get_mocked_context(licence, authority, interaction, interaction_sub_id)
+        context = get_mocked_context(licence_slug, authority_slug, interaction_id, interaction_sub_id)
         context.update({"step": 2})
 
         if request.method == "POST":
