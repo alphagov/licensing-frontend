@@ -7,6 +7,7 @@ prepare:
 
 start:
 	mise exec -- docker compose up -d
+	nohup mise exec -- docker compose watch > /dev/null 2>&1 &
 
 watch:
 	mise exec -- docker compose up --watch
@@ -15,6 +16,7 @@ test-ui: start prepare
 	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
 
 kill:
+	pkill -f "docker compose watch"
 	docker compose down && \
 	cd licensing_common && docker compose down
 
