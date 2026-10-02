@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[Authority] | None:
+def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[Authority]:
     try:
         authorities = list(
             Authority.objects.filter(
