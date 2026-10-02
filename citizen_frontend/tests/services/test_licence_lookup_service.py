@@ -316,11 +316,14 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
 
 
 def test_group_interactions(mocker):
-    result = licence_lookup_service.group_interactions(TEST_LICENCE)
+    expected_grouped_interactions = {
+        LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0], TEST_LICENCE.licence_interactions[1]],
+        LicenceInteractions.RENEW.value: [TEST_LICENCE.licence_interactions[2]],
+    }
 
-    assert result.keys() == {LicenceInteractions.APPLY, LicenceInteractions.RENEW}
-    assert len(result[LicenceInteractions.APPLY]) == 2
-    assert len(result[LicenceInteractions.RENEW]) == 1
+    actual = licence_lookup_service.group_interactions(TEST_LICENCE)
+
+    assert actual == expected_grouped_interactions
 
 
 def test_build_authority_interactions(mocker):
