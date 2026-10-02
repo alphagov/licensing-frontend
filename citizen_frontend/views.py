@@ -1,3 +1,4 @@
+from common.models.interaction_customisations import Customisation
 from django.http import Http404
 from django.shortcuts import render
 
@@ -18,7 +19,7 @@ def _redirect_if_cant_apply_via_licensify(context: LicenceInteractionContext):
         raise Http404("unhandled") from None
 
 
-def _get_published_customisation_or_redirect(context: LicenceInteractionContext, authority_slug: str):
+def _get_published_customisation_or_redirect(context: LicenceInteractionContext, authority_slug: str) -> Customisation:
     published_customisation = interaction_customisation_repository.find_published_customisation(
         authority_slug,
         context.licence.licence_code,
@@ -26,9 +27,14 @@ def _get_published_customisation_or_redirect(context: LicenceInteractionContext,
         context.interaction.interaction_sub_id,
     )
     if not published_customisation:
-        # TODO this actually checks to see if a licence has been suspended or something
         raise Http404("suspended") from None
     return published_customisation
+
+
+def _get_correct_url_for_legislation(
+    full_licence_interaction_context: LicenceInteractionContext, published_customisation: Customisation
+):
+    return published_customisation.information_url or full_licence_interaction_context.licence_detail.authority_url
 
 
 def begin_application_steps(
@@ -51,9 +57,6 @@ def begin_application_steps(
             if len(full_licence_interaction_context.interaction.display_title) < 1
             else full_licence_interaction_context.interaction.display_title
         )
-        licence_info_url = (
-            published_customisation.information_url or full_licence_interaction_context.licence_detail.authority_url
-        )
         context = {
             "authority_name": full_licence_interaction_context.authority.full_name.title(),
             "licence_name": licence_name,
@@ -68,7 +71,9 @@ def begin_application_steps(
             "licence_slug": full_licence_interaction_context.licence.url_slug,
             "supporting_documents": published_customisation.supporting_document_definitions,
             "general_info_url": published_customisation.guidance_url,
-            "legislation_info_url": licence_info_url,
+            "legislation_info_url": _get_correct_url_for_legislation(
+                full_licence_interaction_context, published_customisation
+            ),
             "is_postal_allowed": published_customisation.is_postal_allowed,
         }
         context.update({"step": 1})

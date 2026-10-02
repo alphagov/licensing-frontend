@@ -61,3 +61,29 @@ def test_begin_application_steps_reaches_correct_page_when_all_data_exists(
     response = client.get(begin_application_steps_view)
     assert response.status_code == 200
     assertTemplateUsed(response, "citizen_frontend/licence_introduction_page.html")
+
+
+def test_begin_application_steps_returns_published_customisation_information_url_as_legislation_url_if_exists(
+    client: Client,
+    mock_get_licence_interaction_context,
+    begin_application_steps_view,
+    mock_find_published_customisation,
+):
+    expected_url = "www.superceedingurl.com"
+    mock_find_published_customisation.return_value.information_url = expected_url
+    mock_get_licence_interaction_context.return_value.licence_detail.authority_url = "www.fallbackurl.com"
+    response = client.get(begin_application_steps_view)
+    assert response.context["legislation_info_url"] == expected_url
+
+
+def test_begin_application_steps_returns_authority_url_as_fallback(
+    client: Client,
+    mock_get_licence_interaction_context,
+    begin_application_steps_view,
+    mock_find_published_customisation,
+):
+    expected_url = "www.fallbackurl.com"
+    mock_find_published_customisation.return_value.information_url = None
+    mock_get_licence_interaction_context.return_value.licence_detail.authority_url = expected_url
+    response = client.get(begin_application_steps_view)
+    assert response.context["legislation_info_url"] == expected_url
