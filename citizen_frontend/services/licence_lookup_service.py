@@ -22,17 +22,19 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-# TODO raise errors here that the API handles
+# TODO: These returned strings are only used to send a NotFoundJsonResponse with a 404,
+#  keeping for use with error handling in separate ticket
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
-        return "Licence " + licence_code + " doesn't exist"
+        return None
+        # "Licence " + licence_code + " doesn't exist"
 
     authorities = get_authorities(licence, snac_code)
     if not authorities:
-        return f"No authorities found for the licence {licence.licence_code}" + (
-            f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
-        )
+        return None
+    #     f"No authorities found for the licence {licence.licence_code}" + (
+    #     f" and for the SNAC/GSS Code {snac_code}" if snac_code else "")
 
     is_location_specific = check_if_location_specific(authorities, licence)
 
