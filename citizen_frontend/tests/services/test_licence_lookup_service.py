@@ -1,11 +1,13 @@
 from copy import deepcopy
 
 import pytest
+from common.models.authorities import ContactDetails
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
     AuthorityInteraction,
     LicenceAuthoritiesAndInteractionsResponse,
 )
@@ -114,6 +116,52 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
     assert actual == expected
 
 
+def test_get_licence_authorities_and_interactions_multiple_authorities(
+    mock_get_licence_by_licence_code,
+    mock_get_authorities_by_licence_code,
+    mock_get_authority_licence_interaction_details,
+):
+    contact_details_2 = ContactDetails(
+        line_one="2 test authority",
+        line_two="2 test road",
+        line_three="",
+        city="city",
+        post_code="post2code",
+        phone_number="0123456789",
+        email="testauth2@email.com",
+    )
+    test_authority_2 = deepcopy(TEST_AUTHORITY)
+    test_authority_2.full_name = "Test authority 2"
+    test_authority_2.url_slug = "test-authority-2"
+    test_authority_2.contact_details = contact_details_2
+    test_authority_2_address_formatted = licence_lookup_service.format_postal_address(contact_details_2)
+
+    test_issuing_authority_2 = deepcopy(TEST_ISSUING_AUTHORITY)
+    test_issuing_authority_2.authority_name = test_authority_2.full_name
+    test_issuing_authority_2.authority_slug = test_authority_2.url_slug
+    test_issuing_authority_2.authority_contact = AuthorityContactDetails(
+        website=test_authority_2.authority_url,
+        email=test_authority_2.contact_details.email,
+        phone=test_authority_2.contact_details.phone_number,
+        address=test_authority_2_address_formatted,
+    )
+
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY, test_authority_2]
+    mock_get_authority_licence_interaction_details.side_effect = [TEST_ISSUING_AUTHORITY, test_issuing_authority_2]
+
+    expected = LicenceAuthoritiesAndInteractionsResponse(
+        is_location_specific=False,
+        is_offered_by_county=TEST_LICENCE.is_offered_by_county,
+        geographical_availability=TEST_LICENCE.administrative_area.countries,
+        issuing_authorities=[TEST_ISSUING_AUTHORITY, test_issuing_authority_2],
+    )
+
+    actual = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+
+    assert actual == expected
+
+
 def test_get_licence_authorities_and_interactions_is_location_specific_is_true_snac_code_not_present(
     mock_get_licence_by_licence_code,
     mock_get_authorities_by_licence_code,
@@ -180,10 +228,6 @@ def test_get_licence_authorities_and_interactions_is_location_specific_is_true_s
 
     mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
-
-
-def test_get_licence_authorities_and_interactions_multiple_authorities():
-    pass
 
 
 def test_get_licence_url_when_authority_uses_gov_uk():
