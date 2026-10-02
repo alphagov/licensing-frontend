@@ -50,25 +50,20 @@ def mock_check_if_location_specific(mocker):
     yield mocker.patch.object(licence_lookup_service, "check_if_location_specific")
 
 
-def test_get_licence_authorities_and_interactions_calls_licence_repository(mock_get_licence_by_licence_code):
-    mock_get_licence_by_licence_code.return_value = None
-
-    licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
-
-    mock_get_licence_by_licence_code.assert_called_with("unmatched-licence-code")
-
-
-def test_get_licence_authorities_and_interactions_returns_string_when_no_licence_found(
+def test_get_licence_authorities_and_interactions_returns_none_when_no_licence_found(
     mock_get_licence_by_licence_code,
 ):
     mock_get_licence_by_licence_code.return_value = None
 
     result = licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
 
-    assert result == "Licence " + "unmatched-licence-code" + " doesn't exist"
+    assert result is None
 
 
-def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_without_snac(
+# "Licence " + "unmatched-licence-code" + " doesn't exist"
+
+
+def test_get_licence_authorities_and_interactions_returns_none_when_no_authorities_found_for_licence_without_snac(
     mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
 ):
     mock_get_licence_by_licence_code.return_value = TEST_LICENCE
@@ -77,10 +72,13 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_authori
 
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
-    assert result == "No authorities found for the licence " + TEST_LICENCE_CODE
+    assert result is None
 
 
-def test_get_licence_authorities_and_interactions_returns_string_when_no_authorities_found_for_licence_with_snac(
+# "No authorities found for the licence " + TEST_LICENCE_CODE)
+
+
+def test_get_licence_authorities_and_interactions_returns_none_when_no_authorities_found_for_licence_with_snac(
     mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
 ):
     mock_get_licence_by_licence_code.return_value = TEST_LICENCE
@@ -89,10 +87,10 @@ def test_get_licence_authorities_and_interactions_returns_string_when_no_authori
 
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
-    assert (
-        result
-        == "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
-    )
+    assert result is None
+
+
+# "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
 
 
 def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
