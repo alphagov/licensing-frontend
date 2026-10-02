@@ -1,3 +1,4 @@
+import logging
 import os
 from collections import defaultdict
 
@@ -17,7 +18,11 @@ from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
+
+# TODO raise errors here that the API handles
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
