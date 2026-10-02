@@ -66,7 +66,7 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
     )
 
 
-def build_authority_interactions(authority: Authority, licence: Licence) -> dict:
+def build_authority_interactions(authority: Authority, licence: Licence) -> dict[str, list[AuthorityInteraction]]:
     licence_details = next((ld for ld in authority.licence_details if ld.licence_code == licence.licence_code), None)
     uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
     offered_by_auth = getattr(licence_details, "offered_by_authority", False)
@@ -151,7 +151,7 @@ def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] 
     return authorities
 
 
-def group_interactions(licence: Licence):
+def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
     grouped_interactions = defaultdict(list)
     for interaction in licence.licence_interactions:
         interaction_type = INTERACTION_ID_WORD_MAPPING.get(
