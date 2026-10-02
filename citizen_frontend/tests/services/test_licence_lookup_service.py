@@ -93,7 +93,7 @@ def test_get_licence_authorities_and_interactions_returns_none_when_no_authoriti
 # "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
 
 
-def test_get_licence_authorities_and_interactions_returns_licence_authorities_and_interactions_response(
+def test_get_licence_authorities_and_interactions_returns_expected_licence_authorities_and_interactions_response(
     mock_get_licence_by_licence_code,
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
@@ -114,7 +114,7 @@ def test_get_licence_authorities_and_interactions_returns_licence_authorities_an
     assert actual == expected
 
 
-def test_get_licence_authorities_and_interactions_multiple_authorities(
+def test_get_licence_authorities_and_interactions_when_given_multiple_authorities(
     mock_get_licence_by_licence_code,
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
@@ -160,7 +160,7 @@ def test_get_licence_authorities_and_interactions_multiple_authorities(
     assert actual == expected
 
 
-def test_get_licence_authorities_and_interactions_is_location_specific_is_true_snac_code_not_present(
+def test_get_licence_authorities_and_interactions_when_location_specific_is_true_and_snac_code_not_present(
     mock_get_licence_by_licence_code,
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
@@ -177,7 +177,7 @@ def test_get_licence_authorities_and_interactions_is_location_specific_is_true_s
     mock_get_authority_licence_interaction_details.assert_not_called()
 
 
-def test_get_licence_authorities_and_interactions_is_location_specific_is_false_snac_code_not_present(
+def test_get_licence_authorities_and_interactions_when_location_specific_is_false_and_snac_code_not_present(
     mock_get_licence_by_licence_code,
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
@@ -194,7 +194,7 @@ def test_get_licence_authorities_and_interactions_is_location_specific_is_false_
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
 
 
-def test_get_licence_authorities_and_interactions_is_location_specific_is_false_snac_code_present(
+def test_get_licence_authorities_and_interactions_when_location_specific_is_false_and_snac_code_present(
     mocker,
     mock_get_authority_licence_interaction_details,
     mock_check_if_location_specific,
@@ -211,7 +211,7 @@ def test_get_licence_authorities_and_interactions_is_location_specific_is_false_
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
 
 
-def test_get_licence_authorities_and_interactions_is_location_specific_is_true_snac_code_present(
+def test_get_licence_authorities_and_interactions_when_location_specific_is_true_and_snac_code_present(
     mocker,
     mock_get_authority_licence_interaction_details,
     mock_check_if_location_specific,
