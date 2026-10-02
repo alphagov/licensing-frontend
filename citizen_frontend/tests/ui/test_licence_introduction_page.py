@@ -16,7 +16,7 @@ from playwright.sync_api import Page, expect
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
-def test_page_has_correct_headings(page: Page, mock_get_licence_interaction_context):
+def test_page_has_correct_headings(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     expect(page.get_by_test_id("page-heading")).to_contain_text("Temporary Event Notice")

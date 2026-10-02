@@ -1,9 +1,8 @@
 import pytest
 from django.test import Client
 from django.urls import reverse
-from pytest_mock import MockerFixture
+from pytest_django.asserts import assertTemplateUsed
 
-import citizen_frontend.views
 from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 
 
@@ -47,6 +46,18 @@ def test_begin_application_steps_redirects_to_suspended_licence_when_no_publishe
     begin_application_steps_view,
     mock_find_published_customisation,
 ):
+    mock_find_published_customisation.return_value = None
     response = client.get(begin_application_steps_view)
     assert response.status_code == 404
     assert response.context["exception"].lower() == "suspended"
+
+
+def test_begin_application_steps_reaches_correct_page_when_all_data_exists(
+    client: Client,
+    mock_get_licence_interaction_context,
+    begin_application_steps_view,
+    mock_find_published_customisation,
+):
+    response = client.get(begin_application_steps_view)
+    assert response.status_code == 200
+    assertTemplateUsed(response, "citizen_frontend/licence_introduction_page.html")
