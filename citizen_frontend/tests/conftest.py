@@ -68,8 +68,8 @@ def mock_find_interaction_customisation(mocker):
 
 
 @pytest.fixture
-def mock_licence_filter(mocker):
-    mock_model = mocker.patch.object(Licence.objects, "filter")
+def mock_get_licence(mocker):
+    mock_model = mocker.patch.object(Licence.objects, "get")
     yield mock_model
 
 
