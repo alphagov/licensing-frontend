@@ -81,10 +81,7 @@ def test_page_has_download_pdf_inset(page: Page):
     expect(pdf_download_link).to_have_attribute("href", "#")
 
 
-# failing but not sure on assert reason
-def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(
-    page: Page, mock_find_published_customisation
-):
+def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
     general_info_link = page.get_by_test_id("general-information")
@@ -93,10 +90,15 @@ def test_page_has_additional_information_inset_when_both_legislation_and_general
     expect(page.get_by_test_id("additional-information")).to_contain_text(
         "There is additional information available for this licence that you might find useful"
     )
+    # url expected to be the same for both in this specific case
     expect(general_info_link).to_have_role("link")
-    expect(general_info_link).to_have_attribute("href", "#")
+    expect(general_info_link).to_have_attribute(
+        "href", "http://www.winchester.gov.uk/licensing/alcohol-entertainment/ten/"
+    )
     expect(legislation_info_link).to_have_role("link")
-    expect(legislation_info_link).to_have_attribute("href", "#")
+    expect(legislation_info_link).to_have_attribute(
+        "href", "http://www.winchester.gov.uk/licensing/alcohol-entertainment/ten/"
+    )
 
 
 def test_page_has_additional_information_inset_when_general_info_url_available(

@@ -120,7 +120,7 @@ def test_get_licence_interaction_context_returns_none_when_no_licence_interactio
     mock_licence_repository, mock_authority_repository, mocker
 ):
     mock_licence = mocker.MagicMock()
-    mock_licence.find_interaction.return_value = None
+    mock_licence_repository.find_interaction.return_value = None
     mock_licence_repository.get_licence_by_url_slug.return_value = mock_licence
     actual = licence_lookup_service.get_licence_interaction_context(
         "authority", "url_slug", str(LicenceInteractions.RENEW), 5
@@ -132,7 +132,7 @@ def test_get_licence_interaction_context_returns_none_when_no_licence_details_fo
     mock_licence_repository, mock_authority_repository, mocker
 ):
     mock_authority = mocker.MagicMock()
-    mock_authority.find_licence_detail.return_value = None
+    mock_authority_repository.find_licence_detail.return_value = None
     mock_authority_repository.find_authority_by_url_slug.return_value = mock_authority
     actual = licence_lookup_service.get_licence_interaction_context(
         "authority", "url_slug", str(LicenceInteractions.RENEW), 5
