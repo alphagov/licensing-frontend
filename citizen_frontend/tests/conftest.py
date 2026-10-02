@@ -119,7 +119,7 @@ TEST_LICENCE = Licence(
         code="5", name=f"{Countries.ENGLAND},{Countries.WALES}", countries=[Countries.ENGLAND, Countries.WALES]
     ),
     is_offered_by_county=False,
-    licence_interactions=[TEST_LICENCE_DETAIL],
+    licence_interactions=[TEST_LICENCE_INTERACTION],
 )
 
 TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
