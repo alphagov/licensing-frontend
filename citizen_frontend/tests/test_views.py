@@ -31,9 +31,7 @@ def test_begin_application_steps_redirects_to_not_found_when_no_licence_context_
 def test_begin_application_steps_redirects_to_not_handled_when_not_handled_by_licensify(
     client: Client, mock_get_licence_interaction_context, begin_application_steps_view
 ):
-    mock_get_licence_interaction_context.return_value: LicenceInteractionContext = (
-        mock_get_licence_interaction_context.return_value
-    )
+    mock_get_licence_interaction_context.return_value = mock_get_licence_interaction_context.return_value
     mock_get_licence_interaction_context.return_value.licence_detail.using_gov_uk = False
     response = client.get(begin_application_steps_view)
     assert response.status_code == 404
