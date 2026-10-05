@@ -40,3 +40,6 @@ test-api: prepare
 
 test-services: prepare
 	pytest citizen_frontend/tests/services
+
+test-views: prepare
+	pytest citizen_frontend/tests/test_views.py
