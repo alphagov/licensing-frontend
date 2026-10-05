@@ -91,7 +91,3 @@ def test_get_all_licences_from_database_calls_database_with_correct_method(mock_
     licence_repository.get_all_licences_from_database()
 
     mock_get_all.assert_called_once()
-
-
-def test_get_licence_by_licence_code_returns_expected_licence(mocker):
-    pass
