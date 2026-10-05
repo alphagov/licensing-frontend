@@ -3,8 +3,6 @@ from django.test import Client
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
-from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
-
 
 @pytest.fixture
 def begin_application_steps_view():
