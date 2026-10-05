@@ -18,8 +18,6 @@ from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
 
 
-# TODO: These returned strings are only used to send a NotFoundJsonResponse with a 404,
-#  keeping for use with error handling in separate ticket
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
