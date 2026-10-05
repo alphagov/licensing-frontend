@@ -52,6 +52,7 @@ def test_page_has_no_fee_amount_when_licence_has_no_fee_required(page: Page):
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
 
 
+@pytest.mark.django_db
 def test_page_has_no_fee_amount_when_licence_fee_is_required(
     live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
 ):
@@ -81,6 +82,7 @@ def test_page_has_download_pdf_inset(page: Page):
     expect(pdf_download_link).to_have_attribute("href", "#")
 
 
+@pytest.mark.django_db
 def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(page: Page):
     page.goto(TEST_TEMP_EVENT_APPLY_URL)
 
@@ -101,6 +103,7 @@ def test_page_has_additional_information_inset_when_both_legislation_and_general
     )
 
 
+@pytest.mark.django_db
 def test_page_has_additional_information_inset_when_general_info_url_available(
     live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
 ):
@@ -117,6 +120,7 @@ def test_page_has_additional_information_inset_when_general_info_url_available(
     expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
 
 
+@pytest.mark.django_db
 def test_page_has_additional_information_inset_when_legislation_info_url_available(
     live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
 ):
@@ -177,6 +181,7 @@ def test_page_marks_non_mandatory_supporting_documents_optional(page: Page):
     expect(optional_document).to_contain_text("(optional)")
 
 
+@pytest.mark.django_db
 def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_not_allowed(
     live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
 ):
