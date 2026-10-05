@@ -29,7 +29,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
         licence = licence_repository.get_licence_by_licence_code(licence_code)
         if not licence:
             logger.info("Licence %s doesn't exist", licence_code)
-            return None
+            raise LicenceLookupError(f"Licence {licence_code} doesn't exist")
 
         authorities = get_authorities(licence, snac_code)
         if not authorities:
