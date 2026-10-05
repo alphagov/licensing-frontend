@@ -12,3 +12,11 @@ class AuthorityDataError(Exception):
 
 class AuthorityDBError(Exception):
     pass
+
+
+class InteractionCustomisationDataError(Exception):
+    pass
+
+
+class InteractionCustomisationDBError(Exception):
+    pass

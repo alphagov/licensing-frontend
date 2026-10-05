@@ -1,4 +1,12 @@
+import logging
+
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
+from django.core.exceptions import ValidationError
+
+from citizen_frontend.exceptions import InteractionCustomisationDataError
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def find_published_customisation(
@@ -19,15 +27,18 @@ def find_published_customisation(
 def find_interaction_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
 ) -> InteractionCustomisation | None:
-    customisations = list(
-        InteractionCustomisation.objects.get(
+    try:
+        customisation = InteractionCustomisation.objects.get(
             authority_url_slug=authority_url_slug,
             licence_code=licence_code,
             interaction_id=interaction_id,
             interaction_sub_id=interaction_sub_id,
         )
-    )
-    # TODO error handle when more than one or verify there's never more than one
-    if customisations:
-        return customisations[0]
-    return None
+        # TODO error handle when more than one or verify there's never more than one
+        if customisation:
+            customisation.full_clean()
+            return customisation
+        return None
+    except ValidationError as e:
+        logger.error(e)
+        raise InteractionCustomisationDataError(f"InteractionCustomisation validation error: {e.message}") from e

@@ -1,6 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 
+import pytest
 from common.models.interaction_customisations import InteractionCustomisation
 from conftest import (
     TEST_AUTH_SLUG,
@@ -9,8 +10,10 @@ from conftest import (
     TEST_INTERACTION_SUB_ID_INT,
     TEST_LICENCE_CODE,
 )
+from django.core.exceptions import ValidationError
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+from citizen_frontend.exceptions import InteractionCustomisationDataError
 
 interaction_customisation_with_unset_published_customisation = InteractionCustomisation(
     interaction_id=TEST_INTERACTION_ID,
@@ -95,3 +98,22 @@ def test_find_published_customisation_doesnt_return_suspended_published_customis
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation is None
+
+
+def test_find_published_customisation_throws_error_full_clean_failure(mock_interaction_customisation_get, mocker):
+    instance = TEST_CUSTOMISATION_FIXED_FEE
+
+    mock_interaction_customisation_get.return_value = instance
+
+    mocker.patch.object(instance, "full_clean", side_effect=ValidationError("field error"))
+
+    with pytest.raises(InteractionCustomisationDataError) as e:
+        interaction_customisation_repository.find_interaction_customisation(
+            TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
+        )
+
+    assert e.value.args[0] == "InteractionCustomisation validation error: field error"
+
+
+def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found():
+    pass
