@@ -21,6 +21,9 @@ def get_all_licences_from_database() -> list[Licence]:
     except ValidationError as e:
         logger.error(e.message)
         raise DataError(f"Licence validation error: {e.message}") from e
+    except DatabaseError as e:
+        logger.error(e)
+        raise DocumentDBError("DocumentDB error fetching all licences") from e
 
 
 def get_licence_by_licence_code(licence_code: str) -> Licence | None:

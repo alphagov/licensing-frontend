@@ -67,7 +67,14 @@ def test_get_all_licences_from_database_throws_exception_validation_error(mocker
 
 
 def test_get_all_licences_from_database_throws_database_error(mocker):
-    pass
+    mocker.patch.object(Licence.objects, "all", side_effect=DatabaseError())
+
+    expected_error_message = "DocumentDB error fetching all licences"
+
+    with pytest.raises(DocumentDBError) as e:
+        licence_repository.get_all_licences_from_database()
+
+    assert e.value.args[0] == expected_error_message
 
 
 def test_get_all_licences_from_database_returns_expected_licences(mocker):
