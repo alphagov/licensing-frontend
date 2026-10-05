@@ -11,9 +11,10 @@ from conftest import (
     TEST_LICENCE_CODE,
 )
 from django.core.exceptions import ValidationError
+from django.db import DatabaseError
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
-from citizen_frontend.exceptions import InteractionCustomisationDataError
+from citizen_frontend.exceptions import InteractionCustomisationDataError, InteractionCustomisationDBError
 
 interaction_customisation_with_unset_published_customisation = InteractionCustomisation(
     interaction_id=TEST_INTERACTION_ID,
@@ -115,5 +116,32 @@ def test_find_published_customisation_throws_error_full_clean_failure(mock_inter
     assert e.value.args[0] == "InteractionCustomisation validation error: field error"
 
 
-def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found():
-    pass
+def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found(
+    mock_interaction_customisation_get,
+):
+    mock_interaction_customisation_get.side_effect = InteractionCustomisation.MultipleObjectsReturned
+
+    expected_error_message = (
+        f"More than one InteractionCustomisations found for the following arguments:"
+        f"{TEST_AUTH_SLUG}, {TEST_LICENCE_CODE}, "
+        f"{TEST_INTERACTION_ID}, {TEST_INTERACTION_SUB_ID_INT}"
+    )
+
+    with pytest.raises(InteractionCustomisationDataError) as e:
+        interaction_customisation_repository.find_interaction_customisation(
+            TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
+        )
+
+    assert e.value.args[0] == expected_error_message
+
+
+def test_find_published_customisation_throws_error_generic_database_error(mock_interaction_customisation_get):
+    mock_interaction_customisation_get.side_effect = DatabaseError()
+
+    expected_error_message = "A database error occurred"
+    with pytest.raises(InteractionCustomisationDBError) as e:
+        interaction_customisation_repository.find_interaction_customisation(
+            TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
+        )
+
+    assert e.value.args[0] == expected_error_message
