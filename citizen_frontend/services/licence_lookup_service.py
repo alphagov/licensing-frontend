@@ -5,6 +5,7 @@ from collections import defaultdict
 from common.models.authorities import Authority, ContactDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
+from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
@@ -16,6 +17,7 @@ from citizen_frontend.api.repository import interaction_customisation_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.exceptions import DataError, DocumentDBError, LicenceLookupError
 from citizen_frontend.services import authority_service
 
 logger = logging.getLogger(__name__)
@@ -23,35 +25,41 @@ logger.setLevel(logging.INFO)
 
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
-    licence = licence_repository.get_licence_by_licence_code(licence_code)
-    if not licence:
-        logger.info("Licence %s doesn't exist", licence_code)
-        return None
+    try:
+        licence = licence_repository.get_licence_by_licence_code(licence_code)
+        if not licence:
+            logger.info("Licence %s doesn't exist", licence_code)
+            return None
 
-    authorities = get_authorities(licence, snac_code)
-    if not authorities:
-        message = f"No authorities found for the licence {licence.licence_code}" + (
-            f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
+        authorities = get_authorities(licence, snac_code)
+        if not authorities:
+            message = f"No authorities found for the licence {licence.licence_code}" + (
+                f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
+            )
+            logger.info(message)
+            return None
+
+        is_location_specific = check_if_location_specific(authorities, licence)
+
+        issuing_authorities = (
+            []
+            if is_location_specific and not snac_code
+            else [
+                get_authority_licence_interaction_details(authority=authority, licence=licence)
+                for authority in authorities
+            ]
         )
-        logger.info(message)
-        return None
 
-    is_location_specific = check_if_location_specific(authorities, licence)
-
-    issuing_authorities = (
-        []
-        if is_location_specific and not snac_code
-        else [
-            get_authority_licence_interaction_details(authority=authority, licence=licence) for authority in authorities
-        ]
-    )
-
-    return LicenceAuthoritiesAndInteractionsResponse(
-        is_location_specific=is_location_specific,
-        is_offered_by_county=licence.is_offered_by_county,
-        geographical_availability=licence.administrative_area.countries,
-        issuing_authorities=issuing_authorities,
-    )
+        return LicenceAuthoritiesAndInteractionsResponse(
+            is_location_specific=is_location_specific,
+            is_offered_by_county=licence.is_offered_by_county,
+            geographical_availability=licence.administrative_area.countries,
+            issuing_authorities=issuing_authorities,
+        )
+    except (DataError, DocumentDBError) as e:
+        raise LicenceLookupError(e.args[0]) from e
+    except ValidationError as e:
+        raise LicenceLookupError(f"{e.title} validation error") from e
 
 
 def get_authority_licence_interaction_details(authority: Authority, licence: Licence) -> IssuingAuthority:

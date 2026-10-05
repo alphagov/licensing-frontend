@@ -4,6 +4,7 @@ import pytest
 from common.models.authorities import ContactDetails
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
+from pydantic import ValidationError
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
@@ -13,6 +14,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.exceptions import DocumentDBError, LicenceLookupError
 from citizen_frontend.services import authority_service
 from citizen_frontend.tests.conftest import (
     BASE_URL,
@@ -48,6 +50,11 @@ def mock_get_authority_licence_interaction_details(mocker):
 @pytest.fixture
 def mock_check_if_location_specific(mocker):
     yield mocker.patch.object(licence_lookup_service, "check_if_location_specific")
+
+
+@pytest.fixture
+def mock_get_authorities(mocker):
+    yield mocker.patch.object(licence_lookup_service, "get_authorities")
 
 
 def test_get_licence_authorities_and_interactions_returns_none_when_no_licence_found(
@@ -367,3 +374,66 @@ def test_get_authority_licence_interaction_details_returns_expected_issuing_auth
     actual = licence_lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
 
     assert actual == expected
+
+
+def test_get_licence_authorities_and_interactions_throws_error_licence_repository_error(
+    mock_get_licence_by_licence_code,
+):
+    mock_get_licence_by_licence_code.side_effect = DocumentDBError("error message")
+
+    with pytest.raises(LicenceLookupError) as e:
+        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert e.value.args[0] == "error message"
+
+
+def test_get_licence_authorities_and_interactions_throws_error_authority_repository_error(
+    mock_get_licence_by_licence_code, mock_get_authorities
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities.side_effect = DocumentDBError("error message")
+
+    with pytest.raises(LicenceLookupError) as e:
+        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert e.value.args[0] == "error message"
+
+
+def test_get_licence_authorities_and_interactions_throws_error_interaction_customisation_repository_error(
+    mock_get_licence_by_licence_code, mock_get_authorities, mock_find_interaction_customisation
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities.return_value = [TEST_AUTHORITY]
+
+    mock_find_interaction_customisation.side_effect = DocumentDBError("error message")
+
+    with pytest.raises(LicenceLookupError) as e:
+        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert e.value.args[0] == "error message"
+
+
+def test_get_licence_authorities_and_interactions_throws_error_on_response_validation_error(
+    mock_get_licence_by_licence_code, mock_get_authorities, mocker
+):
+    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
+    mock_get_authorities.return_value = [TEST_AUTHORITY]
+
+    dummy_validation_error = ValidationError.from_exception_data(
+        title="AuthorityInteraction",
+        line_errors=[
+            {
+                "type": "string_type",
+                "loc": ("url",),
+                "msg": "Input should be a valid string",
+                "input": 123,
+            }
+        ],
+    )
+
+    mocker.patch.object(licence_lookup_service, "build_authority_interactions", side_effect=dummy_validation_error)
+
+    with pytest.raises(LicenceLookupError) as e:
+        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+
+    assert e.value.args[0] == "AuthorityInteraction validation error"
