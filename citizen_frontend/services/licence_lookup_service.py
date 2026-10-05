@@ -1,20 +1,23 @@
 import os
-
+from collections import defaultdict
 from dataclasses import dataclass
 
-from common.models.authorities import Authority, LicenceDetails, ContactDetails
-from collections import defaultdict
+from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 
-from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_WORD_MAPPING
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
     AuthorityInteraction,
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
-from citizen_frontend.api.repository import interaction_customisation_repository, licence_repository
+from citizen_frontend.api.repository import (
+    authority_repository,
+    interaction_customisation_repository,
+    licence_repository,
+)
+from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.services import authority_service
@@ -47,6 +50,7 @@ def get_licence_interaction_context(
     licence_context = LicenceInteractionContext(authority, licence, interaction_object, licence_detail)
 
     return licence_context
+
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
     licence = licence_repository.get_licence_by_licence_code(licence_code)
