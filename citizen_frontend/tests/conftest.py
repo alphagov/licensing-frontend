@@ -4,6 +4,7 @@ import bson
 import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
+from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
@@ -17,13 +18,15 @@ from citizen_frontend.api.models.api_responses import (
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
+from citizen_frontend.enums.payment_type import PaymentType
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
 TEMP_EVENT_SLUG = "temporary-event-notice"
 FOOD_PREMISES_APPLICATION_SLUG = "food-premises-approval-6"
 TEST_AUTH_SLUG = "winchester"
-TEST_INTERACTION = "apply"
+TEST_INTERACTION = LicenceInteractions.APPLY
 TEST_INTERACTION_SUB_ID = "1"
 TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
@@ -64,6 +67,12 @@ def mock_find_interaction_customisation(mocker):
     yield mock_model
 
 
+@pytest.fixture
+def mock_get_licence(mocker):
+    mock_model = mocker.patch.object(Licence.objects, "get")
+    yield mock_model
+
+
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
@@ -75,6 +84,7 @@ TEST_AUTHORITY = Authority(
     full_name="Test Authority for testing with",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
+    authority_url="https://test-authority.com",
     licence_details=[
         LicenceDetails(
             licence_code=TEST_LICENCE_CODE,
@@ -100,14 +110,14 @@ TEST_LICENCE = Licence(
     is_offered_by_county=False,
     licence_interactions=[
         LicenceInteraction(
-            interaction_id=0,
+            interaction_id=InteractionIdCodes.APPLY.value,
             interaction_sub_id=1,
             licence_interaction_name="Application for a Test Licence",
             form=LicenceForm(
-                name="Test Licence Form",
+                name="Test Licence Form 1",
                 sub_form=1,
                 form_ref_number="123000000",
-                file_name="EAF_123000000_LA_TEST",
+                file_name="EAF_123000000_LA_TEST_1",
                 file_size=185000,
                 form_version=2,
             ),
@@ -116,11 +126,101 @@ TEST_LICENCE = Licence(
             fee=PaymentAmount(pence=2100),
             fee_calculation_instructions=[],
             tacit_consent="required",
-        )
+        ),
+        LicenceInteraction(
+            interaction_id=InteractionIdCodes.APPLY.value,
+            interaction_sub_id=1,
+            licence_interaction_name="Application for a Test Licence",
+            form=LicenceForm(
+                name="Test Licence Form 2",
+                sub_form=1,
+                form_ref_number="123400000",
+                file_name="EAF_123000000_LA_TEST_2",
+                file_size=185000,
+                form_version=2,
+            ),
+            sub_forms=[],
+            supporting_documents=[],
+            fee=PaymentAmount(pence=2100),
+            fee_calculation_instructions=[],
+            tacit_consent="required",
+        ),
+        LicenceInteraction(
+            interaction_id=InteractionIdCodes.RENEW.value,
+            interaction_sub_id=1,
+            licence_interaction_name="Renewal for a Test Licence",
+            form=LicenceForm(
+                name="Test Licence Form 3",
+                sub_form=1,
+                form_ref_number="123450000",
+                file_name="EAF_123000000_LR_TEST",
+                file_size=185000,
+                form_version=2,
+            ),
+            sub_forms=[],
+            supporting_documents=[],
+            fee=PaymentAmount(pence=2100),
+            fee_calculation_instructions=[],
+            tacit_consent="required",
+        ),
     ],
 )
 
-TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
+
+TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    is_fee_required=True,
+    fee_calculation_instructions=["fee calculation 1", "fee calculation 2"],
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+TEST_CUSTOMISATION_FIXED_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    fixed_fee_amount=PaymentAmount(pence=500),
+    is_fee_required=True,
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+)
+
+
+TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
+    url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
+    uses_licensify=TEST_AUTHORITY.licence_details[0].using_gov_uk,
+    uses_authority_url=False,
+    description=TEST_LICENCE.licence_interactions[0].licence_interaction_name,
+    payment=PaymentType.FIXED_FEE.value,
+    payment_amount=TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds,
+    introduction_text=TEST_CUSTOMISATION_FIXED_FEE.introduction_text,
+)
+
+
+TEST_ISSUING_AUTHORITY = IssuingAuthority(
+    authority_name=TEST_AUTHORITY.full_name,
+    authority_slug=TEST_AUTHORITY.url_slug,
+    authority_contact=AuthorityContactDetails(
+        website=TEST_AUTHORITY.authority_url,
+        email=TEST_AUTHORITY.contact_details.email,
+        phone=TEST_AUTHORITY.contact_details.phone_number,
+        address="",
+    ),
+    authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
+)
+
+
+TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsResponse(
     is_offered_by_county=True,
     is_location_specific=True,
     geographical_availability=[Countries.ENGLAND],
@@ -149,34 +249,6 @@ TEST_LICENCE_AUTH_AND_INTERACTION = LicenceAuthoritiesAndInteractionsResponse(
             },
         )
     ],
-)
-
-TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
-    is_postal_allowed=False,
-    number_of_days_to_process=30,
-    is_processing_days_working_days=True,
-    has_tacit_consent=False,
-    created_at=timezone.now(),
-    is_fee_required=True,
-    fee_calculation_instructions=["fee calculation 1", "fee calculation 2"],
-    legislation_name="test-legislation",
-    introduction_text="test-introduction",
-    declarations=["test-declaration1", "test-declaration2"],
-    department=bson.ObjectId(),
-)
-
-TEST_CUSTOMISATION_FIXED_FEE = Customisation(
-    is_postal_allowed=False,
-    number_of_days_to_process=30,
-    is_processing_days_working_days=True,
-    has_tacit_consent=False,
-    created_at=timezone.now(),
-    fixed_fee_amount=PaymentAmount(pence=500),
-    is_fee_required=True,
-    legislation_name="test-legislation",
-    introduction_text="test-introduction",
-    declarations=["test-declaration1", "test-declaration2"],
-    department=bson.ObjectId(),
 )
 
 
