@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 
 import bson
 import pytest
@@ -19,10 +20,10 @@ from citizen_frontend.api.models.api_responses import (
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
-from citizen_frontend.services import licence_lookup_service
-from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -292,12 +293,12 @@ def mock_authority_repository(mocker):
 
 @pytest.fixture
 def mock_authority():
-    return TEST_AUTHORITY
+    return deepcopy(TEST_AUTHORITY)
 
 
 @pytest.fixture
 def mock_licence():
-    return TEST_LICENCE
+    return deepcopy(TEST_LICENCE)
 
 
 @pytest.fixture
@@ -305,8 +306,8 @@ def licence_interaction_context(mock_licence, mock_authority):
     return LicenceInteractionContext(
         licence=mock_licence,
         authority=mock_authority,
-        licence_detail=TEST_LICENCE_DETAIL,
-        interaction=TEST_LICENCE_INTERACTION,
+        licence_detail=deepcopy(TEST_LICENCE_DETAIL),
+        interaction=deepcopy(TEST_LICENCE_INTERACTION),
     )
 
 
@@ -328,5 +329,5 @@ def mock_find_published_customisation(mocker):
         "find_published_customisation",
         autospec=True,
     )
-    mock_find_published_customisation.return_value = TEST_CUSTOMISATION_VARIABLE_FEE
+    mock_find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
     return mock_find_published_customisation
