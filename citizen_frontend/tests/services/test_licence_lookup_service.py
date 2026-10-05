@@ -75,9 +75,6 @@ def test_get_licence_authorities_and_interactions_returns_none_when_no_authoriti
     assert result is None
 
 
-# "No authorities found for the licence " + TEST_LICENCE_CODE)
-
-
 def test_get_licence_authorities_and_interactions_returns_none_when_no_authorities_found_for_licence_with_snac(
     mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
 ):
@@ -88,9 +85,6 @@ def test_get_licence_authorities_and_interactions_returns_none_when_no_authoriti
     result = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
     assert result is None
-
-
-# "No authorities found for the licence " + TEST_LICENCE_CODE + " and for the SNAC/GSS Code " + TEST_SNAC_CODE
 
 
 def test_get_licence_authorities_and_interactions_returns_expected_licence_authorities_and_interactions_response(
@@ -315,7 +309,7 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_group_interactions(mocker):
+def test_group_interactions():
     expected_grouped_interactions = {
         LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0], TEST_LICENCE.licence_interactions[1]],
         LicenceInteractions.RENEW.value: [TEST_LICENCE.licence_interactions[2]],

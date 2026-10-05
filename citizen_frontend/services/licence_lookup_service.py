@@ -24,13 +24,10 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
     licence = licence_repository.get_licence_by_licence_code(licence_code)
     if not licence:
         return None
-        # "Licence " + licence_code + " doesn't exist"
 
     authorities = get_authorities(licence, snac_code)
     if not authorities:
         return None
-    #     f"No authorities found for the licence {licence.licence_code}" + (
-    #     f" and for the SNAC/GSS Code {snac_code}" if snac_code else "")
 
     is_location_specific = check_if_location_specific(authorities, licence)
 
