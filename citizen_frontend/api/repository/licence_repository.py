@@ -1,4 +1,3 @@
-
 import logging
 
 from common.models.licences import Licence, LicenceInteraction

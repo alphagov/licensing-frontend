@@ -1,3 +1,4 @@
+
 from copy import deepcopy
 
 import pytest
@@ -372,6 +373,8 @@ def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
     assert actual.licence.licence_code == "licence_code"
     assert actual.interaction is not None
     assert actual.licence_detail is not None
+
+
 def test_group_interactions():
     expected_grouped_interactions = {
         LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0], TEST_LICENCE.licence_interactions[1]],
