@@ -4,7 +4,7 @@ from django.views.decorators.http import require_GET
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceResponse
-from citizen_frontend.api.utils import get_all_licences_from_database
+from citizen_frontend.api.repository.licence_repository import get_all_licences_from_database
 
 
 @require_GET

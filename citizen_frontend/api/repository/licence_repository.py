@@ -10,6 +10,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+def get_all_licences_from_database() -> list[Licence]:
+    licences = list(Licence.objects.all())
+
+    for licence in licences:
+        licence.clean()
+
+    return licences
+
+
 def get_licence_by_licence_code(licence_code: str) -> Licence | None:
     try:
         logger.info("Getting licence by licence code: %s", licence_code)
