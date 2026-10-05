@@ -4,7 +4,7 @@ from common.models.licences import Licence
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-from citizen_frontend.exceptions import LicenceDataError, LicenceDBError
+from citizen_frontend.exceptions import DataError, DocumentDBError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -22,10 +22,10 @@ def get_licence_by_licence_code(licence_code: str) -> Licence | None:
         return None
     except Licence.MultipleObjectsReturned as e:
         logger.error("Multiple licences with licence code: %s", licence_code)
-        raise LicenceDataError(f"More than one licence found for licence code: {licence_code}") from e
+        raise DataError(f"More than one licence found for licence code: {licence_code}") from e
     except ValidationError as e:
         logger.error(e.message)
-        raise LicenceDataError(f"Licence validation error: {e.message}") from e
+        raise DataError(f"Licence validation error: {e.message}") from e
     except DatabaseError as e:
         logger.error("An error occurred while getting licence with code %s: %s", licence_code, e)
-        raise LicenceDBError(f"DocumentDB error fetching licence: {licence_code}") from e
+        raise DocumentDBError(f"DocumentDB error fetching licence: {licence_code}") from e

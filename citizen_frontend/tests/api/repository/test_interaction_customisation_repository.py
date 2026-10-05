@@ -14,7 +14,7 @@ from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
-from citizen_frontend.exceptions import InteractionCustomisationDataError, InteractionCustomisationDBError
+from citizen_frontend.exceptions import DataError, DocumentDBError
 
 interaction_customisation_with_unset_published_customisation = InteractionCustomisation(
     interaction_id=TEST_INTERACTION_ID,
@@ -108,7 +108,7 @@ def test_find_published_customisation_throws_error_full_clean_failure(mock_inter
 
     mocker.patch.object(instance, "full_clean", side_effect=ValidationError("field error"))
 
-    with pytest.raises(InteractionCustomisationDataError) as e:
+    with pytest.raises(DataError) as e:
         interaction_customisation_repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
@@ -127,7 +127,7 @@ def test_find_published_customisation_throws_error_more_than_one_interaction_cus
         f"{TEST_INTERACTION_ID}, {TEST_INTERACTION_SUB_ID_INT}"
     )
 
-    with pytest.raises(InteractionCustomisationDataError) as e:
+    with pytest.raises(DataError) as e:
         interaction_customisation_repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
@@ -138,8 +138,8 @@ def test_find_published_customisation_throws_error_more_than_one_interaction_cus
 def test_find_published_customisation_throws_error_generic_database_error(mock_interaction_customisation_get):
     mock_interaction_customisation_get.side_effect = DatabaseError()
 
-    expected_error_message = "A database error occurred"
-    with pytest.raises(InteractionCustomisationDBError) as e:
+    expected_error_message = "There was a database error accessing InteractionCustomisations collection"
+    with pytest.raises(DocumentDBError) as e:
         interaction_customisation_repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )

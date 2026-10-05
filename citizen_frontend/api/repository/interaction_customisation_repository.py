@@ -4,7 +4,7 @@ from common.models.interaction_customisations import Customisation, InteractionC
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-from citizen_frontend.exceptions import InteractionCustomisationDataError, InteractionCustomisationDBError
+from citizen_frontend.exceptions import DataError, DocumentDBError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -42,10 +42,10 @@ def find_interaction_customisation(
         return None
     except ValidationError as e:
         logger.error(e)
-        raise InteractionCustomisationDataError(f"InteractionCustomisation validation error: {e.message}") from e
+        raise DataError(f"InteractionCustomisation validation error: {e.message}") from e
     except InteractionCustomisation.MultipleObjectsReturned as e:
         logger.error(e)
-        raise InteractionCustomisationDataError(
+        raise DataError(
             f"More than one InteractionCustomisations found for the following "
             f"arguments:"
             f"{authority_url_slug}, {licence_code}, {interaction_id}, "
@@ -53,4 +53,4 @@ def find_interaction_customisation(
         ) from e
     except DatabaseError as e:
         logger.error(e)
-        raise InteractionCustomisationDBError("A database error occurred") from e
+        raise DocumentDBError("There was a database error accessing InteractionCustomisations collection") from e
