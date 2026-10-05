@@ -19,7 +19,7 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
         )
 
         for authority in authorities:
-            authority.clean()
+            authority.full_clean()
 
         return authorities
     except ValidationError as e:
