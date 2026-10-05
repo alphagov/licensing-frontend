@@ -37,7 +37,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
                 f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
             )
             logger.info(message)
-            return None
+            raise LicenceLookupError(message)
 
         is_location_specific = check_if_location_specific(authorities, licence)
 
