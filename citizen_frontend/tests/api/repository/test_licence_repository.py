@@ -8,6 +8,11 @@ import citizen_frontend.api.repository.licence_repository as licence_repository
 from citizen_frontend.exceptions import DataError, DocumentDBError
 
 
+@pytest.fixture
+def mock_get_all(mocker):
+    yield mocker.patch.object(Licence.objects, "all")
+
+
 def test_get_licence_by_licence_code_returns_none_when_no_licence_matches(mock_get_licence):
     mock_get_licence.side_effect = Licence.DoesNotExist
 
@@ -54,8 +59,8 @@ def test_get_licence_by_licence_code_throws_exception_database_error(mock_get_li
     assert e.value.args[0] == expected_error_message
 
 
-def test_get_all_licences_from_database_throws_exception_validation_error(mocker):
-    mocker.patch.object(Licence.objects, "all", return_value=[TEST_LICENCE])
+def test_get_all_licences_from_database_throws_exception_validation_error(mocker, mock_get_all):
+    mock_get_all.return_value = [TEST_LICENCE]
 
     mocker.patch.object(TEST_LICENCE, "full_clean", side_effect=ValidationError("field error message"))
 
@@ -66,8 +71,8 @@ def test_get_all_licences_from_database_throws_exception_validation_error(mocker
     assert e.value.args[0] == expected_error_message
 
 
-def test_get_all_licences_from_database_throws_database_error(mocker):
-    mocker.patch.object(Licence.objects, "all", side_effect=DatabaseError())
+def test_get_all_licences_from_database_throws_database_error(mock_get_all):
+    mock_get_all.side_effect = DatabaseError()
 
     expected_error_message = "DocumentDB error fetching all licences"
 
@@ -77,8 +82,10 @@ def test_get_all_licences_from_database_throws_database_error(mocker):
     assert e.value.args[0] == expected_error_message
 
 
-def test_get_all_licences_from_database_returns_expected_licences(mocker):
-    pass
+def test_get_all_licences_from_database_calls_database_with_correct_method(mock_get_all):
+    licence_repository.get_all_licences_from_database()
+
+    mock_get_all.assert_called_once()
 
 
 def test_get_licence_by_licence_code_returns_expected_licence(mocker):
