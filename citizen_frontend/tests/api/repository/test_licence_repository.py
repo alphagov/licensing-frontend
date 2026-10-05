@@ -13,11 +13,16 @@ def mock_get_all(mocker):
     yield mocker.patch.object(Licence.objects, "all")
 
 
+def test_get_licence_by_licence_code_calls_database_with_correct_method_and_args(mock_get_licence):
+    licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
+
+    mock_get_licence.assert_called_with(licence_code=TEST_LICENCE.licence_code)
+
+
 def test_get_licence_by_licence_code_returns_none_when_no_licence_matches(mock_get_licence):
     mock_get_licence.side_effect = Licence.DoesNotExist
 
     actual = licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
-    mock_get_licence.assert_called_with(licence_code=TEST_LICENCE.licence_code)
 
     assert actual is None
 
