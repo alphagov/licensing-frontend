@@ -24,7 +24,7 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
         return authorities
     except ValidationError as e:
         logger.error("Authority does not match model")
-        raise AuthorityDataError("Authority validation error: %s", e.message) from e
+        raise AuthorityDataError(f"Authority validation error: {e.message}") from e
     except DatabaseError as e:
         logger.error("There was a database error: %s", e)
         raise AuthorityDBError("There was a database error") from e

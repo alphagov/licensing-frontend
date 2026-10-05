@@ -18,17 +18,14 @@ def get_licence_by_licence_code(licence_code: str) -> Licence | None:
             licence.full_clean()
             return licence
     except Licence.DoesNotExist:
+        logger.info("No licence found for licence code: %s", licence_code)
         return None
-    except Licence.MultipleObjectsReturned:
+    except Licence.MultipleObjectsReturned as e:
         logger.error("Multiple licences with licence code: %s", licence_code)
-        raise LicenceDataError("More than one licence found for licence code: %s", licence_code) from None
+        raise LicenceDataError(f"More than one licence found for licence code: {licence_code}") from e
     except ValidationError as e:
         logger.error(e.message)
-        raise LicenceDataError("Licence validation error: %s", e.message) from e
+        raise LicenceDataError(f"Licence validation error: {e.message}") from e
     except DatabaseError as e:
-        logger.error(
-            "An error occurred while getting licence with code %s: %s",
-            licence_code,
-            e,
-        )
-        raise LicenceDBError("DocumentDB error fetching licence: %s", licence_code) from e
+        logger.error("An error occurred while getting licence with code %s: %s", licence_code, e)
+        raise LicenceDBError(f"DocumentDB error fetching licence: {licence_code}") from e

@@ -20,7 +20,7 @@ def find_interaction_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
 ) -> InteractionCustomisation | None:
     customisations = list(
-        InteractionCustomisation.objects.filter(
+        InteractionCustomisation.objects.get(
             authority_url_slug=authority_url_slug,
             licence_code=licence_code,
             interaction_id=interaction_id,

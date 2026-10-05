@@ -31,12 +31,12 @@ interaction_customisations_with_published_customisation_of_none.published_custom
 
 
 def test_get_offering_authorities_by_licence_code_calls_database_with_correct_method_and_args(
-    mock_interaction_customisation_filter,
+    mock_interaction_customisation_get,
 ):
     interaction_customisation_repository.find_interaction_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
-    mock_interaction_customisation_filter.assert_called_with(
+    mock_interaction_customisation_get.assert_called_with(
         authority_url_slug=TEST_AUTH_SLUG,
         licence_code=TEST_LICENCE_CODE,
         interaction_id=TEST_INTERACTION_ID,
