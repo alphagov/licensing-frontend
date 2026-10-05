@@ -5,6 +5,7 @@ from django.views.decorators.http import require_GET
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.api.repository.licence_repository import get_all_licences_from_database
+from citizen_frontend.exceptions import LicenceLookupError
 
 
 @require_GET
@@ -28,13 +29,16 @@ def get_all_licences(request):
 
 @require_GET
 def get_licence_authorities_and_interactions(request, licence_code: str, snac_code: str | None = None):
-    result = licence_lookup_service.get_licence_authorities_and_interactions(
-        licence_code=licence_code, snac_code=snac_code
-    )
+    try:
+        result = licence_lookup_service.get_licence_authorities_and_interactions(
+            licence_code=licence_code, snac_code=snac_code
+        )
 
-    if not result:
-        return JsonResponse(status=404, data="No licences found", safe=False)
+        if not result:
+            return JsonResponse(status=404, data="No licences found", safe=False)
 
-    response = result.model_dump(by_alias=True, exclude_none=True)
+        response = result.model_dump(by_alias=True, exclude_none=True)
 
-    return JsonResponse(status=200, data=response, safe=False)
+        return JsonResponse(status=200, data=response, safe=False)
+    except LicenceLookupError as e:
+        return JsonResponse(status=404, data=e.args[0], safe=False)
