@@ -39,7 +39,7 @@ INTERACTION_ID_WORD_MAPPING = {
     InteractionIdCodes.APPLY_FOR_EXEMPTION: LicenceInteractions.APPLY_FOR_EXEMPTION,
     InteractionIdCodes.TELL_US_ONCE: LicenceInteractions.TELL_US_ONCE,
     InteractionIdCodes.NOTIFY_OF_INCIDENT_OR_INSTANCES: LicenceInteractions.NOTIFY_OF_INCIDENT_OR_INSTANCES,
-}
+    InteractionIdCodes.UNKNOWN: LicenceInteractions.UNKNOWN,
 
 # inverse of INTERACTION_ID_WORD_MAPPING
 INTERACTION_WORD_MAPPING: dict[str, InteractionIdCodes] = {

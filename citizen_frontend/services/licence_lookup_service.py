@@ -1,15 +1,23 @@
 import os
+
 from dataclasses import dataclass
 
-from common.models.authorities import Authority, LicenceDetails
+from common.models.authorities import Authority, LicenceDetails, ContactDetails
+from collections import defaultdict
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
-from common.models.shared_models import PaymentAmount
 
-import citizen_frontend.api.repository.authority_repository as authority_repository
-import citizen_frontend.api.repository.licence_repository as licence_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_WORD_MAPPING
+from citizen_frontend.api.models.api_responses import (
+    AuthorityContactDetails,
+    AuthorityInteraction,
+    IssuingAuthority,
+    LicenceAuthoritiesAndInteractionsResponse,
+)
+from citizen_frontend.api.repository import interaction_customisation_repository, licence_repository
+from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.services import authority_service
 
 
 @dataclass(frozen=True)
@@ -40,13 +48,82 @@ def get_licence_interaction_context(
 
     return licence_context
 
+def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
+    licence = licence_repository.get_licence_by_licence_code(licence_code)
+    if not licence:
+        return None
 
-def get_licence_authority_and_interactions(licence_code: str):
-    pass
+    authorities = get_authorities(licence, snac_code)
+    if not authorities:
+        return None
+
+    is_location_specific = check_if_location_specific(authorities, licence)
+
+    issuing_authorities = (
+        []
+        if is_location_specific and not snac_code
+        else [
+            get_authority_licence_interaction_details(authority=authority, licence=licence) for authority in authorities
+        ]
+    )
+
+    return LicenceAuthoritiesAndInteractionsResponse(
+        is_location_specific=is_location_specific,
+        is_offered_by_county=licence.is_offered_by_county,
+        geographical_availability=licence.administrative_area.countries,
+        issuing_authorities=issuing_authorities,
+    )
 
 
-def licence_authorities_and_interactions_by_snac_code(licence_code: str, snac_code: str):
-    pass
+def get_authority_licence_interaction_details(authority: Authority, licence: Licence) -> IssuingAuthority:
+    interactions = build_authority_interactions(authority, licence)
+
+    contact_details = authority.contact_details
+    postal_address = format_postal_address(contact_details)
+
+    return IssuingAuthority(
+        authority_name=authority.full_name,
+        authority_slug=authority.url_slug,
+        authority_contact=AuthorityContactDetails(
+            website=authority.authority_url,
+            email=contact_details.email,
+            phone=contact_details.phone_number,
+            address=postal_address,
+        ),
+        authority_interactions=interactions,
+    )
+
+
+def build_authority_interactions(authority: Authority, licence: Licence) -> dict:
+    licence_details = next((ld for ld in authority.licence_details if ld.licence_code == licence.licence_code), None)
+    uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
+    offered_by_auth = getattr(licence_details, "offered_by_authority", False)
+
+    grouped_interactions = group_interactions(licence)
+
+    result = defaultdict(list)
+    for interaction_type, interactions in grouped_interactions.items():
+        for interaction in interactions:
+            customisation = interaction_customisation_repository.find_published_customisation(
+                authority.url_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id
+            )
+            interaction_url = get_licence_url(interaction, licence, authority, uses_gov_uk)
+            uses_auth_url = bool(not uses_gov_uk and offered_by_auth and interaction_url)
+
+            payment_type, payment_amount = get_payment_info_from_customisation(customisation)
+
+            result[interaction_type].append(
+                AuthorityInteraction(
+                    url=interaction_url,
+                    uses_licensify=uses_gov_uk,
+                    uses_authority_url=uses_auth_url,
+                    description=interaction.licence_interaction_name,
+                    payment=payment_type,
+                    payment_amount=payment_amount,
+                    introduction_text=customisation.introduction_text if customisation else "",
+                )
+            )
+    return result
 
 
 def get_licence_url(licence_interaction: LicenceInteraction, licence: Licence, authority: Authority, uses_gov_uk: bool):
@@ -66,11 +143,47 @@ def get_licence_url(licence_interaction: LicenceInteraction, licence: Licence, a
     return matched_licence_details[0].authority_url
 
 
-def get_payment_info_from_customisation(customisation: Customisation) -> tuple[PaymentType, PaymentAmount | None]:
-    if not customisation.is_fee_required:
+def get_payment_info_from_customisation(customisation: Customisation | None) -> tuple[PaymentType, str | None]:
+    if not customisation or not customisation.is_fee_required:
         return PaymentType.NONE, None
 
     if customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0:
-        return PaymentType.FIXED_FEE, customisation.fixed_fee_amount
+        return PaymentType.FIXED_FEE, customisation.fixed_fee_amount.format_to_string_in_pounds
 
     return PaymentType.VARIABLE_FEE, None
+
+
+def format_postal_address(contact_details: ContactDetails) -> str:
+    address_lines = [
+        contact_details.line_one,
+        contact_details.line_two,
+        contact_details.line_three,
+        contact_details.city,
+        contact_details.post_code,
+    ]
+    return "\n".join(line for line in address_lines if line)
+
+
+def check_if_location_specific(authorities: list[Authority], licence: Licence) -> bool:
+    return any(
+        authority.snac_codes or not set(licence.administrative_area.countries).issubset(authority.countries)
+        for authority in authorities
+    )
+
+
+def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] | None:
+    if snac_code:
+        authorities = authority_service.get_authorities_for_licence_with_geographical_locator(snac_code, licence)
+    else:
+        authorities = authority_service.get_authorities_for_licence(licence.licence_code)
+    return authorities
+
+
+def group_interactions(licence: Licence):
+    grouped_interactions = defaultdict(list)
+    for interaction in licence.licence_interactions:
+        interaction_type = INTERACTION_ID_WORD_MAPPING.get(
+            interaction.interaction_id, LicenceInteractions.UNKNOWN
+        ).value
+        grouped_interactions[interaction_type].append(interaction)
+    return grouped_interactions

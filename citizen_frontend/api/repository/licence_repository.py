@@ -1,3 +1,4 @@
+
 import logging
 
 from common.models.licences import Licence, LicenceInteraction
@@ -34,3 +35,12 @@ def find_interaction(licence: Licence, interaction_id: int, interaction_sub_id: 
         )
 
     return matching_interactions[0] if matching_interactions else None
+
+
+def get_licence_by_licence_code(licence_code: str) -> Licence | None:
+    try:
+        licence = Licence.objects.get(licence_code=licence_code)
+        if licence:
+            return licence
+    except Licence.DoesNotExist:
+        return None
