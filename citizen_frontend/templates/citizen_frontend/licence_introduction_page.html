@@ -21,13 +21,13 @@
     <p class="govuk-body">Open the form using Adobe Reader instead of your web browser.</p>
     <p class="govuk-body">If you can't complete the form right now don't worry, you can edit it in your own time. Once
         you're ready, return to this page to complete the application.</p>
-    {% if legislation_info_url or general_info_url %}
+    {% if additional_info_exists %}
         {% include "citizen_frontend/partials/additional_information.html" %}
     {% endif %}
-    {% if is_fee_required or supporting_documents|length > 0 %}
+    {% if before_you_apply_required %}
         <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
-        {% include "citizen_frontend/partials/fee.html" %}
-        {% include "citizen_frontend/partials/supporting_documents.html" %}
+        {% if is_fee_required %} {% include "citizen_frontend/partials/fee.html" %}{% endif %}
+        {% if supporting_documents %}{% include "citizen_frontend/partials/supporting_documents.html" %}{% endif %}
     {% endif %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
     <a href="{% url 'submit' licence_slug authority_slug interaction_id interaction_sub_id %}" class="govuk-button"

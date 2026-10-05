@@ -57,6 +57,13 @@ def begin_application_steps(
             if len(full_licence_interaction_context.interaction.display_title) < 1
             else full_licence_interaction_context.interaction.display_title
         )
+        legislation_info_url = _get_correct_url_for_legislation(
+            full_licence_interaction_context, published_customisation
+        )
+        general_info_url = published_customisation.guidance_url
+        before_you_apply_required = (
+            published_customisation.is_fee_required or published_customisation.supporting_document_definitions
+        )
         context = {
             "authority_name": full_licence_interaction_context.authority.full_name.title(),
             "licence_name": licence_name,
@@ -71,10 +78,10 @@ def begin_application_steps(
             "licence_slug": full_licence_interaction_context.licence.url_slug,
             "supporting_documents": published_customisation.supporting_document_definitions,
             "general_info_url": published_customisation.guidance_url,
-            "legislation_info_url": _get_correct_url_for_legislation(
-                full_licence_interaction_context, published_customisation
-            ),
+            "legislation_info_url": legislation_info_url,
             "is_postal_allowed": published_customisation.is_postal_allowed,
+            "additional_info_exists": legislation_info_url or general_info_url,
+            "before_you_apply_required": before_you_apply_required,
         }
         context.update({"step": 1})
         return render(request, "citizen_frontend/licence_introduction_page.html", context)
