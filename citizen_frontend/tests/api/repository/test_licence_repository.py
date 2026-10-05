@@ -20,7 +20,7 @@ def test_get_licence_by_licence_code_returns_none_when_no_licence_matches(mock_g
 def test_get_licence_by_licence_code_throws_exception_full_clean_error(mock_get_licence, mocker):
     instance = TEST_LICENCE
 
-    mock_get_licence.return_value = TEST_LICENCE
+    mock_get_licence.return_value = instance
 
     mocker.patch.object(instance, "full_clean", side_effect=ValidationError("field error message"))
 
@@ -52,3 +52,27 @@ def test_get_licence_by_licence_code_throws_exception_database_error(mock_get_li
         licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
 
     assert e.value.args[0] == expected_error_message
+
+
+def test_get_all_licences_from_database_throws_exception_validation_error(mocker):
+    mocker.patch.object(Licence.objects, "all", return_value=[TEST_LICENCE])
+
+    mocker.patch.object(TEST_LICENCE, "full_clean", side_effect=ValidationError("field error message"))
+
+    expected_error_message = "Licence validation error: field error message"
+
+    with pytest.raises(DataError) as e:
+        licence_repository.get_all_licences_from_database()
+    assert e.value.args[0] == expected_error_message
+
+
+def test_get_all_licences_from_database_throws_database_error(mocker):
+    pass
+
+
+def test_get_all_licences_from_database_returns_expected_licences(mocker):
+    pass
+
+
+def test_get_licence_by_licence_code_returns_expected_licence(mocker):
+    pass

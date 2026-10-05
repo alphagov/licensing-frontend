@@ -11,12 +11,16 @@ logger.setLevel(logging.INFO)
 
 
 def get_all_licences_from_database() -> list[Licence]:
-    licences = list(Licence.objects.all())
+    try:
+        licences = list(Licence.objects.all())
 
-    for licence in licences:
-        licence.clean()
+        for licence in licences:
+            licence.full_clean()
 
-    return licences
+        return licences
+    except ValidationError as e:
+        logger.error(e.message)
+        raise DataError(f"Licence validation error: {e.message}") from e
 
 
 def get_licence_by_licence_code(licence_code: str) -> Licence | None:
