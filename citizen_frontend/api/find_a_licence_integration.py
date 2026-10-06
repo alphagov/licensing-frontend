@@ -46,9 +46,6 @@ def get_licence_authorities_and_interactions(request, licence_code: str, snac_co
             licence_code=licence_code, snac_code=snac_code
         )
 
-        if not result:
-            return JsonResponse(status=404, data="No licences found", safe=False)
-
         response = result.model_dump(by_alias=True, exclude_none=True)
 
         return JsonResponse(status=200, data=response, safe=False)
