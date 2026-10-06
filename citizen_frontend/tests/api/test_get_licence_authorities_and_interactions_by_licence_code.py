@@ -3,7 +3,20 @@ import json
 import pytest
 from django.urls import reverse
 
+from citizen_frontend.exceptions import LicenceLookupError
 from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
+
+
+def test_get_all_licences_happy_path(client):
+    pass
+
+
+def test_get_all_licences_returns_404_licence_lookup_error():
+    pass
+
+
+def test_get_all_licences_returns_404_pydantic_validation_error():
+    pass
 
 
 def test_get_licence_authorities_and_interactions_by_licence_code_happy_path(client, mock_lookup_service):
@@ -41,3 +54,18 @@ def test_get_licence_authorities_and_interactions_by_licence_code_returns_404_em
     )
 
     assert response.status_code == 404
+
+
+def test_get_licence_authorities_and_interactions_by_licence_code_returns_404_licence_lookup_error(
+    client, mock_lookup_service
+):
+    mock_lookup_service.get_licence_authorities_and_interactions.side_effect = LicenceLookupError("test error")
+
+    response = client.get(
+        reverse("get_licence_authorities_and_interactions_by_licence_code", kwargs={"licence_code": "1234"})
+    )
+
+    actual = json.loads(response.content.decode("utf-8"))
+
+    assert response.status_code == 404
+    assert actual == "test error"
