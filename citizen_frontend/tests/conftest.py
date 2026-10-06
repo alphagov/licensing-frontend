@@ -36,12 +36,11 @@ TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
 
 TEST_TEMP_EVENT_APPLY_URL = (
-    f"{BASE_URL}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    f"{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
 )
 
 TEST_FOOD_PREMISES_APPLY_URL = (
-    f"{BASE_URL}/{SERVICE_SLUG}/"
-    f"{FOOD_PREMISES_APPLICATION_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    f"/{SERVICE_SLUG}/{FOOD_PREMISES_APPLICATION_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
 )
 
 TEST_TEMP_EVENT_APPLY_FORM_URL = (
@@ -57,6 +56,16 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
     pass
+
+
+@pytest.fixture
+def test_introduction_page_url(live_server):
+    return f"{live_server.url}/apply-for-a-licence/test-licence/test-authority/apply-1"
+
+
+@pytest.fixture
+def test_submit_form_page_url(live_server):
+    return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
 
 
 @pytest.fixture
@@ -113,7 +122,7 @@ TEST_LICENCE_INTERACTION = LicenceInteraction(
         form_version=2,
     ),
     sub_forms=[],
-    supporting_documents=[],
+    supporting_documents=[SupportingDocumentDefinition(name="test_supportingDocument", is_mandatory=True)],
     fee=PaymentAmount(pence=2100),
     fee_calculation_instructions=[],
     tacit_consent="required",
@@ -216,6 +225,13 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
     department=bson.ObjectId(),
+    information_url="https://test-information.com",
+    guidance_url="https://test-guidance.com",
+    supporting_document_definitions=[
+        SupportingDocumentDefinition(name="test", is_mandatory=True),
+        SupportingDocumentDefinition(name="test2", is_mandatory=False),
+        SupportingDocumentDefinition(name="test3", is_mandatory=False),
+    ],
 )
 
 
@@ -323,11 +339,35 @@ def mock_get_licence_interaction_context(mocker, licence_interaction_context):
 
 
 @pytest.fixture
-def mock_find_published_customisation(mocker):
-    mock_find_published_customisation = mocker.patch.object(
+def mock_find_published_customisation_with_fixed_fee(mocker):
+    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
         citizen_frontend.views.interaction_customisation_repository,
         "find_published_customisation",
         autospec=True,
     )
-    mock_find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    return mock_find_published_customisation
+    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
+    return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_variable_fee(mocker):
+    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_no_fee(mocker):
+    mock_find_published_customisation_with_no_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
+    mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
+    return mock_find_published_customisation_with_fixed_fee

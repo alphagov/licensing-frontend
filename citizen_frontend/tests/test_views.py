@@ -40,9 +40,9 @@ def test_begin_application_steps_redirects_to_suspended_licence_when_no_publishe
     client: Client,
     mock_get_licence_interaction_context,
     begin_application_steps_view,
-    mock_find_published_customisation,
+    mock_find_published_customisation_with_fixed_fee,
 ):
-    mock_find_published_customisation.return_value = None
+    mock_find_published_customisation_with_fixed_fee.return_value = None
     response = client.get(begin_application_steps_view)
     assert response.status_code == 404
     assert response.context["exception"].lower() == "suspended"
@@ -52,7 +52,7 @@ def test_begin_application_steps_reaches_correct_page_when_all_data_exists(
     client: Client,
     mock_get_licence_interaction_context,
     begin_application_steps_view,
-    mock_find_published_customisation,
+    mock_find_published_customisation_with_fixed_fee,
 ):
     response = client.get(begin_application_steps_view)
     assert response.status_code == 200
@@ -63,10 +63,10 @@ def test_begin_application_steps_returns_published_customisation_information_url
     client: Client,
     mock_get_licence_interaction_context,
     begin_application_steps_view,
-    mock_find_published_customisation,
+    mock_find_published_customisation_with_fixed_fee,
 ):
     expected_url = "www.superceedingurl.com"
-    mock_find_published_customisation.return_value.information_url = expected_url
+    mock_find_published_customisation_with_fixed_fee.return_value.information_url = expected_url
     mock_get_licence_interaction_context.return_value.licence_detail.authority_url = "www.fallbackurl.com"
     response = client.get(begin_application_steps_view)
     assert response.context["legislation_info_url"] == expected_url
@@ -76,10 +76,10 @@ def test_begin_application_steps_returns_authority_url_as_fallback(
     client: Client,
     mock_get_licence_interaction_context,
     begin_application_steps_view,
-    mock_find_published_customisation,
+    mock_find_published_customisation_with_fixed_fee,
 ):
     expected_url = "www.fallbackurl.com"
-    mock_find_published_customisation.return_value.information_url = None
+    mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
     mock_get_licence_interaction_context.return_value.licence_detail.authority_url = expected_url
     response = client.get(begin_application_steps_view)
     assert response.context["legislation_info_url"] == expected_url

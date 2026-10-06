@@ -1,26 +1,21 @@
 import os
+from urllib.parse import urlparse
 
-import pytest
-from conftest import (
-    SERVICE_SLUG,
-    TEMP_EVENT_SLUG,
-    TEST_AUTH_SLUG,
-    TEST_FOOD_PREMISES_APPLY_URL,
-    TEST_INTERACTION,
-    TEST_INTERACTION_SUB_ID,
-    TEST_TEMP_EVENT_APPLY_FORM_URL,
-    TEST_TEMP_EVENT_APPLY_URL,
-)
 from playwright.sync_api import Page, expect
 
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
-def test_page_has_correct_headings(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
+def test_page_has_correct_headings(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
-    expect(page.get_by_test_id("page-heading")).to_contain_text("Temporary Event Notice")
-    expect(page.get_by_test_id("page-heading")).to_contain_text("Winchester")
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Test Licence")
+    expect(page.get_by_test_id("page-heading")).to_contain_text("Test Authority")
     expect(page.get_by_test_id("action-heading")).to_have_text("Complete the application form")
     expect(page.get_by_test_id("download-heading")).to_have_text("First, download the form")
     expect(page.get_by_test_id("fill-in-heading")).to_have_text("Next, fill in the application form on your computer")
@@ -28,49 +23,71 @@ def test_page_has_correct_headings(page: Page):
     expect(page.get_by_test_id("submit-heading")).to_have_text("Now, submit the application")
 
 
-def test_page_has_4_steps_when_licence_has_fee(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
+def test_page_has_4_steps_when_licence_has_fee(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 4")
 
 
-def test_page_has_3_steps_when_licence_has_no_fee(page: Page):
-    page.goto(TEST_FOOD_PREMISES_APPLY_URL)
+def test_page_has_3_steps_when_licence_has_no_fee(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_no_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("steps")).to_contain_text("1 of 3")
 
 
-def test_page_has_fee_amount_when_licence_has_fixed_fee_required(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
+def test_page_has_fee_amount_when_licence_has_fixed_fee_required(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
-    expect(page.get_by_test_id("fee-amount")).to_contain_text("£21.00")
+    expect(page.get_by_test_id("fee-amount")).to_contain_text("£5.00")
 
 
-def test_page_has_no_fee_amount_when_licence_has_no_fee_required(page: Page):
-    page.goto(TEST_FOOD_PREMISES_APPLY_URL)
+def test_page_has_no_fee_amount_when_licence_has_no_fee_required(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_no_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
 
 
-@pytest.mark.django_db
 def test_page_has_no_fee_amount_when_licence_fee_is_required(
-    live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_variable_fee,
+    test_introduction_page_url,
 ):
 
-    mock_find_published_customisation.return_value.is_fee_required = True
-    mock_find_published_customisation.return_value.fee_amount = None
-
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("fee-amount")).not_to_be_visible()
     expect(page.get_by_test_id("fee")).to_be_visible()
     expect(page.get_by_test_id("fee")).to_contain_text("There's a fee you'll need to pay for this submission.")
 
 
-def test_page_has_download_pdf_inset(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
+def test_page_has_download_pdf_inset(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     adobe_download_link = page.get_by_test_id("adobe-download")
     pdf_download_link = page.get_by_test_id("pdf-download")
@@ -82,9 +99,13 @@ def test_page_has_download_pdf_inset(page: Page):
     expect(pdf_download_link).to_have_attribute("href", "#")
 
 
-@pytest.mark.django_db
-def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
+def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     general_info_link = page.get_by_test_id("general-information")
     legislation_info_link = page.get_by_test_id("legislation-information")
@@ -94,71 +115,80 @@ def test_page_has_additional_information_inset_when_both_legislation_and_general
     )
     # url expected to be the same for both in this specific case
     expect(general_info_link).to_have_role("link")
-    expect(general_info_link).to_have_attribute(
-        "href", "http://www.winchester.gov.uk/licensing/alcohol-entertainment/ten/"
-    )
+    expect(general_info_link).to_have_attribute("href", "https://test-guidance.com")
     expect(legislation_info_link).to_have_role("link")
-    expect(legislation_info_link).to_have_attribute(
-        "href", "http://www.winchester.gov.uk/licensing/alcohol-entertainment/ten/"
-    )
+    expect(legislation_info_link).to_have_attribute("href", "https://test-information.com")
 
 
-@pytest.mark.django_db
 def test_page_has_additional_information_inset_when_general_info_url_available(
-    live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
 ):
-    mock_find_published_customisation.return_value.guidance_url = "test_url"
-    mock_find_published_customisation.return_value.information_url = None
+    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = "test_url"
+    mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
     mock_get_licence_interaction_context.return_value.licence_detail.authority_url = None
 
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("additional-information")).to_be_visible()
     expect(page.get_by_test_id("general-information")).to_be_visible()
     expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
 
 
-@pytest.mark.django_db
 def test_page_has_additional_information_inset_when_legislation_info_url_available(
-    live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
 ):
-    mock_find_published_customisation.return_value.information_url = "info_url"
-    mock_find_published_customisation.return_value.guidance_url = None
+    mock_find_published_customisation_with_fixed_fee.return_value.information_url = "info_url"
+    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
 
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("additional-information")).to_be_visible()
     expect(page.get_by_test_id("general-information")).not_to_be_visible()
     expect(page.get_by_test_id("legislation-information")).to_be_visible()
 
 
-@pytest.mark.django_db
 def test_page_does_not_have_additional_information_inset_when_no_general_info_nor_legislation_info_urls_available(
-    live_server, page: Page, mock_get_licence_interaction_context
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
 ):
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
+    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
+    mock_get_licence_interaction_context.return_value.licence_detail.authority_url = None
+    page.goto(test_introduction_page_url)
 
     expect(page.get_by_test_id("additional-information")).not_to_be_visible()
     expect(page.get_by_test_id("general-information")).not_to_be_visible()
     expect(page.get_by_test_id("legislation-information")).not_to_be_visible()
 
 
-def test_page_has_submit_button(page: Page):
-    page.goto(TEST_TEMP_EVENT_APPLY_URL)
-
+def test_page_has_submit_button(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
+    expected_url = f"{urlparse(test_introduction_page_url).path}/form"
     submit_button = page.get_by_test_id("submit-button")
     expect(submit_button).to_be_visible()
-    expect(submit_button).to_have_attribute("href", TEST_TEMP_EVENT_APPLY_FORM_URL)
+    expect(submit_button).to_have_attribute("href", expected_url)
 
 
-def test_page_has_supporting_documents_list_when_licence_requires_supporting_documents(page: Page):
-    page.goto(TEST_FOOD_PREMISES_APPLY_URL)
+def test_page_has_supporting_documents_list_when_licence_requires_supporting_documents(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     details = page.get_by_test_id("electronic-copies-detail")
     details_text = page.get_by_test_id("electronic-copies-detail-text")
@@ -171,8 +201,13 @@ def test_page_has_supporting_documents_list_when_licence_requires_supporting_doc
     expect(details_text).to_be_visible()
 
 
-def test_page_marks_non_mandatory_supporting_documents_optional(page: Page):
-    page.goto(TEST_FOOD_PREMISES_APPLY_URL)
+def test_page_marks_non_mandatory_supporting_documents_optional(
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
+):
+    page.goto(test_introduction_page_url)
 
     mandatory_document = page.get_by_test_id("support-document-1")
     optional_document = page.get_by_test_id("support-document-3")
@@ -181,15 +216,15 @@ def test_page_marks_non_mandatory_supporting_documents_optional(page: Page):
     expect(optional_document).to_contain_text("(optional)")
 
 
-@pytest.mark.django_db
 def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_not_allowed(
-    live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
 ):
-    mock_find_published_customisation.return_value.is_postal_allowed = False
+    mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = False
 
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    page.goto(test_introduction_page_url)
 
     details = page.get_by_test_id("electronic-copies-detail")
     details.click()
@@ -200,13 +235,14 @@ def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_
 
 
 def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_allowed(
-    live_server, page: Page, mock_get_licence_interaction_context, mock_find_published_customisation
+    page: Page,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+    test_introduction_page_url,
 ):
-    mock_find_published_customisation.return_value.is_postal_allowed = True
+    mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = True
 
-    page.goto(
-        f"{live_server.url}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
-    )
+    page.goto(test_introduction_page_url)
 
     details = page.get_by_test_id("electronic-copies-detail")
     details.click()
