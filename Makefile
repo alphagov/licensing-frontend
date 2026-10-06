@@ -16,7 +16,7 @@ test-ui: start prepare
 	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
 
 kill:
-	pkill -f "docker compose watch"
+	-pkill -f "docker compose watch"
 	docker compose down && \
 	cd licensing_common && docker compose down
 
