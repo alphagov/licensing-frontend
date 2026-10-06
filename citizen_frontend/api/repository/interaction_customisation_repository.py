@@ -13,6 +13,13 @@ logger.setLevel(logging.INFO)
 def find_published_customisation(
     authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
 ) -> Customisation | None:
+    logger.info(
+        "Finding published customisation for: %s, %s, %s, %s",
+        authority_url_slug,
+        licence_code,
+        interaction_id,
+        interaction_sub_id,
+    )
     interaction_customisation = find_interaction_customisation(
         authority_url_slug, licence_code, interaction_id, interaction_sub_id
     )
@@ -22,6 +29,8 @@ def find_published_customisation(
         and not interaction_customisation.published_customisation.suspended_at
     ):
         return interaction_customisation.published_customisation
+
+    logger.info("No published customisation found")
     return None
 
 

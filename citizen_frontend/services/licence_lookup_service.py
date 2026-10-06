@@ -28,7 +28,6 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
     try:
         licence = licence_repository.get_licence_by_licence_code(licence_code)
         if not licence:
-            logger.info("Licence %s doesn't exist", licence_code)
             raise LicenceLookupError(f"Licence {licence_code} doesn't exist")
 
         authorities = get_authorities(licence, snac_code)
@@ -36,7 +35,6 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
             message = f"No authorities found for the licence {licence.licence_code}" + (
                 f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
             )
-            logger.info(message)
             raise LicenceLookupError(message)
 
         is_location_specific = check_if_location_specific(authorities, licence)
@@ -59,6 +57,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
     except (DataError, DocumentDBError) as e:
         raise LicenceLookupError(e.args[0]) from e
     except ValidationError as e:
+        logger.error("Failed to build: %s", e.title)
         raise LicenceLookupError(f"{e.title} validation error") from e
 
 
@@ -82,6 +81,7 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
 
 
 def build_authority_interactions(authority: Authority, licence: Licence) -> dict[str, list[AuthorityInteraction]]:
+    logger.info("Building AuthorityInteractions for: %s, %s", authority.id, licence.id)
     licence_details = next((ld for ld in authority.licence_details if ld.licence_code == licence.licence_code), None)
     uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
     offered_by_auth = getattr(licence_details, "offered_by_authority", False)
@@ -97,6 +97,7 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
             interaction_url = get_licence_url(interaction, licence, authority, uses_gov_uk)
             uses_auth_url = bool(not uses_gov_uk and offered_by_auth and interaction_url)
 
+            logger.info("Retrieving payment information")
             payment_type, payment_amount = get_payment_info_from_customisation(customisation)
 
             result[interaction_type].append(
@@ -167,6 +168,7 @@ def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] 
 
 
 def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
+    logger.info("Grouping interactions for licence: %s", licence.id)
     grouped_interactions = defaultdict(list)
     for interaction in licence.licence_interactions:
         interaction_type = INTERACTION_ID_WORD_MAPPING.get(
