@@ -14,7 +14,7 @@ watch:
 
 
 test-ui:start prepare
-	pytest citizen_frontend/tests/ui/test_licence_submission_page.py
+	pytest citizen_frontend/tests/ui
 
 kill:
 	-pkill -f "docker compose watch"
@@ -28,7 +28,7 @@ test-ui-ci:
 	uv sync
 	python -m playwright install --with-deps
 	docker compose up -d
-	pytest citizen_frontend/tests/ui
+	pytest citizen_frontend/tests/ui/test_licence_submission_page.py
 
 test-common:
 	cd licensing_common && \
