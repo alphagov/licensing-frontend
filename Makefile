@@ -12,8 +12,9 @@ start:
 watch:
 	mise exec -- docker compose up --watch
 
-test-ui: start prepare
-	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
+
+test-ui:prepare
+	pytest citizen_frontend/tests/ui/test_licence_introduction_page_alt.py
 
 kill:
 	-pkill -f "docker compose watch"
