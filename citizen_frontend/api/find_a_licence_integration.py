@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 import citizen_frontend.api.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+from citizen_frontend.api.decorators import handle_exceptions
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.exceptions import DataError, DocumentDBError, LicenceLookupError
 
@@ -14,6 +15,7 @@ logger.setLevel(logging.INFO)
 
 
 @require_GET
+@handle_exceptions
 def get_all_licences(request):
     try:
         logger.info("Fetching all licences")
@@ -37,6 +39,7 @@ def get_all_licences(request):
 
 
 @require_GET
+@handle_exceptions
 def get_licence_authorities_and_interactions(request, licence_code: str, snac_code: str | None = None):
     try:
         result = licence_lookup_service.get_licence_authorities_and_interactions(

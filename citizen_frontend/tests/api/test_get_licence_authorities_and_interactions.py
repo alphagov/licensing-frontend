@@ -109,3 +109,14 @@ def test_get_licence_authorities_and_interactions_by_licence_code_and_snac_retur
     )
 
     assert response.status_code == 405
+
+
+def test_get_licence_authorities_and_interactions_returns_500_with_unhandled_exception(client, mock_lookup_service):
+    mock_lookup_service.get_licence_authorities_and_interactions.side_effect = Exception("Test error")
+
+    response = client.get(
+        reverse("get_licence_authorities_and_interactions_by_licence_code", kwargs={"licence_code": "1234"})
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"message": "Unhandled exception: Test error"}

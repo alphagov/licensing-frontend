@@ -82,3 +82,12 @@ def test_get_all_licences_returns_404_pydantic_validation_error(client, mock_get
 
     assert response.status_code == 404
     assert response.json() == "Invalid response"
+
+
+def test_get_all_licences_returns_500_with_unhandled_exception(client, mock_get_all_licences):
+    mock_get_all_licences.side_effect = Exception("Test error")
+
+    response = client.get(reverse("get_all_licences"))
+
+    assert response.status_code == 500
+    assert response.json() == {"message": "Unhandled exception: Test error"}
