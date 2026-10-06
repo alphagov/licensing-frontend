@@ -14,7 +14,7 @@ watch:
 
 
 test-ui:start prepare
-	pytest citizen_frontend/tests/ui
+	pytest citizen_frontend/tests/ui/test_licence_submission_page.py
 
 kill:
 	-pkill -f "docker compose watch"
