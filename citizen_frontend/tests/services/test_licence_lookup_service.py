@@ -318,7 +318,7 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_group_interactions(mocker):
+def test_group_interactions():
     expected_grouped_interactions = {
         LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0], TEST_LICENCE.licence_interactions[1]],
         LicenceInteractions.RENEW.value: [TEST_LICENCE.licence_interactions[2]],
