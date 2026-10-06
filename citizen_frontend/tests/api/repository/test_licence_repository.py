@@ -72,7 +72,7 @@ def test_get_all_licences_from_database_throws_exception_validation_error(mocker
     expected_error_message = "Licence validation error: field error message"
 
     with pytest.raises(DataError) as e:
-        licence_repository.get_all_licences_from_database()
+        licence_repository.get_all_licences()
     assert e.value.args[0] == expected_error_message
 
 
@@ -82,12 +82,12 @@ def test_get_all_licences_from_database_throws_database_error(mock_get_all):
     expected_error_message = "DocumentDB error fetching all licences"
 
     with pytest.raises(DocumentDBError) as e:
-        licence_repository.get_all_licences_from_database()
+        licence_repository.get_all_licences()
 
     assert e.value.args[0] == expected_error_message
 
 
 def test_get_all_licences_from_database_calls_database_with_correct_method(mock_get_all):
-    licence_repository.get_all_licences_from_database()
+    licence_repository.get_all_licences()
 
     mock_get_all.assert_called_once()

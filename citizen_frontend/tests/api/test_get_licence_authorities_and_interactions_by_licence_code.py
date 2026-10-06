@@ -7,18 +7,6 @@ from citizen_frontend.exceptions import LicenceLookupError
 from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
 
 
-def test_get_all_licences_happy_path(client):
-    pass
-
-
-def test_get_all_licences_returns_404_licence_lookup_error():
-    pass
-
-
-def test_get_all_licences_returns_404_pydantic_validation_error():
-    pass
-
-
 def test_get_licence_authorities_and_interactions_by_licence_code_happy_path(client, mock_lookup_service):
     mock_lookup_service.get_licence_authorities_and_interactions.return_value = (
         TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE

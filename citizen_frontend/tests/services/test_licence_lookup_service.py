@@ -415,7 +415,7 @@ def test_get_licence_authorities_and_interactions_throws_error_on_response_valid
     mock_get_licence_by_licence_code.return_value = TEST_LICENCE
     mock_get_authorities.return_value = [TEST_AUTHORITY]
 
-    dummy_validation_error = ValidationError.from_exception_data(
+    mock_validation_error = ValidationError.from_exception_data(
         title="AuthorityInteraction",
         line_errors=[
             {
@@ -427,7 +427,7 @@ def test_get_licence_authorities_and_interactions_throws_error_on_response_valid
         ],
     )
 
-    mocker.patch.object(licence_lookup_service, "build_authority_interactions", side_effect=dummy_validation_error)
+    mocker.patch.object(licence_lookup_service, "build_authority_interactions", side_effect=mock_validation_error)
 
     with pytest.raises(LicenceLookupError) as e:
         licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)

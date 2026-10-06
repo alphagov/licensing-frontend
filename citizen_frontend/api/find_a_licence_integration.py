@@ -1,17 +1,23 @@
-from django.core.exceptions import ValidationError
+import logging
+
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
+from pydantic import ValidationError
 
+import citizen_frontend.api.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import LicenceResponse
-from citizen_frontend.api.repository.licence_repository import get_all_licences_from_database
-from citizen_frontend.exceptions import LicenceLookupError
+from citizen_frontend.exceptions import DataError, DocumentDBError, LicenceLookupError
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 @require_GET
 def get_all_licences(request):
     try:
-        licences = get_all_licences_from_database()
+        logger.info("Fetching all licences")
+        licences = licence_repository.get_all_licences()
 
         if not licences:
             return JsonResponse(status=404, data="No licences found", safe=False)
@@ -24,7 +30,10 @@ def get_all_licences(request):
         ]
         return JsonResponse(response, safe=False)
     except ValidationError as e:
-        return JsonResponse(status=404, data=e.messages, safe=False)
+        logger.error(e)
+        return JsonResponse(status=404, data="Invalid response", safe=False)
+    except (DataError, DocumentDBError) as e:
+        return JsonResponse(status=404, data=e.args, safe=False)
 
 
 @require_GET
