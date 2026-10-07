@@ -3,13 +3,13 @@ import re
 import pytest
 from common.models.authorities import Authority, LicenceDetails
 from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE
+from django.core.exceptions import ValidationError
+from django.db import DatabaseError
 
 from citizen_frontend.api.repository.authority_repository import (
     find_licence_detail,
     get_licence_offering_authorities_by_licence_code,
 )
-from django.core.exceptions import ValidationError
-from django.db import DatabaseError
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
