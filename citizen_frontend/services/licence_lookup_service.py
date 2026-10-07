@@ -1,9 +1,11 @@
+import logging
 import os
 from collections import defaultdict
 
 from common.models.authorities import Authority, ContactDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
+from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
@@ -15,34 +17,48 @@ from citizen_frontend.api.repository import interaction_customisation_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
 from citizen_frontend.services import authority_service
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
-    licence = licence_repository.get_licence_by_licence_code(licence_code)
-    if not licence:
-        return None
+    try:
+        licence = licence_repository.get_licence_by_licence_code(licence_code)
+        if not licence:
+            raise LicenceLookupError(f"Licence {licence_code} doesn't exist")
 
-    authorities = get_authorities(licence, snac_code)
-    if not authorities:
-        return None
+        authorities = get_authorities(licence, snac_code)
+        if not authorities:
+            message = f"No authorities found for the licence {licence.licence_code}" + (
+                f" and for the SNAC/GSS Code {snac_code}" if snac_code else ""
+            )
+            raise LicenceLookupError(message)
 
-    is_location_specific = check_if_location_specific(authorities, licence)
+        is_location_specific = check_if_location_specific(authorities, licence)
 
-    issuing_authorities = (
-        []
-        if is_location_specific and not snac_code
-        else [
-            get_authority_licence_interaction_details(authority=authority, licence=licence) for authority in authorities
-        ]
-    )
+        issuing_authorities = (
+            []
+            if is_location_specific and not snac_code
+            else [
+                get_authority_licence_interaction_details(authority=authority, licence=licence)
+                for authority in authorities
+            ]
+        )
 
-    return LicenceAuthoritiesAndInteractionsResponse(
-        is_location_specific=is_location_specific,
-        is_offered_by_county=licence.is_offered_by_county,
-        geographical_availability=licence.administrative_area.countries,
-        issuing_authorities=issuing_authorities,
-    )
+        return LicenceAuthoritiesAndInteractionsResponse(
+            is_location_specific=is_location_specific,
+            is_offered_by_county=licence.is_offered_by_county,
+            geographical_availability=licence.administrative_area.countries,
+            issuing_authorities=issuing_authorities,
+        )
+    except (DataIntegrityError, DocumentDBError) as e:
+        raise LicenceLookupError(e.args[0]) from e
+    except ValidationError as e:
+        logger.error("Failed to build: %s", e.title)
+        raise LicenceLookupError(f"{e.title} validation error") from e
 
 
 def get_authority_licence_interaction_details(authority: Authority, licence: Licence) -> IssuingAuthority:
@@ -64,7 +80,8 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
     )
 
 
-def build_authority_interactions(authority: Authority, licence: Licence) -> dict:
+def build_authority_interactions(authority: Authority, licence: Licence) -> dict[str, list[AuthorityInteraction]]:
+    logger.info("Building AuthorityInteractions for: %s, %s", authority.id, licence.id)
     licence_details = next((ld for ld in authority.licence_details if ld.licence_code == licence.licence_code), None)
     uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
     offered_by_auth = getattr(licence_details, "offered_by_authority", False)
@@ -80,6 +97,7 @@ def build_authority_interactions(authority: Authority, licence: Licence) -> dict
             interaction_url = get_licence_url(interaction, licence, authority, uses_gov_uk)
             uses_auth_url = bool(not uses_gov_uk and offered_by_auth and interaction_url)
 
+            logger.info("Retrieving payment information")
             payment_type, payment_amount = get_payment_info_from_customisation(customisation)
 
             result[interaction_type].append(
@@ -149,7 +167,8 @@ def get_authorities(licence: Licence, snac_code: str | None) -> list[Authority] 
     return authorities
 
 
-def group_interactions(licence: Licence):
+def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
+    logger.info("Grouping interactions for licence: %s", licence.id)
     grouped_interactions = defaultdict(list)
     for interaction in licence.licence_interactions:
         interaction_type = INTERACTION_ID_WORD_MAPPING.get(

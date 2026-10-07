@@ -56,21 +56,23 @@ def django_db_setup():
 
 
 @pytest.fixture
-def mock_interaction_customisation_filter(mocker):
-    mock_model = mocker.patch.object(InteractionCustomisation.objects, "filter")
-    yield mock_model
+def mock_interaction_customisation_get(mocker):
+    mock_get = mocker.patch.object(InteractionCustomisation.objects, "get")
+    yield mock_get
 
 
 @pytest.fixture
 def mock_find_interaction_customisation(mocker):
-    mock_model = mocker.patch.object(interaction_customisation_repository, "find_interaction_customisation")
-    yield mock_model
+    mock_find_interaction_customisation = mocker.patch.object(
+        interaction_customisation_repository, "find_interaction_customisation"
+    )
+    yield mock_find_interaction_customisation
 
 
 @pytest.fixture
 def mock_get_licence(mocker):
-    mock_model = mocker.patch.object(Licence.objects, "get")
-    yield mock_model
+    mock_get = mocker.patch.object(Licence.objects, "get")
+    yield mock_get
 
 
 TEST_LICENCE_CODE = "1234-5-6"
