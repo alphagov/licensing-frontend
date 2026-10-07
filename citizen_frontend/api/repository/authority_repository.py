@@ -29,6 +29,7 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
         logger.error("There was a database error: %s", e)
         raise DocumentDBError("There was a database error accessing Authorities collection") from e
 
+
 def find_authority_by_url_slug(url_slug: str) -> Authority | None:
     try:
         authority = Authority.objects.get(url_slug=url_slug)

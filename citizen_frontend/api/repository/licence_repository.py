@@ -37,6 +37,8 @@ def find_interaction(licence: Licence, interaction_id: int, interaction_sub_id: 
         )
 
     return matching_interactions[0] if matching_interactions else None
+
+
 def get_all_licences() -> list[Licence]:
     try:
         licences = list(Licence.objects.all())

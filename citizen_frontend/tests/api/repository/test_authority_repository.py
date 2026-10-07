@@ -67,6 +67,8 @@ def test_find_licence_detail_returns_none_when_empty_list():
     authority = Authority(licence_details=[])
     licence_detail = find_licence_detail(authority, non_existing_licence_code)
     assert licence_detail is None
+
+
 def test_get_licence_offering_authorities_by_licence_code_throws_error_validation_error(
     mock_authority_model_filter, mocker
 ):
