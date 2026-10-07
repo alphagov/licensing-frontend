@@ -12,6 +12,7 @@ logger.setLevel(logging.INFO)
 
 
 def get_authorities_for_licence(licence_code: str) -> list[Authority]:
+    logger.info("Retrieving authorities that offer licence for licence code: %s", licence_code)
     return authority_repository.get_licence_offering_authorities_by_licence_code(licence_code=licence_code)
 
 
@@ -24,7 +25,6 @@ def get_authorities_for_licence_with_geographical_locator(locator: str, licence:
         logger.info("%s not present in licence administrative area for licence: %s", country, licence.licence_code)
         return None
 
-    logger.info("Retrieving authorities that offer licence for licence code: %s", licence.licence_code)
     authorities = get_authorities_for_licence(licence_code=licence.licence_code)
 
     return [

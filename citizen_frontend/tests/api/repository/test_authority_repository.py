@@ -2,18 +2,21 @@ import re
 
 import pytest
 from common.models.authorities import Authority, LicenceDetails
-from conftest import TEST_LICENCE_CODE
+from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE
 
 from citizen_frontend.api.repository.authority_repository import (
     find_licence_detail,
     get_licence_offering_authorities_by_licence_code,
 )
+from django.core.exceptions import ValidationError
+from django.db import DatabaseError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
 @pytest.fixture
 def mock_authority_model_filter(mocker):
-    mock_model = mocker.patch("citizen_frontend.api.repository.authority_repository.Authority.objects.filter")
-    yield mock_model
+    mock_filter = mocker.patch("citizen_frontend.api.repository.authority_repository.Authority.objects.filter")
+    yield mock_filter
 
 
 @pytest.fixture
@@ -64,3 +67,29 @@ def test_find_licence_detail_returns_none_when_empty_list():
     authority = Authority(licence_details=[])
     licence_detail = find_licence_detail(authority, non_existing_licence_code)
     assert licence_detail is None
+def test_get_licence_offering_authorities_by_licence_code_throws_error_validation_error(
+    mock_authority_model_filter, mocker
+):
+    instance = TEST_AUTHORITY
+    mock_authority_model_filter.return_value = [instance]
+
+    mocker.patch.object(instance, "full_clean", side_effect=[ValidationError("field error")])
+
+    expected_error_message = "Authority validation error: field error"
+
+    with pytest.raises(DataIntegrityError) as e:
+        get_licence_offering_authorities_by_licence_code(licence_code=TEST_LICENCE_CODE)
+
+    assert e.value.args[0] == expected_error_message
+
+
+def test_get_licence_offering_authorities_by_licence_code_throws_error_database_error(
+    mock_authority_model_filter,
+):
+    mock_authority_model_filter.side_effect = DatabaseError()
+    expected_error_message = "There was a database error accessing Authorities collection"
+
+    with pytest.raises(DocumentDBError) as e:
+        get_licence_offering_authorities_by_licence_code(licence_code=TEST_LICENCE_CODE)
+
+    assert e.value.args[0] == expected_error_message
