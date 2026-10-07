@@ -21,7 +21,9 @@ def test_get_licence_authorities_and_interactions_happy_paths(client, mock_looku
     mock_lookup_service.get_licence_authorities_and_interactions.return_value = (
         TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
     )
-    with open("citizen_frontend/tests/api/mock_get_licence_authorities_and_interactions_by_licence_code.json") as f:
+    with open(
+        "citizen_frontend/tests/api/find_a_licence_integration/mock_get_licence_authorities_and_interactions_by_licence_code.json"
+    ) as f:
         expected = json.load(f)
 
     response = client.get(reverse(view_name, kwargs=kwargs))
