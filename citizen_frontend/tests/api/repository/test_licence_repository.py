@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
 import citizen_frontend.api.repository.licence_repository as licence_repository
-from citizen_frontend.exceptions import DataError, DocumentDBError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def test_get_licence_by_licence_code_throws_exception_full_clean_error(mock_get_
 
     expected_error_message = "Licence validation error: field error message"
 
-    with pytest.raises(DataError) as e:
+    with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
 
     assert e.value.args[0] == expected_error_message
@@ -57,7 +57,7 @@ def test_get_licence_by_licence_code_throws_exception_more_than_one_licence_foun
 
     expected_error_message = f"More than one licence found for licence code: {TEST_LICENCE.licence_code}"
 
-    with pytest.raises(DataError) as e:
+    with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
 
     assert e.value.args[0] == expected_error_message
@@ -81,7 +81,7 @@ def test_get_all_licences_from_database_throws_exception_validation_error(mocker
 
     expected_error_message = "Licence validation error: field error message"
 
-    with pytest.raises(DataError) as e:
+    with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_all_licences()
     assert e.value.args[0] == expected_error_message
 

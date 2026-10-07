@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
 from citizen_frontend.api.repository.authority_repository import get_licence_offering_authorities_by_licence_code
-from citizen_frontend.exceptions import DataError, DocumentDBError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def test_get_licence_offering_authorities_by_licence_code_throws_error_validatio
 
     expected_error_message = "Authority validation error: field error"
 
-    with pytest.raises(DataError) as e:
+    with pytest.raises(DataIntegrityError) as e:
         get_licence_offering_authorities_by_licence_code(licence_code=TEST_LICENCE_CODE)
 
     assert e.value.args[0] == expected_error_message

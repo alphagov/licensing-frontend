@@ -6,7 +6,7 @@ from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.api.repository import licence_repository
-from citizen_frontend.exceptions import DataError, DocumentDBError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 from citizen_frontend.tests.conftest import TEST_LICENCE
 
 
@@ -44,7 +44,7 @@ def test_get_all_licences_returns_405_non_get_request_call(client, mock_get_all_
 
 
 def test_get_all_licences_returns_404_data_error(client, mock_get_all_licences):
-    mock_get_all_licences.side_effect = DataError("Invalid")
+    mock_get_all_licences.side_effect = DataIntegrityError("Invalid")
 
     response = client.get(reverse("get_all_licences"))
 

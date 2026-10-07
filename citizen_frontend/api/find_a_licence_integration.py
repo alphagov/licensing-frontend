@@ -8,7 +8,7 @@ import citizen_frontend.api.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.decorators import handle_exceptions
 from citizen_frontend.api.models.api_responses import LicenceResponse
-from citizen_frontend.exceptions import DataError, DocumentDBError, LicenceLookupError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -34,7 +34,7 @@ def get_all_licences(request):
     except ValidationError as e:
         logger.error(e)
         return JsonResponse(status=404, data="Invalid response", safe=False)
-    except (DataError, DocumentDBError) as e:
+    except (DataIntegrityError, DocumentDBError) as e:
         return JsonResponse(status=404, data=e.args, safe=False)
 
 

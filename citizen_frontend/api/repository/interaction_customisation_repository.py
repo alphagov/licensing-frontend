@@ -4,7 +4,7 @@ from common.models.interaction_customisations import Customisation, InteractionC
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-from citizen_frontend.exceptions import DataError, DocumentDBError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -51,10 +51,10 @@ def find_interaction_customisation(
         return None
     except ValidationError as e:
         logger.error(e)
-        raise DataError(f"InteractionCustomisation validation error: {e.message}") from e
+        raise DataIntegrityError(f"InteractionCustomisation validation error: {e.message}") from e
     except InteractionCustomisation.MultipleObjectsReturned as e:
         logger.error(e)
-        raise DataError(
+        raise DataIntegrityError(
             f"More than one InteractionCustomisations found for the following "
             f"arguments:"
             f"{authority_url_slug}, {licence_code}, {interaction_id}, "

@@ -17,7 +17,7 @@ from citizen_frontend.api.repository import interaction_customisation_repository
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.exceptions import DataError, DocumentDBError, LicenceLookupError
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
 from citizen_frontend.services import authority_service
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
             geographical_availability=licence.administrative_area.countries,
             issuing_authorities=issuing_authorities,
         )
-    except (DataError, DocumentDBError) as e:
+    except (DataIntegrityError, DocumentDBError) as e:
         raise LicenceLookupError(e.args[0]) from e
     except ValidationError as e:
         logger.error("Failed to build: %s", e.title)

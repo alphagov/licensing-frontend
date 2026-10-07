@@ -1,5 +1,4 @@
-# TODO rename, django has this error
-class DataError(Exception):
+class DataIntegrityError(Exception):
     pass
 
 
