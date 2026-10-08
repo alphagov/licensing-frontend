@@ -22,7 +22,6 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -309,11 +308,11 @@ def mock_licence():
 
 @pytest.fixture
 def licence_interaction_context(mock_licence, mock_authority):
-    return LicenceInteractionContext(
-        licence=mock_licence,
-        authority=mock_authority,
-        licence_detail=deepcopy(TEST_LICENCE_DETAIL),
-        interaction=deepcopy(TEST_LICENCE_INTERACTION),
+    return (
+        mock_licence,
+        mock_authority,
+        deepcopy(TEST_LICENCE_INTERACTION),
+        deepcopy(TEST_LICENCE_DETAIL),
     )
 
 

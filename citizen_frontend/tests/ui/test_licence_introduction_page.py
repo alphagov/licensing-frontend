@@ -140,7 +140,8 @@ def test_page_has_additional_information_inset_when_general_info_url_available(
 ):
     mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = "test_url"
     mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
-    mock_get_licence_interaction_context.return_value.licence_detail.authority_url = None
+    _, _, _, licence_details = mock_get_licence_interaction_context.return_value
+    licence_details.authority_url = None
 
     dom = get_dom(test_introduction_page_url)
 
@@ -173,7 +174,8 @@ def test_page_does_not_have_additional_information_inset_when_no_general_info_no
 ):
     mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
     mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
-    mock_get_licence_interaction_context.return_value.licence_detail.authority_url = None
+    _, _, _, licence_details = mock_get_licence_interaction_context.return_value
+    licence_details.authority_url = None
     dom = get_dom(test_introduction_page_url)
 
     assert dom.get_by_test_id("additional-information") is None

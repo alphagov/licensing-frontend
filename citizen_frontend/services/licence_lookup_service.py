@@ -1,7 +1,6 @@
 import logging
 import os
 from collections import defaultdict
-from dataclasses import dataclass
 
 from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
@@ -30,30 +29,25 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-@dataclass(frozen=True)
-class LicenceInteractionContext:
-    authority: Authority
-    licence: Licence
-    interaction: LicenceInteraction
-    licence_detail: LicenceDetails
-
-
 # previously lookupLicence
 def get_licence_interaction_context(
     authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
-) -> LicenceInteractionContext | None:
+) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetails]:
 
     authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
-    if authority is None or licence is None:
-        return None
+    if authority is None:
+        raise RuntimeError("missing authority")
+    if licence is None:
+        raise RuntimeError("missing licence")
     interaction_object = licence_service.find_interaction(licence, interaction, interaction_sub_id)
     licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
-    if licence_detail is None or interaction_object is None:
-        return None
-    licence_context = LicenceInteractionContext(authority, licence, interaction_object, licence_detail)
+    if licence_detail is None:
+        raise RuntimeError("missing details")
+    if interaction_object is None:
+        raise RuntimeError("missing interaction")
 
-    return licence_context
+    return licence, authority, interaction_object, licence_detail
 
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):
