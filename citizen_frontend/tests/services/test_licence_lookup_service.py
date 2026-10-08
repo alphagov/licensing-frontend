@@ -382,14 +382,8 @@ def test_get_licence_interaction_context_returns_error_when_no_interaction_found
 def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
     mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
 ):
-    mock_authority = mocker.MagicMock()
-    mock_authority.url_slug = "url_slug"
-
-    mock_licence = mocker.MagicMock()
-    mock_licence.licence_code = "licence_code"
-
-    mock_authority_repository.find_authority_by_url_slug.return_value = mock_authority
-    mock_licence_repository.get_licence_by_url_slug.return_value = mock_licence
+    mock_authority_repository.find_authority_by_url_slug.return_value.url_slug = "url_slug"
+    mock_licence_repository.get_licence_by_url_slug.return_value.licence_code = "licence_code"
     actual_licence, actual_authority, actual_interaction, actual_licence_detail = (
         licence_lookup_service.get_licence_interaction_context(
             "authority", "url_slug", str(LicenceInteractions.RENEW), 5
