@@ -38,7 +38,7 @@ def begin_application_steps(
             raise Http404("bad interaction") from None
         try:
             licence, authority, interaction, licence_details = licence_lookup_service.get_licence_interaction_context(
-                authority_slug, licence_slug, interaction_id, interaction_sub_id
+                authority_slug, licence_slug, interaction_type, interaction_sub_id
             )
         except RuntimeError:
             raise Http404("missing context") from None
