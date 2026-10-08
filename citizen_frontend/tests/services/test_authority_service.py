@@ -9,12 +9,8 @@ from conftest import TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE_CODE, TEST_SNAC_
 import citizen_frontend.services.authority_service as authority_service
 
 
-@pytest.fixture
-def make_license_details():
-    def _factory(codes=None):
-        return [LicenceDetails(licence_code=code) for code in codes]
-
-    return _factory
+def make_license_details(codes) -> list[LicenceDetails]:
+    return [LicenceDetails(licence_code=code) for code in codes]
 
 
 def test_get_authorities_for_licence_calls_authority_repository(mocker):
@@ -209,14 +205,14 @@ def test_get_country_from_geographical_locator_returns_none_for_invalid_locator(
     assert authority_service.get_country_from_geographical_locator(invalid_geographical_locator) is None
 
 
-def test_find_licence_detail_finds_licence_with_matching_code(make_license_details):
+def test_find_licence_detail_finds_licence_with_matching_code():
     expected_licence_code = "5151-5-1"
     authority = Authority(licence_details=make_license_details(["1234-2-1", expected_licence_code, "3421-3-1"]))
     licence_detail = authority_service.find_licence_detail(authority, expected_licence_code)
     assert licence_detail.licence_code == expected_licence_code
 
 
-def test_find_licence_detail_throws_error_when_multiple_licences_found(make_license_details):
+def test_find_licence_detail_throws_error_when_multiple_licences_found():
     expected_licence_code = "5151-5-1"
     authority = Authority(
         licence_details=make_license_details(["1234-2-1", expected_licence_code, expected_licence_code])
@@ -226,7 +222,7 @@ def test_find_licence_detail_throws_error_when_multiple_licences_found(make_lice
         authority_service.find_licence_detail(authority, expected_licence_code)
 
 
-def test_find_licence_detail_returns_none_when_no_licence_with_matching_code(make_license_details):
+def test_find_licence_detail_returns_none_when_no_licence_with_matching_code():
     non_existing_licence_code = "5151-5-1"
     authority = Authority(licence_details=make_license_details(["1234-2-1", "2323-5-1", "3421-3-1"]))
     licence_detail = authority_service.find_licence_detail(authority, non_existing_licence_code)

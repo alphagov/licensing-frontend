@@ -6,18 +6,15 @@ from common.models.licences import Licence, LicenceInteraction
 import citizen_frontend.services.licence_service as licence_service
 
 
-@pytest.fixture
-def make_licence_interactions():
-    def _factory(interactions=None):
-        return [
-            LicenceInteraction(interaction_id=interaction_id, interaction_sub_id=interaction_sub_id)
-            for interaction_id, interaction_sub_id in interactions
-        ]
+def make_licence_interactions(interactions: tuple(int, int)) -> list[LicenceInteraction]:
 
-    return _factory
+    return [
+        LicenceInteraction(interaction_id=interaction_id, interaction_sub_id=interaction_sub_id)
+        for interaction_id, interaction_sub_id in interactions
+    ]
 
 
-def test_find_licence_interaction_finds_interaction_only_when_both_ids_match(make_licence_interactions):
+def test_find_licence_interaction_finds_interaction_only_when_both_ids_match():
     expected_interaction_id = 15
     expected_sub_interaction_id = 2
     licence = Licence(
@@ -34,7 +31,7 @@ def test_find_licence_interaction_finds_interaction_only_when_both_ids_match(mak
     assert interaction.interaction_sub_id == expected_sub_interaction_id
 
 
-def test_find_licence_interaction_throws_error_when_multiple_licences_found(make_licence_interactions):
+def test_find_licence_interaction_throws_error_when_multiple_licences_found():
     expected_interaction_id = 15
     expected_sub_interaction_id = 2
     licence = Licence(
@@ -51,7 +48,7 @@ def test_find_licence_interaction_throws_error_when_multiple_licences_found(make
         licence_service.find_interaction(licence, expected_interaction_id, expected_sub_interaction_id)
 
 
-def test_find_licence_interaction_returns_none_when_no_licence_with_matching_code(make_licence_interactions):
+def test_find_licence_interaction_returns_none_when_no_licence_with_matching_code():
     not_expected_interaction_id = 15
     not_expected_sub_interaction_id = 2
     licence = Licence(
