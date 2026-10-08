@@ -3,6 +3,7 @@ import os
 from collections import defaultdict
 from dataclasses import dataclass
 
+from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
@@ -19,7 +20,7 @@ from citizen_frontend.api.repository import (
     interaction_customisation_repository,
     licence_repository,
 )
-from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_WORD_MAPPING
+from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
@@ -39,17 +40,14 @@ class LicenceInteractionContext:
 
 # previously lookupLicence
 def get_licence_interaction_context(
-    authority_url_slug: str, licence_url_slug: str, interaction: str, interaction_sub_id: int
+    authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
 ) -> LicenceInteractionContext | None:
 
     authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
     if authority is None or licence is None:
         return None
-    interaction_id = INTERACTION_WORD_MAPPING.get(interaction)
-    if interaction_id is None:
-        return None
-    interaction_object = licence_service.find_interaction(licence, interaction_id, interaction_sub_id)
+    interaction_object = licence_service.find_interaction(licence, interaction, interaction_sub_id)
     licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
     if licence_detail is None or interaction_object is None:
         return None

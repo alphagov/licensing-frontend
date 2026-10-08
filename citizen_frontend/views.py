@@ -3,6 +3,7 @@ from django.http import Http404
 from django.shortcuts import render
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.mocks import get_mocked_context
 from citizen_frontend.services import licence_lookup_service
@@ -41,9 +42,13 @@ def begin_application_steps(
     request, licence_slug: str, authority_slug: str, interaction_id: str, interaction_sub_id: int
 ):
     try:
+        interaction = INTERACTION_WORD_MAPPING.get(interaction_id)
+        if interaction is None:
+            raise Http404("bad interaction") from None
         full_licence_interaction_context = licence_lookup_service.get_licence_interaction_context(
             authority_slug, licence_slug, interaction_id, interaction_sub_id
         )
+
         _redirect_if_no_context(full_licence_interaction_context)
         _redirect_if_cant_apply_via_licensify(full_licence_interaction_context)
         published_customisation = _get_published_customisation_or_redirect(
