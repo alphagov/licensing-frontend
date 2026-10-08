@@ -1,7 +1,7 @@
 import logging
 import re
 
-from common.models.authorities import Authority
+from common.models.authorities import Authority, LicenceDetails
 from common.models.licences import Licence
 
 import citizen_frontend.api.repository.authority_repository as authority_repository
@@ -56,3 +56,14 @@ def check_authority_covers_location(authority: Authority, locator: str, country:
         return False
 
     return True
+
+
+def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetails | None:
+    matching_licence_details = [
+        details for details in authority.licence_details if details.licence_code == licence_code
+    ]
+    if len(matching_licence_details) > 1:
+        raise RuntimeError(
+            f" Bad data, multiple matching details for licence code: {licence_code} on {authority.full_name}"
+        )
+    return matching_licence_details[0] if matching_licence_details else None

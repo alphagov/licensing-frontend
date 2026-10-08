@@ -22,7 +22,6 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.services import licence_lookup_service
 from citizen_frontend.services.licence_lookup_service import LicenceInteractionContext
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
@@ -296,16 +295,6 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
 def mock_lookup_service(mocker):
     mock_look_up_service = mocker.patch("citizen_frontend.api.find_a_licence_integration.licence_lookup_service")
     yield mock_look_up_service
-
-
-@pytest.fixture
-def mock_licence_repository(mocker):
-    return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
-
-
-@pytest.fixture
-def mock_authority_repository(mocker):
-    return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
 
 
 @pytest.fixture

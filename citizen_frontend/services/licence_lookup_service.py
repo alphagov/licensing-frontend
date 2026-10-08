@@ -50,7 +50,7 @@ def get_licence_interaction_context(
     if interaction_id is None:
         return None
     interaction_object = licence_repository.find_interaction(licence, interaction_id, interaction_sub_id)
-    licence_detail = authority_repository.find_licence_detail(authority, licence.licence_code)
+    licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
     if licence_detail is None or interaction_object is None:
         return None
     licence_context = LicenceInteractionContext(authority, licence, interaction_object, licence_detail)
