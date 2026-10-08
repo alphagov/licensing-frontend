@@ -25,9 +25,7 @@
         {% include "citizen_frontend/partials/additional_information.html" %}
     {% endif %}
     {% if before_you_apply_required %}
-        <h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
-        {% if is_fee_required %} {% include "citizen_frontend/partials/fee.html" %}{% endif %}
-        {% if supporting_documents %}{% include "citizen_frontend/partials/supporting_documents.html" %}{% endif %}
+        {% include "citizen_frontend/partials/before_you_apply.html" %}
     {% endif %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
     <a href="{% url 'submit' licence_slug authority_slug interaction_id interaction_sub_id %}" class="govuk-button"
