@@ -23,7 +23,7 @@ from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING, INTERACTION_
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
-from citizen_frontend.services import authority_service
+from citizen_frontend.services import authority_service, licence_service
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -49,7 +49,7 @@ def get_licence_interaction_context(
     interaction_id = INTERACTION_WORD_MAPPING.get(interaction)
     if interaction_id is None:
         return None
-    interaction_object = licence_repository.find_interaction(licence, interaction_id, interaction_sub_id)
+    interaction_object = licence_service.find_interaction(licence, interaction_id, interaction_sub_id)
     licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
     if licence_detail is None or interaction_object is None:
         return None

@@ -72,6 +72,11 @@ def mock_find_licence_detail(mocker):
     return mocker.patch.object(authority_service, "find_licence_detail", autospec=True)
 
 
+@pytest.fixture
+def mock_licence_service(mocker):
+    return mocker.patch.object(licence_lookup_service, "licence_service", autospec=True)
+
+
 def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_found(
     mock_get_licence_by_licence_code,
 ):
@@ -354,10 +359,10 @@ def test_get_licence_interaction_context_returns_none_when_no_authority_found(
 
 
 def test_get_licence_interaction_context_returns_none_when_no_licence_interaction_found(
-    mock_licence_repository, mock_authority_repository, mocker
+    mock_licence_repository, mock_authority_repository, mocker, mock_licence_service
 ):
     mock_licence = mocker.MagicMock()
-    mock_licence_repository.find_interaction.return_value = None
+    mock_licence_service.find_interaction.return_value = None
     mock_licence_repository.get_licence_by_url_slug.return_value = mock_licence
     actual = licence_lookup_service.get_licence_interaction_context(
         "authority", "url_slug", str(LicenceInteractions.RENEW), 5
@@ -378,7 +383,7 @@ def test_get_licence_interaction_context_returns_none_when_no_licence_details_fo
 
 
 def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail
+    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
 ):
     mock_authority = mocker.MagicMock()
     mock_authority.url_slug = "url_slug"
