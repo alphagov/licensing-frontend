@@ -1,4 +1,3 @@
-import re
 from copy import deepcopy
 
 import pytest
@@ -217,9 +216,10 @@ def test_find_licence_detail_throws_error_when_multiple_licences_found():
     authority = Authority(
         licence_details=make_license_details(["1234-2-1", expected_licence_code, expected_licence_code])
     )
-    expected_error_message = re.compile(r"multiple matching", re.IGNORECASE)
-    with pytest.raises(RuntimeError, match=expected_error_message):
+    expected_error_message = "multiple matching"
+    with pytest.raises(RuntimeError) as e:
         authority_service.find_licence_detail(authority, expected_licence_code)
+    assert expected_error_message in e.value.args[0].lower()
 
 
 def test_find_licence_detail_returns_none_when_no_licence_with_matching_code():

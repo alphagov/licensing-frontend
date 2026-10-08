@@ -1,5 +1,3 @@
-import re
-
 import pytest
 from common.models.licences import Licence, LicenceInteraction
 
@@ -43,9 +41,10 @@ def test_find_licence_interaction_throws_error_when_multiple_licences_found():
             ]
         )
     )
-    expected_error_message = re.compile(r"multiple matching", re.IGNORECASE)
-    with pytest.raises(RuntimeError, match=expected_error_message):
+    expected_error_message = "multiple matching"
+    with pytest.raises(RuntimeError) as e:
         licence_service.find_interaction(licence, expected_interaction_id, expected_sub_interaction_id)
+    assert expected_error_message in e.value.args[0].lower()
 
 
 def test_find_licence_interaction_returns_none_when_no_licence_with_matching_code():
