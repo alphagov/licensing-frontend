@@ -2,7 +2,7 @@ import logging
 import re
 
 from common.models.authority import Authority, LicenceDetails
-from common.models.licences import Licence
+from common.models.licence import Licence
 
 import citizen_frontend.api.repository.authority_repository as authority_repository
 from citizen_frontend.api.utils import COUNTRY_TO_GSS_CODE, COUNTRY_TO_SNAC_CODE

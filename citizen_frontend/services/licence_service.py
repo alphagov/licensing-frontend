@@ -1,4 +1,4 @@
-from common.models.licences import Licence, LicenceInteraction
+from common.models.licence import Licence, LicenceInteraction
 
 
 def find_interaction(licence: Licence, interaction_id: int, interaction_sub_id: int) -> LicenceInteraction | None:

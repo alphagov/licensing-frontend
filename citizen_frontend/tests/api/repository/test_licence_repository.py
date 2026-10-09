@@ -1,5 +1,5 @@
 import pytest
-from common.models.licences import Licence
+from common.models.licence import Licence
 from conftest import TEST_LICENCE
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError

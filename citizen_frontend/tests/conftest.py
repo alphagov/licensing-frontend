@@ -8,7 +8,7 @@ from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authority import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
-from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
+from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 
