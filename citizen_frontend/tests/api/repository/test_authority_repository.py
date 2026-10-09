@@ -3,7 +3,9 @@ from conftest import TEST_AUTHORITY, TEST_LICENCE_CODE
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-from citizen_frontend.api.repository.authority_repository import get_licence_offering_authorities_by_licence_code
+from citizen_frontend.api.repository.authority_repository import (
+    get_licence_offering_authorities_by_licence_code,
+)
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 

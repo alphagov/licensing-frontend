@@ -1,4 +1,5 @@
 import os
+from copy import deepcopy
 
 import bson
 import pytest
@@ -8,10 +9,11 @@ from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
-from common.models.shared_models import PaymentAmount
+from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.views
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactDetails,
     AuthorityInteraction,
@@ -32,12 +34,11 @@ TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
 
 TEST_TEMP_EVENT_APPLY_URL = (
-    f"{BASE_URL}/{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    f"{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
 )
 
 TEST_FOOD_PREMISES_APPLY_URL = (
-    f"{BASE_URL}/{SERVICE_SLUG}/"
-    f"{FOOD_PREMISES_APPLICATION_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
+    f"/{SERVICE_SLUG}/{FOOD_PREMISES_APPLICATION_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
 )
 
 TEST_TEMP_EVENT_APPLY_FORM_URL = (
@@ -56,6 +57,15 @@ def django_db_setup():
 
 
 @pytest.fixture
+def test_introduction_page_url(live_server):
+    return f"{live_server.url}/apply-for-a-licence/test-licence/test-authority/apply-1"
+
+
+@pytest.fixture
+def test_submit_form_page_url(live_server):
+    return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
+
+
 def mock_interaction_customisation_get(mocker):
     mock_get = mocker.patch.object(InteractionCustomisation.objects, "get")
     yield mock_get
@@ -78,6 +88,13 @@ def mock_get_licence(mocker):
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
+TEST_LICENCE_DETAIL = LicenceDetails(
+    licence_code=TEST_LICENCE_CODE,
+    offered_by_authority=True,
+    using_gov_uk=True,
+    authority_url="https://test-authority.com",
+)
+
 
 TEST_AUTHORITY = Authority(
     _id=ObjectId("50c8520393867870cb0d775f"),
@@ -86,18 +103,29 @@ TEST_AUTHORITY = Authority(
     full_name="Test Authority for testing with",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
+    licence_details=[TEST_LICENCE_DETAIL],
     authority_url="https://test-authority.com",
-    licence_details=[
-        LicenceDetails(
-            licence_code=TEST_LICENCE_CODE,
-            offered_by_authority=True,
-            using_gov_uk=True,
-            authority_url="https://test-authority.com",
-        )
-    ],
     contact_details=ContactDetails(),
 )
 
+TEST_LICENCE_INTERACTION = LicenceInteraction(
+    interaction_id=0,
+    interaction_sub_id=1,
+    licence_interaction_name="Application for a Test Licence",
+    form=LicenceForm(
+        name="Test Licence Form",
+        sub_form=1,
+        form_ref_number="123000000",
+        file_name="EAF_123000000_LA_TEST",
+        file_size=185000,
+        form_version=2,
+    ),
+    sub_forms=[],
+    supporting_documents=[SupportingDocumentDefinition(name="test_supportingDocument", is_mandatory=True)],
+    fee=PaymentAmount(pence=2100),
+    fee_calculation_instructions=[],
+    tacit_consent="required",
+)
 
 TEST_LICENCE = Licence(
     _id=ObjectId("50c8520393867870cb0d775f"),
@@ -181,6 +209,7 @@ TEST_CUSTOMISATION_VARIABLE_FEE = Customisation(
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
     department=bson.ObjectId(),
+    supporting_document_definitions=[SupportingDocumentDefinition(name="test", is_mandatory=True)],
 )
 
 TEST_CUSTOMISATION_FIXED_FEE = Customisation(
@@ -195,6 +224,13 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
     department=bson.ObjectId(),
+    information_url="https://test-information.com",
+    guidance_url="https://test-guidance.com",
+    supporting_document_definitions=[
+        SupportingDocumentDefinition(name="test", is_mandatory=True),
+        SupportingDocumentDefinition(name="test2", is_mandatory=False),
+        SupportingDocumentDefinition(name="test3", is_mandatory=False),
+    ],
 )
 
 
@@ -258,3 +294,69 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
 def mock_lookup_service(mocker):
     mock_look_up_service = mocker.patch("citizen_frontend.api.find_a_licence_integration.licence_lookup_service")
     yield mock_look_up_service
+
+
+@pytest.fixture
+def mock_authority():
+    return deepcopy(TEST_AUTHORITY)
+
+
+@pytest.fixture
+def mock_licence():
+    return deepcopy(TEST_LICENCE)
+
+
+@pytest.fixture
+def licence_interaction_context(mock_licence, mock_authority):
+    return (
+        mock_licence,
+        mock_authority,
+        deepcopy(TEST_LICENCE_INTERACTION),
+        deepcopy(TEST_LICENCE_DETAIL),
+    )
+
+
+@pytest.fixture
+def mock_get_licence_interaction_context(mocker, licence_interaction_context):
+    mock_get_context = mocker.patch.object(
+        citizen_frontend.views.licence_lookup_service,
+        "get_licence_interaction_context",
+        autospec=True,
+    )
+    mock_get_context.return_value = licence_interaction_context
+    return mock_get_context
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_fixed_fee(mocker):
+    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
+    return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_variable_fee(mocker):
+    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_no_fee(mocker):
+    mock_find_published_customisation_with_no_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
+    mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
+    return mock_find_published_customisation_with_fixed_fee

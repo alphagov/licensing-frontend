@@ -7,15 +7,17 @@ prepare:
 
 start:
 	mise exec -- docker compose up -d
+	nohup mise exec -- docker compose watch > /dev/null 2>&1 &
 
 watch:
 	mise exec -- docker compose up --watch
 
-test-ui: start
-	uv sync
-	DOCUMENTDB_HOST=127.0.0.1 pytest citizen_frontend/tests/ui
+
+test-ui:start prepare
+	pytest citizen_frontend/tests/ui
 
 kill:
+	-pkill -f "docker compose watch"
 	docker compose down && \
 	cd licensing_common && docker compose down
 
@@ -26,7 +28,7 @@ test-ui-ci:
 	uv sync
 	python -m playwright install --with-deps
 	docker compose up -d
-	pytest citizen_frontend/tests/ui
+	pytest citizen_frontend/tests/ui/test_licence_submission_page.py
 
 test-common:
 	cd licensing_common && \
@@ -39,3 +41,6 @@ test-api: prepare
 
 test-services: prepare
 	pytest citizen_frontend/tests/services
+
+test-views: prepare
+	pytest citizen_frontend/tests/test_views.py

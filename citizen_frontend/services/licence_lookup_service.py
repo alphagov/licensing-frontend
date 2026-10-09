@@ -2,7 +2,8 @@ import logging
 import os
 from collections import defaultdict
 
-from common.models.authorities import Authority, ContactDetails
+from common.enums.interaction_id_codes import InteractionIdCodes
+from common.models.authorities import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from pydantic import ValidationError
@@ -13,15 +14,40 @@ from citizen_frontend.api.models.api_responses import (
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
-from citizen_frontend.api.repository import interaction_customisation_repository, licence_repository
+from citizen_frontend.api.repository import (
+    authority_repository,
+    interaction_customisation_repository,
+    licence_repository,
+)
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
-from citizen_frontend.services import authority_service
+from citizen_frontend.services import authority_service, licence_service
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+# previously lookupLicence
+def get_licence_interaction_context(
+    authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
+) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetails]:
+
+    authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
+    licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
+    if authority is None:
+        raise RuntimeError("missing authority")
+    if licence is None:
+        raise RuntimeError("missing licence")
+    interaction_object = licence_service.find_interaction(licence, interaction, interaction_sub_id)
+    licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
+    if licence_detail is None:
+        raise RuntimeError("missing details")
+    if interaction_object is None:
+        raise RuntimeError("missing interaction")
+
+    return licence, authority, interaction_object, licence_detail
 
 
 def get_licence_authorities_and_interactions(licence_code: str, snac_code: str | None = None):

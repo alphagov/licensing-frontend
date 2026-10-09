@@ -1,0 +1,3 @@
+<h3 class="govuk-heading-s" data-testid="before-apply-heading">Before you apply...</h3>
+{% if is_fee_required %} {% include "citizen_frontend/partials/fee.html" %}{% endif %}
+{% if supporting_documents %}{% include "citizen_frontend/partials/supporting_documents.html" %}{% endif %}

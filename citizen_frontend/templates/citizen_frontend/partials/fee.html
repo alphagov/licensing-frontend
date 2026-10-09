@@ -1,9 +1,7 @@
-    {% if is_fee_required %}
-        <p class="govuk-body" data-testid="fee">
-            {% if fee_amount %}
-                There's a <strong data-testid="fee-amount">{{ fee_amount }}</strong> fee.</p>
-            {% else %}
-                There's a fee you'll need to pay for this submission.
-            {% endif %}
-        <p class="govuk-body">You'll need a debit or credit card.</p>
+<p class="govuk-body" data-testid="fee">
+    {% if fee_amount %}
+        There's a <strong data-testid="fee-amount">£{{ fee_amount }}</strong> fee.</p>
+    {% else %}
+        There's a fee you'll need to pay for this submission.
     {% endif %}
+<p class="govuk-body">You'll need a debit or credit card.</p>
