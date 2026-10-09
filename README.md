@@ -21,13 +21,13 @@ To update the submodule, run `git submodule update --remote` or using the comman
 
 Further info found [here](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 
-Alternatively: To set this as `git pull` default edit your `.gitconfig` file to include 
+Alternatively: Add the following block to your `.gitconfig` file to include 
 
 ```
 [submodule]
 	recurse = true
 ```
-or running `git config --global submodule.recurse true` 
+or run `git config --global submodule.recurse true` 
 
 ## Mise
 
