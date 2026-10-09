@@ -13,7 +13,7 @@ watch:
 	mise exec -- docker compose up --watch
 
 
-test-ui:kill start prepare
+test-ui:start prepare
 	pytest citizen_frontend/tests/ui
 
 kill:
