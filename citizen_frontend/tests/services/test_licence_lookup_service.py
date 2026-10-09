@@ -57,6 +57,26 @@ def mock_get_authorities(mocker):
     yield mocker.patch.object(licence_lookup_service, "get_authorities")
 
 
+@pytest.fixture
+def mock_licence_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
+
+
+@pytest.fixture
+def mock_authority_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
+
+
+@pytest.fixture
+def mock_find_licence_detail(mocker):
+    return mocker.patch.object(authority_service, "find_licence_detail", autospec=True)
+
+
+@pytest.fixture
+def mock_licence_service(mocker):
+    return mocker.patch.object(licence_lookup_service, "licence_service", autospec=True)
+
+
 def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_found(
     mock_get_licence_by_licence_code,
 ):
@@ -316,6 +336,63 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
     actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
+
+
+def test_get_licence_interaction_context_returns_error_when_no_licence_found(
+    mock_licence_repository, mock_authority_repository
+):
+    mock_licence_repository.get_licence_by_url_slug.return_value = None
+
+    with pytest.raises(RuntimeError) as e:
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+
+    assert e.value.args[0] == "missing licence"
+
+
+def test_get_licence_interaction_context_returns_error_when_no_authority_found(
+    mock_licence_repository, mock_authority_repository
+):
+    mock_authority_repository.find_authority_by_url_slug.return_value = None
+    with pytest.raises(RuntimeError) as e:
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+
+    assert e.value.args[0] == "missing authority"
+
+
+def test_get_licence_interaction_context_returns_error_when_no_licence_details_found(
+    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail
+):
+    mock_find_licence_detail.return_value = None
+    with pytest.raises(RuntimeError) as e:
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+
+    assert e.value.args[0] == "missing details"
+
+
+def test_get_licence_interaction_context_returns_error_when_no_interaction_found(
+    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
+):
+    mock_licence_service.find_interaction.return_value = None
+    with pytest.raises(RuntimeError) as e:
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+
+    assert e.value.args[0] == "missing interaction"
+
+
+def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
+    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
+):
+    mock_authority_repository.find_authority_by_url_slug.return_value.url_slug = "url_slug"
+    mock_licence_repository.get_licence_by_url_slug.return_value.licence_code = "licence_code"
+    actual_licence, actual_authority, actual_interaction, actual_licence_detail = (
+        licence_lookup_service.get_licence_interaction_context(
+            "authority", "url_slug", str(LicenceInteractions.RENEW), 5
+        )
+    )
+    assert actual_authority.url_slug == "url_slug"
+    assert actual_licence.licence_code == "licence_code"
+    assert actual_interaction is not None
+    assert actual_licence_detail is not None
 
 
 def test_group_interactions():

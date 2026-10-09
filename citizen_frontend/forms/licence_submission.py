@@ -37,6 +37,7 @@ class ApplicationSubmissionForm(forms.Form):
             attrs={
                 "data-testid": "application-upload",
                 "class": "govuk-file-upload",
+                "accept": ".pdf,application/pdf",
             }
         ),
     )
