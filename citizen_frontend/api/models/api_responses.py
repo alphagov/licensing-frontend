@@ -8,7 +8,7 @@ class LicenceResponse(BaseModel):
     legislation: list[str]
 
 
-class AuthorityContactDetails(BaseModel):
+class AuthorityContactInformation(BaseModel):
     website: str
     email: str
     phone: str
@@ -32,7 +32,7 @@ class IssuingAuthority(BaseModel):
 
     authority_name: str
     authority_slug: str
-    authority_contact: AuthorityContactDetails
+    authority_contact: AuthorityContactInformation
     authority_interactions: dict[str, list[AuthorityInteraction]]
 
 

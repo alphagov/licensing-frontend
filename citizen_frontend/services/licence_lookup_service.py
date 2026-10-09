@@ -9,7 +9,7 @@ from common.models.licence import Licence, LicenceInteraction
 from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
@@ -96,7 +96,7 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
     return IssuingAuthority(
         authority_name=authority.full_name,
         authority_slug=authority.url_slug,
-        authority_contact=AuthorityContactDetails(
+        authority_contact=AuthorityContactInformation(
             website=authority.authority_url,
             email=contact_details.email,
             phone=contact_details.phone_number,

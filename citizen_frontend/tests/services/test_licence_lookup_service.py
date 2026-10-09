@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     LicenceAuthoritiesAndInteractionsResponse,
 )
@@ -160,7 +160,7 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
     test_issuing_authority_2 = deepcopy(TEST_ISSUING_AUTHORITY)
     test_issuing_authority_2.authority_name = test_authority_2.full_name
     test_issuing_authority_2.authority_slug = test_authority_2.url_slug
-    test_issuing_authority_2.authority_contact = AuthorityContactDetails(
+    test_issuing_authority_2.authority_contact = AuthorityContactInformation(
         website=test_authority_2.authority_url,
         email=test_authority_2.contact_details.email,
         phone=test_authority_2.contact_details.phone_number,

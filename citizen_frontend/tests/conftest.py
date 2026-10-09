@@ -15,7 +15,7 @@ from django.utils import timezone
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.views
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
@@ -248,7 +248,7 @@ TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
 TEST_ISSUING_AUTHORITY = IssuingAuthority(
     authority_name=TEST_AUTHORITY.full_name,
     authority_slug=TEST_AUTHORITY.url_slug,
-    authority_contact=AuthorityContactDetails(
+    authority_contact=AuthorityContactInformation(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
@@ -266,7 +266,7 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
         IssuingAuthority(
             authority_name="Test Authority",
             authority_slug="test-authority",
-            authority_contact=AuthorityContactDetails(
+            authority_contact=AuthorityContactInformation(
                 website="https://test-authority.com",
                 email="test@test-authority.com",
                 phone="12345667801",
