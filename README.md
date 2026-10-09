@@ -17,17 +17,10 @@ This repository use a Git Submodule to reuse common code from `licensing-common`
 In the root of the project run `git submodule update --init --recursive` to fetch update to code.
 
 ### Updating the Submodule
-To update the submodule, run `git submodule update --remote` or using the command `git pull --recurse-submodules`
+To update the submodule, run `git submodule update --remote`
 
 Further info found [here](https://git-scm.com/book/en/v2/Git-Tools-Submodules)
 
-Alternatively: Add the following block to your `.gitconfig` file to include 
-
-```
-[submodule]
-	recurse = true
-```
-or run `git config --global submodule.recurse true` 
 
 ## Mise
 
