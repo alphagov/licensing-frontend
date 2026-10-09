@@ -36,12 +36,10 @@ def begin_application_steps(
         interaction_type = INTERACTION_WORD_MAPPING.get(interaction_id)
         if interaction_type is None:
             raise Http404("bad interaction") from None
-        try:
-            licence, authority, interaction, licence_details = licence_lookup_service.get_licence_interaction_context(
-                authority_slug, licence_slug, interaction_type, interaction_sub_id
-            )
-        except RuntimeError:
-            raise Http404("missing context") from None
+
+        licence, authority, interaction, licence_details = licence_lookup_service.get_licence_interaction_context(
+            authority_slug, licence_slug, interaction_type, interaction_sub_id
+        )
 
         if not licence_details.can_apply_via_licensify:
             raise Http404("unhandled") from None
@@ -83,6 +81,8 @@ def begin_application_steps(
         return render(request, "citizen_frontend/licence_introduction_page.html", context)
     except Http404:
         raise
+    except RuntimeError:
+        raise Http404("missing context") from None
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
 
