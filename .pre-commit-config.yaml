@@ -4,5 +4,13 @@ repos:
   hooks:
     - id: ruff-check
       args: [ --fix ]
-
     - id: ruff-format
+
+- repo: local
+  hooks:
+    - id: post-merge-legacy
+      name: Run post-merge.legacy
+      entry: .git/hooks/post-merge.legacy
+      language: script
+      stages: [post-merge]
+      always_run: true
