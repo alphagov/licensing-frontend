@@ -6,7 +6,7 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authorities import Authority, ContactDetails, LicenceDetails
+from common.models.authority import Authority, ContactDetails, LicenceDetails
 from common.models.interaction_customisations import Customisation, InteractionCustomisation
 from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition

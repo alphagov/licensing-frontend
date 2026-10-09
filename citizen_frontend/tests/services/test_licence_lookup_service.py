@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 import pytest
-from common.models.authorities import ContactDetails
+from common.models.authority import ContactDetails
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
 from pydantic import ValidationError

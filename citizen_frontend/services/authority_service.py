@@ -1,7 +1,7 @@
 import logging
 import re
 
-from common.models.authorities import Authority, LicenceDetails
+from common.models.authority import Authority, LicenceDetails
 from common.models.licences import Licence
 
 import citizen_frontend.api.repository.authority_repository as authority_repository
