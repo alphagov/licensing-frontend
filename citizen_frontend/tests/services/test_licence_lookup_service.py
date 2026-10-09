@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 import pytest
-from common.models.authority import ContactDetails
+from common.models.authority import ContactInformation
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
 from pydantic import ValidationError
@@ -142,7 +142,7 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
 ):
-    contact_details_2 = ContactDetails(
+    contact_details_2 = ContactInformation(
         line_one="2 test authority",
         line_two="2 test road",
         line_three="",

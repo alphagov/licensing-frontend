@@ -6,7 +6,7 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authority import Authority, ContactDetails, LicenceDetail
+from common.models.authority import Authority, ContactInformation, LicenceDetail
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
@@ -105,7 +105,7 @@ TEST_AUTHORITY = Authority(
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
     authority_url="https://test-authority.com",
-    contact_details=ContactDetails(),
+    contact_details=ContactInformation(),
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(

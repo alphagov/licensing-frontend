@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authority import Authority, ContactDetails, LicenceDetail
+from common.models.authority import Authority, ContactInformation, LicenceDetail
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
 from pydantic import ValidationError
@@ -167,7 +167,7 @@ def get_payment_info_from_customisation(customisation: Customisation | None) -> 
     return PaymentType.VARIABLE_FEE, None
 
 
-def format_postal_address(contact_details: ContactDetails) -> str:
+def format_postal_address(contact_details: ContactInformation) -> str:
     address_lines = [
         contact_details.line_one,
         contact_details.line_two,
