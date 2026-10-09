@@ -3,7 +3,7 @@ import os
 from collections import defaultdict
 
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authority import Authority, ContactDetails, LicenceDetails
+from common.models.authority import Authority, ContactDetails, LicenceDetail
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
 from pydantic import ValidationError
@@ -32,7 +32,7 @@ logger.setLevel(logging.INFO)
 # previously lookupLicence
 def get_licence_interaction_context(
     authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
-) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetails]:
+) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetail]:
 
     authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)

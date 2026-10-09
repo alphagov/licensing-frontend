@@ -6,7 +6,7 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authority import Authority, ContactDetails, LicenceDetails
+from common.models.authority import Authority, ContactDetails, LicenceDetail
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
@@ -88,7 +88,7 @@ def mock_get_licence(mocker):
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
-TEST_LICENCE_DETAIL = LicenceDetails(
+TEST_LICENCE_DETAIL = LicenceDetail(
     licence_code=TEST_LICENCE_CODE,
     offered_by_authority=True,
     using_gov_uk=True,
