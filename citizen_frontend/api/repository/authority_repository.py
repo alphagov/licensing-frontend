@@ -1,6 +1,6 @@
 import logging
 
-from common.models.authorities import Authority
+from common.models.authority import Authority
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
