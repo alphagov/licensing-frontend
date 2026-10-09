@@ -1,5 +1,5 @@
 from common.models.authority import LicenceDetails
-from common.models.interaction_customisations import Customisation
+from common.models.interaction_customisation import Customisation
 from common.models.licences import LicenceInteraction
 from django.http import Http404
 from django.shortcuts import render

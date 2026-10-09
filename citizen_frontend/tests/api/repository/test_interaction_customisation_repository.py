@@ -2,7 +2,7 @@ from copy import deepcopy
 from datetime import datetime
 
 import pytest
-from common.models.interaction_customisations import InteractionCustomisation
+from common.models.interaction_customisation import InteractionCustomisation
 from conftest import (
     TEST_AUTH_SLUG,
     TEST_CUSTOMISATION_FIXED_FEE,

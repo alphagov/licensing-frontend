@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authority import Authority, ContactDetails, LicenceDetails
-from common.models.interaction_customisations import Customisation
+from common.models.interaction_customisation import Customisation
 from common.models.licences import Licence, LicenceInteraction
 from pydantic import ValidationError
 
