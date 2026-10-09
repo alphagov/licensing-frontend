@@ -1,3 +1,4 @@
 [submodule "licensing_common"]
 	path = licensing_common
 	url = https://github.com/alphagov/licensing-common
+    branch = main
