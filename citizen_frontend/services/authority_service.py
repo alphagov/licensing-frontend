@@ -1,8 +1,8 @@
 import logging
 import re
 
-from common.models.authorities import Authority, LicenceDetails
-from common.models.licences import Licence
+from common.models.authority import Authority, LicenceDetail
+from common.models.licence import Licence
 
 import citizen_frontend.api.repository.authority_repository as authority_repository
 from citizen_frontend.api.utils import COUNTRY_TO_GSS_CODE, COUNTRY_TO_SNAC_CODE
@@ -58,7 +58,7 @@ def check_authority_covers_location(authority: Authority, locator: str, country:
     return True
 
 
-def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetails | None:
+def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetail | None:
     matching_licence_details = [
         details for details in authority.licence_details if details.licence_code == licence_code
     ]

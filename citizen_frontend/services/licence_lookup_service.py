@@ -3,13 +3,13 @@ import os
 from collections import defaultdict
 
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authorities import Authority, ContactDetails, LicenceDetails
-from common.models.interaction_customisations import Customisation
-from common.models.licences import Licence, LicenceInteraction
+from common.models.authority import Authority, ContactInformation, LicenceDetail
+from common.models.interaction_customisation import Customisation
+from common.models.licence import Licence, LicenceInteraction
 from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
@@ -32,7 +32,7 @@ logger.setLevel(logging.INFO)
 # previously lookupLicence
 def get_licence_interaction_context(
     authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
-) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetails]:
+) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetail]:
 
     authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
@@ -96,7 +96,7 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
     return IssuingAuthority(
         authority_name=authority.full_name,
         authority_slug=authority.url_slug,
-        authority_contact=AuthorityContactDetails(
+        authority_contact=AuthorityContactInformation(
             website=authority.authority_url,
             email=contact_details.email,
             phone=contact_details.phone_number,
@@ -167,7 +167,7 @@ def get_payment_info_from_customisation(customisation: Customisation | None) -> 
     return PaymentType.VARIABLE_FEE, None
 
 
-def format_postal_address(contact_details: ContactDetails) -> str:
+def format_postal_address(contact_details: ContactInformation) -> str:
     address_lines = [
         contact_details.line_one,
         contact_details.line_two,

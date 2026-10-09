@@ -1,5 +1,5 @@
 import pytest
-from common.models.licences import Licence, LicenceInteraction
+from common.models.licence import Licence, LicenceInteraction
 
 import citizen_frontend.services.licence_service as licence_service
 

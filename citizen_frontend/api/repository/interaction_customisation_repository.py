@@ -1,6 +1,6 @@
 import logging
 
-from common.models.interaction_customisations import Customisation, InteractionCustomisation
+from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 

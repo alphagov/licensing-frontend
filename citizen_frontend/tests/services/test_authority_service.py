@@ -2,14 +2,14 @@ from copy import deepcopy
 
 import pytest
 from common.enums.countries import Countries
-from common.models.authorities import Authority, LicenceDetails
+from common.models.authority import Authority, LicenceDetail
 from conftest import TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE_CODE, TEST_SNAC_CODE
 
 import citizen_frontend.services.authority_service as authority_service
 
 
-def make_license_details(codes) -> list[LicenceDetails]:
-    return [LicenceDetails(licence_code=code) for code in codes]
+def make_license_details(codes) -> list[LicenceDetail]:
+    return [LicenceDetail(licence_code=code) for code in codes]
 
 
 def test_get_authorities_for_licence_calls_authority_repository(mocker):
