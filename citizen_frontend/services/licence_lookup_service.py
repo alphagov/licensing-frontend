@@ -29,19 +29,24 @@ logger.setLevel(logging.INFO)
 def get_licence_interaction_context(
     authority_url_slug: str, licence_url_slug: str, interaction: InteractionIdCodes, interaction_sub_id: int
 ) -> tuple[Licence, Authority, LicenceInteraction, LicenceDetail]:
-
-    authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     licence = licence_repository.get_licence_by_url_slug(licence_url_slug)
+    authority = authority_repository.find_authority_by_url_slug(authority_url_slug)
     if authority is None:
-        raise RuntimeError("missing authority")
-    if licence is None:
-        raise RuntimeError("missing licence")
-    interaction_object = licence_service.find_interaction(licence, interaction, interaction_sub_id)
+        logger.error("No authority found for %s", authority_url_slug)
+        raise LicenceLookupError("Missing authority")
     licence_detail = authority_service.find_licence_detail(authority, licence.licence_code)
-    if licence_detail is None:
-        raise RuntimeError("missing details")
-    if interaction_object is None:
-        raise RuntimeError("missing interaction")
+    if not licence_detail:
+        logger.error("Failed to find licence detail for %s in %s", licence.licence_code, authority)
+        raise LicenceLookupError("Missing licence details")
+    interaction_object = licence_service.find_interaction(licence, interaction, interaction_sub_id)
+    if not interaction_object:
+        logger.error(
+            "Missing interaction for licence: %s, interaction: %s and interaction_sub_id: %s",
+            licence,
+            interaction,
+            interaction_sub_id,
+        )
+        raise LicenceLookupError("Missing interaction")
 
     return licence, authority, interaction_object, licence_detail
 
