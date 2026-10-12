@@ -12,7 +12,7 @@ from common.models.licence import AdministrativeArea, Licence, LicenceForm, Lice
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 
-import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.views
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactInformation,

@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from pydantic import ValidationError
 
-import citizen_frontend.api.repository.licence_repository as licence_repository
+import citizen_frontend.repository.licence_repository as licence_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.decorators import handle_exceptions
 from citizen_frontend.api.models.api_responses import LicenceResponse

@@ -13,7 +13,7 @@ from conftest import (
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 interaction_customisation_with_unset_published_customisation = InteractionCustomisation(

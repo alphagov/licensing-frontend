@@ -14,15 +14,11 @@ from citizen_frontend.api.models.api_responses import (
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
 )
-from citizen_frontend.api.repository import (
-    authority_repository,
-    interaction_customisation_repository,
-    licence_repository,
-)
 from citizen_frontend.api.utils import INTERACTION_ID_WORD_MAPPING
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
+from citizen_frontend.repository import authority_repository, interaction_customisation_repository, licence_repository
 from citizen_frontend.services import authority_service, licence_service
 
 logger = logging.getLogger(__name__)

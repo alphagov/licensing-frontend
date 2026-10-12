@@ -4,7 +4,7 @@ from common.models.licence import LicenceInteraction
 from django.http import Http404
 from django.shortcuts import render
 
-import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.mocks import get_mocked_context

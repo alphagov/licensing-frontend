@@ -5,8 +5,8 @@ from django.urls import reverse
 from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
-from citizen_frontend.api.repository import licence_repository
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
+from citizen_frontend.repository import licence_repository
 from citizen_frontend.tests.conftest import TEST_LICENCE
 
 

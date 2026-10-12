@@ -4,7 +4,7 @@ from conftest import TEST_LICENCE
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-import citizen_frontend.api.repository.licence_repository as licence_repository
+import citizen_frontend.repository.licence_repository as licence_repository
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
