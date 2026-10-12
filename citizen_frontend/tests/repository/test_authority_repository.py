@@ -71,7 +71,7 @@ def test_find_authority_by_url_slug_calls_database_with_correct_method_and_args(
     )
 
 
-def test_find_authority_by_url_slug_throws_validation_error_on_full_clean(mock_authority_model_get, mocker):
+def test_find_authority_by_url_slug_throws_error_on_full_clean_failure(mock_authority_model_get, mocker):
     instance = TEST_AUTHORITY
     mock_authority_model_get.return_value = instance
 
@@ -85,7 +85,7 @@ def test_find_authority_by_url_slug_throws_validation_error_on_full_clean(mock_a
     assert e.value.args[0] == expected_error_message
 
 
-def test_find_authority_by_url_slug_throws_database_error(mock_authority_model_get):
+def test_find_authority_by_url_slug_throws_error_on_database_error(mock_authority_model_get):
     mock_authority_model_get.side_effect = DatabaseError()
 
     expected_error_message = "There was a database error accessing Authorities collection"
