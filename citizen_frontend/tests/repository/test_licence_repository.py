@@ -119,3 +119,14 @@ def test_get_licence_by_url_slug_throws_error_on_full_clean_failure(mock_get_lic
     with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_licence_by_url_slug(TEST_LICENCE.url_slug)
     assert e.value.args[0] == expected_error_message
+
+
+def test_get_licence_by_url_slug_throws_error_on_database_error(mock_get_licence):
+    mock_get_licence.side_effect = DatabaseError()
+
+    expected_error_message = "DocumentDB error fetching licence"
+
+    with pytest.raises(DocumentDBError) as e:
+        licence_repository.get_licence_by_url_slug(TEST_LICENCE.url_slug)
+
+    assert e.value.args[0] == expected_error_message

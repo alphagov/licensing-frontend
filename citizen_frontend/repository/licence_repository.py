@@ -18,8 +18,10 @@ def get_licence_by_url_slug(url_slug: str) -> Licence:
     except ValidationError as e:
         logger.error("Licence does not match model")
         raise DataIntegrityError(f"Licence validation error: {e.message}") from e
+    except DatabaseError as e:
+        logger.error("DocumentDB error fetching licence: %s", e)
+        raise DocumentDBError("DocumentDB error fetching licence") from e
     except Licence.DoesNotExist:
-        # TODO return a custom error
         raise FileNotFoundError("Temporary licence does not exist") from None
 
 
