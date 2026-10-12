@@ -1,6 +1,6 @@
-from common.models.authorities import LicenceDetails
-from common.models.interaction_customisations import Customisation
-from common.models.licences import LicenceInteraction
+from common.models.authority import LicenceDetail
+from common.models.interaction_customisation import Customisation
+from common.models.licence import LicenceInteraction
 from django.http import Http404
 from django.shortcuts import render
 
@@ -25,7 +25,7 @@ def _get_published_customisation_or_redirect(
     return published_customisation
 
 
-def _get_correct_url_for_legislation(licence_details: LicenceDetails, published_customisation: Customisation):
+def _get_correct_url_for_legislation(licence_details: LicenceDetail, published_customisation: Customisation):
     return published_customisation.information_url or licence_details.authority_url
 
 
