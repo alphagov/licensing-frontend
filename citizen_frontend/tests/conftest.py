@@ -66,6 +66,7 @@ def test_submit_form_page_url(live_server):
     return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
 
 
+@pytest.fixture
 def mock_interaction_customisation_get(mocker):
     mock_get = mocker.patch.object(InteractionCustomisation.objects, "get")
     yield mock_get
