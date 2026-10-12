@@ -1,7 +1,7 @@
 import logging
 
 from common.models.licence import Licence
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import DatabaseError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
@@ -21,8 +21,8 @@ def get_licence_by_url_slug(url_slug: str) -> Licence:
     except DatabaseError as e:
         logger.error("DocumentDB error fetching licence: %s", e)
         raise DocumentDBError("DocumentDB error fetching licence") from e
-    except Licence.DoesNotExist:
-        raise FileNotFoundError("Temporary licence does not exist") from None
+    except Licence.DoesNotExist as e:
+        raise ObjectDoesNotExist(f"Licence does not exist: {url_slug}") from e
 
 
 def get_all_licences() -> list[Licence]:
