@@ -107,3 +107,15 @@ def test_get_licence_by_url_slug_calls_database_with_correct_method_and_args(moc
     licence_repository.get_licence_by_url_slug(TEST_LICENCE.url_slug)
 
     mock_get_licence.assert_called_with(url_slug=TEST_LICENCE.url_slug)
+
+
+def test_get_licence_by_url_slug_throws_error_on_full_clean_failure(mock_get_licence, mocker):
+    mock_get_licence.return_value = TEST_LICENCE
+
+    mocker.patch.object(TEST_LICENCE, "full_clean", side_effect=ValidationError("field error message"))
+
+    expected_error_message = "Licence validation error: field error message"
+
+    with pytest.raises(DataIntegrityError) as e:
+        licence_repository.get_licence_by_url_slug(TEST_LICENCE.url_slug)
+    assert e.value.args[0] == expected_error_message

@@ -13,12 +13,11 @@ logger.setLevel(logging.INFO)
 def get_licence_by_url_slug(url_slug: str) -> Licence:
     try:
         licence = Licence.objects.get(url_slug=url_slug)
-        licence.clean()
+        licence.full_clean()
         return licence
-    except ValidationError:
+    except ValidationError as e:
         logger.error("Licence does not match model")
-        # TODO return a custom error
-        raise FileNotFoundError("Temporary licence does not exist") from None
+        raise DataIntegrityError(f"Licence validation error: {e.message}") from e
     except Licence.DoesNotExist:
         # TODO return a custom error
         raise FileNotFoundError("Temporary licence does not exist") from None
