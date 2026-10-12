@@ -38,5 +38,8 @@ def find_authority_by_url_slug(url_slug: str) -> Authority | None:
     except ValidationError as e:
         logger.error("Authority does not match model")
         raise DataIntegrityError(f"Authority validation error: {e.message}") from e
+    except DatabaseError as e:
+        logger.error("There was a database error: %s", e)
+        raise DocumentDBError("There was a database error accessing Authorities collection") from e
     except Authority.DoesNotExist:
         return None

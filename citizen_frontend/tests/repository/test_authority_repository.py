@@ -72,3 +72,14 @@ def test_find_authority_by_url_slug_throws_validation_error_on_full_clean(mock_a
         find_authority_by_url_slug(url_slug=TEST_AUTHORITY.url_slug)
 
     assert e.value.args[0] == expected_error_message
+
+
+def test_find_authority_by_url_slug_throws_database_error(mock_authority_model_get):
+    mock_authority_model_get.side_effect = DatabaseError()
+
+    expected_error_message = "There was a database error accessing Authorities collection"
+
+    with pytest.raises(DocumentDBError) as e:
+        find_authority_by_url_slug(url_slug=TEST_AUTHORITY.url_slug)
+
+    assert e.value.args[0] == expected_error_message
