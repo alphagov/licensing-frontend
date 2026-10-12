@@ -1,6 +1,6 @@
 import logging
 
-from common.models.licences import Licence
+from common.models.licence import Licence
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 

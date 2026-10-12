@@ -6,16 +6,16 @@ import pytest
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
-from common.models.authorities import Authority, ContactDetails, LicenceDetails
-from common.models.interaction_customisations import Customisation, InteractionCustomisation
-from common.models.licences import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
+from common.models.authority import Authority, ContactInformation, LicenceDetail
+from common.models.interaction_customisation import Customisation, InteractionCustomisation
+from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 
 import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.views
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     IssuingAuthority,
     LicenceAuthoritiesAndInteractionsResponse,
@@ -88,7 +88,7 @@ def mock_get_licence(mocker):
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
-TEST_LICENCE_DETAIL = LicenceDetails(
+TEST_LICENCE_DETAIL = LicenceDetail(
     licence_code=TEST_LICENCE_CODE,
     offered_by_authority=True,
     using_gov_uk=True,
@@ -105,7 +105,7 @@ TEST_AUTHORITY = Authority(
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
     authority_url="https://test-authority.com",
-    contact_details=ContactDetails(),
+    contact_details=ContactInformation(),
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(
@@ -248,7 +248,7 @@ TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
 TEST_ISSUING_AUTHORITY = IssuingAuthority(
     authority_name=TEST_AUTHORITY.full_name,
     authority_slug=TEST_AUTHORITY.url_slug,
-    authority_contact=AuthorityContactDetails(
+    authority_contact=AuthorityContactInformation(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
@@ -266,7 +266,7 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
         IssuingAuthority(
             authority_name="Test Authority",
             authority_slug="test-authority",
-            authority_contact=AuthorityContactDetails(
+            authority_contact=AuthorityContactInformation(
                 website="https://test-authority.com",
                 email="test@test-authority.com",
                 phone="12345667801",

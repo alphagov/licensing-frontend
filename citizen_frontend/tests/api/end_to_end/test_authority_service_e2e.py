@@ -1,4 +1,4 @@
-from common.models.licences import Licence
+from common.models.licence import Licence
 
 from citizen_frontend.services.authority_service import get_authorities_for_licence_with_geographical_locator
 

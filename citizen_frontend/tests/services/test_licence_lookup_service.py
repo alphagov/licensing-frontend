@@ -1,14 +1,15 @@
 from copy import deepcopy
 
 import pytest
-from common.models.authorities import ContactDetails
+from common.enums.interaction_id_codes import InteractionIdCodes
+from common.models.authority import ContactInformation
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
 from pydantic import ValidationError
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
-    AuthorityContactDetails,
+    AuthorityContactInformation,
     AuthorityInteraction,
     LicenceAuthoritiesAndInteractionsResponse,
 )
@@ -142,7 +143,7 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
     mock_get_authorities_by_licence_code,
     mock_get_authority_licence_interaction_details,
 ):
-    contact_details_2 = ContactDetails(
+    contact_details_2 = ContactInformation(
         line_one="2 test authority",
         line_two="2 test road",
         line_three="",
@@ -160,7 +161,7 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
     test_issuing_authority_2 = deepcopy(TEST_ISSUING_AUTHORITY)
     test_issuing_authority_2.authority_name = test_authority_2.full_name
     test_issuing_authority_2.authority_slug = test_authority_2.url_slug
-    test_issuing_authority_2.authority_contact = AuthorityContactDetails(
+    test_issuing_authority_2.authority_contact = AuthorityContactInformation(
         website=test_authority_2.authority_url,
         email=test_authority_2.contact_details.email,
         phone=test_authority_2.contact_details.phone_number,
@@ -344,7 +345,7 @@ def test_get_licence_interaction_context_returns_error_when_no_licence_found(
     mock_licence_repository.get_licence_by_url_slug.return_value = None
 
     with pytest.raises(RuntimeError) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "missing licence"
 
@@ -354,7 +355,7 @@ def test_get_licence_interaction_context_returns_error_when_no_authority_found(
 ):
     mock_authority_repository.find_authority_by_url_slug.return_value = None
     with pytest.raises(RuntimeError) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "missing authority"
 
@@ -364,7 +365,7 @@ def test_get_licence_interaction_context_returns_error_when_no_licence_details_f
 ):
     mock_find_licence_detail.return_value = None
     with pytest.raises(RuntimeError) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "missing details"
 
@@ -374,7 +375,7 @@ def test_get_licence_interaction_context_returns_error_when_no_interaction_found
 ):
     mock_licence_service.find_interaction.return_value = None
     with pytest.raises(RuntimeError) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", LicenceInteractions.RENEW, 5)
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "missing interaction"
 
@@ -385,9 +386,7 @@ def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
     mock_authority_repository.find_authority_by_url_slug.return_value.url_slug = "url_slug"
     mock_licence_repository.get_licence_by_url_slug.return_value.licence_code = "licence_code"
     actual_licence, actual_authority, actual_interaction, actual_licence_detail = (
-        licence_lookup_service.get_licence_interaction_context(
-            "authority", "url_slug", str(LicenceInteractions.RENEW), 5
-        )
+        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
     )
     assert actual_authority.url_slug == "url_slug"
     assert actual_licence.licence_code == "licence_code"
