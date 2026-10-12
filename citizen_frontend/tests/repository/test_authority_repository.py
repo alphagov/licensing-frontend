@@ -60,6 +60,17 @@ def test_get_licence_offering_authorities_by_licence_code_throws_error_database_
     assert e.value.args[0] == expected_error_message
 
 
+def test_find_authority_by_url_slug_calls_database_with_correct_method_and_args(
+    mock_authority_model_get,
+):
+
+    find_authority_by_url_slug(TEST_AUTHORITY.url_slug)
+
+    mock_authority_model_get.assert_called_with(
+        url_slug=TEST_AUTHORITY.url_slug,
+    )
+
+
 def test_find_authority_by_url_slug_throws_validation_error_on_full_clean(mock_authority_model_get, mocker):
     instance = TEST_AUTHORITY
     mock_authority_model_get.return_value = instance
