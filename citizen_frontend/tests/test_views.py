@@ -1,7 +1,10 @@
 import pytest
+from django.core.exceptions import ObjectDoesNotExist
 from django.test import Client
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
+
+from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
 @pytest.fixture
@@ -20,13 +23,16 @@ def get_begin_application_steps_url():
     return _url
 
 
+@pytest.mark.parametrize("error", [DataIntegrityError, DocumentDBError, ObjectDoesNotExist])
 def test_begin_application_steps_redirects_to_not_found_when_no_licence_context_found(
-    client: Client, mock_get_licence_interaction_context, get_begin_application_steps_url
+    client: Client, mock_get_licence_interaction_context, get_begin_application_steps_url, error
 ):
-    mock_get_licence_interaction_context.side_effect = RuntimeError
+    expected_error_message = "Incorrect licence, or authority does not exist"
+
+    mock_get_licence_interaction_context.side_effect = error("some other error message")
     response = client.get(get_begin_application_steps_url())
     assert response.status_code == 404
-    assert response.context["exception"].lower() == "missing context"
+    assert response.context["exception"] == expected_error_message
 
 
 def test_begin_application_steps_redirects_to_not_handled_when_not_handled_by_licensify(
@@ -36,7 +42,7 @@ def test_begin_application_steps_redirects_to_not_handled_when_not_handled_by_li
     mock_get_licence_interaction_context.return_value[index_of_licence_detail].using_gov_uk = False
     response = client.get(get_begin_application_steps_url())
     assert response.status_code == 404
-    assert response.context["exception"].lower() == "unhandled"
+    assert response.context["exception"] == "Unhandled licence"
 
 
 def test_begin_application_steps_redirects_to_suspended_licence_when_no_published_customisation(
@@ -94,7 +100,7 @@ def test_begin_application_steps_returns_error_when_no_licence_interaction_found
     client: Client,
     get_begin_application_steps_url,
 ):
-    non_existant_interaction_id = "not_real_interaction"
-    response = client.get(get_begin_application_steps_url(interaction_id=non_existant_interaction_id))
+    non_existent_interaction_id = "not_real_interaction"
+    response = client.get(get_begin_application_steps_url(interaction_id=non_existent_interaction_id))
     assert response.status_code == 404
-    assert response.context["exception"].lower() == "bad interaction"
+    assert response.context["exception"] == "Invalid interaction ID"
