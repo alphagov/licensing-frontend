@@ -5,6 +5,7 @@ from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authority import ContactInformation
 from common.models.shared_models import PaymentAmount
 from conftest import TEST_ISSUING_AUTHORITY
+from django.core.exceptions import ObjectDoesNotExist
 from pydantic import ValidationError
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
@@ -342,42 +343,42 @@ def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_
 def test_get_licence_interaction_context_returns_error_when_no_licence_found(
     mock_licence_repository, mock_authority_repository
 ):
-    mock_licence_repository.get_licence_by_url_slug.return_value = None
+    mock_licence_repository.get_licence_by_url_slug.side_effect = ObjectDoesNotExist("Licence does not exist: url_slug")
 
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(ObjectDoesNotExist) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
-    assert e.value.args[0] == "missing licence"
+    assert e.value.args[0] == "Licence does not exist: url_slug"
 
 
 def test_get_licence_interaction_context_returns_error_when_no_authority_found(
     mock_licence_repository, mock_authority_repository
 ):
     mock_authority_repository.find_authority_by_url_slug.return_value = None
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(ObjectDoesNotExist) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
-    assert e.value.args[0] == "missing authority"
+    assert e.value.args[0] == "Authority not found"
 
 
 def test_get_licence_interaction_context_returns_error_when_no_licence_details_found(
     mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail
 ):
     mock_find_licence_detail.return_value = None
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(ObjectDoesNotExist) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
-    assert e.value.args[0] == "missing details"
+    assert e.value.args[0] == "Licence detail not found"
 
 
 def test_get_licence_interaction_context_returns_error_when_no_interaction_found(
     mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
 ):
     mock_licence_service.find_interaction.return_value = None
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(ObjectDoesNotExist) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
-    assert e.value.args[0] == "missing interaction"
+    assert e.value.args[0] == "Interaction not found"
 
 
 def test_get_licence_interaction_context_returns_all_data_when_all_data_found(

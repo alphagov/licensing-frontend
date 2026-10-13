@@ -4,8 +4,9 @@ import re
 from common.models.authority import Authority, LicenceDetail
 from common.models.licence import Licence
 
-import citizen_frontend.api.repository.authority_repository as authority_repository
+import citizen_frontend.repository.authority_repository as authority_repository
 from citizen_frontend.api.utils import COUNTRY_TO_GSS_CODE, COUNTRY_TO_SNAC_CODE
+from citizen_frontend.exceptions import DataIntegrityError
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -63,7 +64,6 @@ def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetai
         details for details in authority.licence_details if details.licence_code == licence_code
     ]
     if len(matching_licence_details) > 1:
-        raise RuntimeError(
-            f" Bad data, multiple matching details for licence code: {licence_code} on {authority.full_name}"
-        )
+        logger.error("Multiple licence details found for licence code: %s, %s", licence_code, authority.id)
+        raise DataIntegrityError(f"Multiple matching details for licence code: {licence_code} on {authority.id}")
     return matching_licence_details[0] if matching_licence_details else None

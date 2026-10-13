@@ -44,3 +44,7 @@ test-services: prepare
 
 test-views: prepare
 	pytest citizen_frontend/tests/test_views.py
+
+
+test-repo: prepare
+	pytest citizen_frontend/tests/repository

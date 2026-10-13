@@ -4,7 +4,7 @@ from common.models.licence import LicenceInteraction
 from django.http import Http404
 from django.shortcuts import render
 
-import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.mocks import get_mocked_context
@@ -35,14 +35,14 @@ def begin_application_steps(
     try:
         interaction_type = INTERACTION_WORD_MAPPING.get(interaction_id)
         if interaction_type is None:
-            raise Http404("bad interaction") from None
+            raise Http404("Invalid interaction ID") from None
 
         licence, authority, interaction, licence_details = licence_lookup_service.get_licence_interaction_context(
             authority_slug, licence_slug, interaction_type, interaction_sub_id
         )
 
         if not licence_details.can_apply_via_licensify:
-            raise Http404("unhandled") from None
+            raise Http404("Unhandled licence") from None
 
         published_customisation = _get_published_customisation_or_redirect(
             authority_slug, licence.licence_code, interaction
@@ -81,8 +81,6 @@ def begin_application_steps(
         return render(request, "citizen_frontend/licence_introduction_page.html", context)
     except Http404:
         raise
-    except RuntimeError:
-        raise Http404("missing context") from None
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
 

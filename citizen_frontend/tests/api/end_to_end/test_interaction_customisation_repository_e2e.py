@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-import citizen_frontend.api.repository.interaction_customisation_repository as interaction_customisation_repository
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 
 
 def test_get_published_customisation():
