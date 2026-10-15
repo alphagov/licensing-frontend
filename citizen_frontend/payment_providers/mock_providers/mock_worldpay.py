@@ -13,10 +13,12 @@ def create_response(data: dict):
         "amount": data["amount"],
         "transId": "UUID",
         "callBackPW": data["callBackPW"],
+        "transStatus": "Y",
     }
     if data["cartId"] == "12345":
         mock_response["transStatus"] = "Y"
     if data["cartId"] == "67890":
+        # "C" represents a failed payment, no transID is included in a failed response
         mock_response["transStatus"] = "C"
         mock_response.pop("transId")
 
