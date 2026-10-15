@@ -71,3 +71,9 @@ def test_mock_worldpay_handles_failed_payment_request(client, mock_post):
         mock_post.assert_called_with(
             "http://testserver/fake/payment/worldpayCallback", data=expect_return_form.cleaned_data
         )
+
+
+def test_mock_worldpay_returns_400_invalid_request(client, mock_post):
+    response = client.post(reverse("worldpay"), data={"invalid": "form format"})
+
+    assert response.status_code == 400

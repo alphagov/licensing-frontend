@@ -60,6 +60,8 @@ NORTHGATE
 """
 
 
+# Do we need to use forms in this instance?
+# Yes it's an easy way to bind and validate querystring params on a GET request.
 class MockNorthgateRequestForm(forms.Form):
     amount = forms.CharField()
     returnurl = forms.CharField()
