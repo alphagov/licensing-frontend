@@ -34,7 +34,6 @@
 # * /
 import requests
 from django.http import JsonResponse
-from django.urls import reverse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.payment_providers.forms.mock_forms import MockNorthgateRequestForm
@@ -42,12 +41,12 @@ from citizen_frontend.payment_providers.forms.mock_forms import MockNorthgateReq
 
 @require_GET
 def handle_payment(request):
-    callback = "http://" + request.get_host() + reverse("northgateCallback")
+    # callback = "http://" + request.get_host() + reverse("northgateCallback")
 
     request_form = MockNorthgateRequestForm(request.GET)
 
     if request_form.is_valid():
-        requests.get(url=callback)
+        requests.get(url=request_form.cleaned_data["returnurl"])
 
     return JsonResponse(status=200, data={})
 

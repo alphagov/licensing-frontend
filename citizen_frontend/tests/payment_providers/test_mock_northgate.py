@@ -20,13 +20,13 @@ def test_mock_northgate_throws_405_on_anything_but_get(client):
     assert response.status_code == 405
 
 
-def test_mock_northgate_calls_callback_valid_request(client, mock_get):
+def test_mock_northgate_calls_callback_with_correct_args_valid_request(client, mock_get):
     with open("citizen_frontend/payment_providers/mock_providers/mock_record.xml", encoding="utf-8") as f:
         xml_string = f.read().strip()
 
     request_data = {
         "data": "we send this and then expect it back",
-        "returnurl": "to our callback url",
+        "returnurl": "http://testserver/fake/payment/northgateCallback",
         "returntext": "take me back",
         "amount": "10",
         "recordxml": xml_string,
@@ -36,4 +36,4 @@ def test_mock_northgate_calls_callback_valid_request(client, mock_get):
     response = client.get(reverse("northgate"), data=request_data)
 
     assert response.status_code == 200
-    mock_get.assert_called()
+    mock_get.assert_called_with(url=request_data["returnurl"])
