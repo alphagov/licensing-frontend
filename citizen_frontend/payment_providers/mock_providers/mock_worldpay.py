@@ -7,17 +7,20 @@ from citizen_frontend.payment_providers.forms.mock_forms import MockWorldPayRequ
 
 
 def create_response(data: dict):
+    mock_response = {
+        "cartId": data["cartId"],
+        "instId": data["instId"],
+        "amount": data["amount"],
+        "transId": "UUID",
+        "callBackPW": data["callBackPW"],
+    }
     if data["cartId"] == "12345":
-        return MockWorldPayResponseForm(
-            {
-                "cartId": data["cartId"],
-                "instId": data["instId"],
-                "amount": data["amount"],
-                "transStatus": "Y",
-                "transId": "UUID",
-                "callBackPW": data["callBackPW"],
-            }
-        )
+        mock_response["transStatus"] = "Y"
+    if data["cartId"] == "67890":
+        mock_response["transStatus"] = "C"
+        mock_response.pop("transId")
+
+    return MockWorldPayResponseForm(mock_response)
 
 
 @require_POST
