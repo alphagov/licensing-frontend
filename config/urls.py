@@ -26,4 +26,5 @@ urlpatterns = [
     path("apply-for-a-licence/", include("citizen_frontend.urls")),
     path("assets/<path:path>", RedirectView.as_view(url="/static/assets/%(path)s", permanent=False)),
     path("api/", include("citizen_frontend.api.urls")),
+    path("fake/", include("citizen_frontend.payment_providers.mock_providers.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

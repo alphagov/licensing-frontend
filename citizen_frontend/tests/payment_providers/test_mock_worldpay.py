@@ -12,24 +12,15 @@
 #                       Failure => "transStatus" == "C" this is wrapped in Seq()
 #                       Failure => CallbackPW mismatch
 #   Mock requests to cover the about scenarios => again post form data
-from copy import deepcopy
+import requests
+from django.urls import reverse
 
-# unsure of data structure of acctId
-SUCCESSFUL_PAYMENT = {
-    "cartId": "12345",
-    "callBackPW": "supersecret",
-    "amount": "10",
-    "currency": "GBP",
-    "signature": "MD5 signature created from various variables",
-    "desc": "description or purchase code",
-    "authValidTo": "string time tha auth is valid to",
-    "acctId": {"details": "from", "payment": "parameters"},
-    "instId": "merchant id on payment account",
-}
+from citizen_frontend.payment_providers.forms.mock_forms import SUCCESSFUL_PAYMENT_REQUEST
 
-FAILED_PAYMENT = deepcopy(SUCCESSFUL_PAYMENT)
-FAILED_PAYMENT["cartId"] = "67890"
 
-NON_MATCHING_PASSWORD_PAYMENT = deepcopy(SUCCESSFUL_PAYMENT)
-NON_MATCHING_PASSWORD_PAYMENT["callBackPW"] = "not matching"
-NON_MATCHING_PASSWORD_PAYMENT["signature"] = "not matching"
+def test_mock_worldpay_handles_successful_payment_request(client, mocker):
+    mock_post = mocker.patch.object(requests, "post")
+
+    response = client.post(reverse("worldpay"), data=SUCCESSFUL_PAYMENT_REQUEST)
+    mock_post.assert_called()
+    assert response.status_code == 200
