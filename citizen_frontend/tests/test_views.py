@@ -1,9 +1,12 @@
+import http
+
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import Client
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
+import citizen_frontend.views as views
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 
@@ -104,3 +107,8 @@ def test_begin_application_steps_returns_error_when_no_licence_interaction_found
     response = client.get(get_begin_application_steps_url(interaction_id=non_existent_interaction_id))
     assert response.status_code == 404
     assert response.context["exception"] == "Invalid interaction ID"
+
+
+def test_licence_must_be_applied_for_locally():
+    response = views.licence_must_be_applied_for_locally(None)
+    assert response.status_code == http.HTTPStatus.OK
