@@ -36,7 +36,12 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
-from citizen_frontend.payment_providers.forms.mock_forms import MockNorthgateRequestForm
+from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_SUCCESS_RESPONSE_NORHTGATE,
+    MockNorthgateRequestForm,
+    MockNorthgateResponseForm,
+    build_northgate_response_with_hash,
+)
 
 
 @require_GET
@@ -46,9 +51,16 @@ def handle_payment(request):
     request_form = MockNorthgateRequestForm(request.GET)
 
     if request_form.is_valid():
-        requests.get(url=request_form.cleaned_data["returnurl"])
+        data = build_response()
+        requests.get(url=request_form.cleaned_data["returnurl"], data=data)
 
     return JsonResponse(status=200, data={})
+
+
+def build_response() -> dict:
+    response_form = MockNorthgateResponseForm(build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORHTGATE))
+    if response_form.is_valid():
+        return response_form.cleaned_data
 
 
 def callback(request):

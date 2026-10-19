@@ -37,7 +37,7 @@ def handle_payment(request):
         if response_form.is_valid():
             requests.post(callback_url, data=response_form.cleaned_data)
 
-        return JsonResponse(status=200, data={})
+        return JsonResponse(status=200, data=f"made call to callback url {callback_url}", safe=False)
 
     else:
         return JsonResponse(status=400, data="Invalid request", safe=False)

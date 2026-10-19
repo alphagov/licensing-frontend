@@ -2,6 +2,21 @@ import pytest
 import requests
 from django.urls import reverse
 
+from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_SUCCESS_REQUEST_NORTHGATE,
+    MOCK_SUCCESS_RESPONSE_NORHTGATE,
+    MockNorthgateResponseForm,
+    build_northgate_response_with_hash,
+)
+from citizen_frontend.payment_providers.mock_providers.mock_northgate import build_response
+
+# TODO scenarios: successful transaction
+#                error in transaction
+#                non matching hash
+#                reason "cancel" present
+#                service processed != "true"
+# hash generation?...
+
 
 @pytest.fixture
 def mock_get(mocker):
@@ -21,19 +36,22 @@ def test_mock_northgate_throws_405_on_anything_but_get(client):
 
 
 def test_mock_northgate_calls_callback_with_correct_args_valid_request(client, mock_get):
-    with open("citizen_frontend/payment_providers/mock_providers/mock_record.xml", encoding="utf-8") as f:
-        xml_string = f.read().strip()
-
-    request_data = {
-        "data": "we send this and then expect it back",
-        "returnurl": "http://testserver/fake/payment/northgateCallback",
-        "returntext": "take me back",
-        "amount": "10",
-        "recordxml": xml_string,
-        "payforbasketmode": "true",
-        "ignoreconfirmation": "true",
-    }
-    response = client.get(reverse("northgate"), data=request_data)
+    response = client.get(reverse("northgate"), data=MOCK_SUCCESS_REQUEST_NORTHGATE)
 
     assert response.status_code == 200
-    mock_get.assert_called_with(url=request_data["returnurl"])
+    expected_success_form = MockNorthgateResponseForm(
+        build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORHTGATE)
+    )
+    if expected_success_form.is_valid():
+        data = expected_success_form.cleaned_data
+
+    mock_get.assert_called_with(url=MOCK_SUCCESS_REQUEST_NORTHGATE["returnurl"], data=data)
+
+
+def test_build_response_builds_success_response():
+    expected_success_form = MockNorthgateResponseForm(
+        build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORHTGATE)
+    )
+    if expected_success_form.is_valid():
+        actual = build_response()
+        assert actual == expected_success_form.cleaned_data

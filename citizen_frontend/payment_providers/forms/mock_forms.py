@@ -1,3 +1,4 @@
+import hashlib
 import json
 from copy import deepcopy
 
@@ -55,6 +56,7 @@ SUCCESS_REQUEST_FORM = MockWorldPayRequestForm(SUCCESSFUL_PAYMENT_REQUEST)
 FAILED_REQUEST_FORM = MockWorldPayRequestForm(FAILED_PAYMENT_REQUEST)
 NON_MATCHING_REQUEST_FORM = MockWorldPayRequestForm(NON_MATCHING_PASSWORD_PAYMENT_REQUEST)
 
+
 """
 NORTHGATE
 """
@@ -87,3 +89,46 @@ class MockNorthgateResponseForm(forms.Form):
     authorisationstatus = forms.CharField(required=False)
     reason = forms.CharField(required=False)
     error = forms.CharField(required=False)
+
+
+# how often does this happen if this is here? once?, alot?
+with open("citizen_frontend/payment_providers/mock_providers/mock_success_record.xml", encoding="utf-8") as f:
+    success_record = f.read().strip()
+
+MOCK_SUCCESS_REQUEST_NORTHGATE = {
+    "data": "we send this and then expect it back",
+    "returnurl": "http://testserver/fake/payment/northgateCallback",
+    "returntext": "take me back",
+    "amount": "10.00",
+    "recordxml": success_record,
+    "payforbasketmode": "true",
+    "ignoreconfirmation": "true",
+}
+
+MOCK_SUCCESS_RESPONSE_NORHTGATE = {
+    "transactiontype": "B2",
+    "amount": MOCK_SUCCESS_REQUEST_NORTHGATE["amount"],
+    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "merchantnumber": "random merchant number",
+    "authorisationcode": "random authorization code",
+    "recipientnumber": "random recipient number",
+    "date": "a date",
+    "merchanttid": "random merchant ID",
+    "serviceprocessed": "true",
+    "administrationcharge": "0.00",
+}
+
+
+def build_northgate_response_with_hash(response_dict):
+    string_to_hash = ""
+    for key, value in response_dict.items():
+        string_to_hash += f"{key}={value}"
+    string_to_hash += "sharedSecret"
+
+    dict_to_return = deepcopy(response_dict)
+    dict_to_return["hash"] = hashlib.sha256(string_to_hash.encode("utf-8")).hexdigest()
+
+    return dict_to_return
+
+
+MOCK_NORTHGATE_RESPONSE_SUCCESS_FORM = MockNorthgateResponseForm(MOCK_SUCCESS_REQUEST_NORTHGATE)
