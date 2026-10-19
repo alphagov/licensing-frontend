@@ -141,6 +141,29 @@ MOCK_NORTHGATE_FAILURE_RESPONSE = {
     "authorisationcode": "failed",
 }
 
+with open("citizen_frontend/payment_providers/mock_providers/mock_cancel_record.xml", encoding="utf-8") as f:
+    cancel_record = f.read()
+
+
+MOCK_NORTHGATE_CANCEL_REQUEST = {
+    "data": "we send this and then expect it back",
+    "returnurl": "http://testserver/fake/payment/northgateCallback",
+    "returntext": "take me back",
+    "amount": "10.00",
+    "recordxml": cancel_record,
+    "payforbasketmode": "true",
+    "ignoreconfirmation": "true",
+}
+
+MOCK_NORTHGATE_CANCEL_RESPONSE = {
+    "transactiontype": "B2",
+    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "merchantid": "random merchant number",
+    "date": "a date",
+    "serviceprocessed": "false",
+    "reason": "cancel",
+}
+
 
 def build_northgate_response_with_hash(response_dict):
     string_to_hash = ""
@@ -152,6 +175,3 @@ def build_northgate_response_with_hash(response_dict):
     dict_to_return["hash"] = hashlib.sha256(string_to_hash.encode("utf-8")).hexdigest()
 
     return dict_to_return
-
-
-MOCK_NORTHGATE_RESPONSE_SUCCESS_FORM = MockNorthgateResponseForm(MOCK_SUCCESS_REQUEST_NORTHGATE)

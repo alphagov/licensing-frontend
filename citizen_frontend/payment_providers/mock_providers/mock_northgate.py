@@ -39,6 +39,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_NORTHGATE_CANCEL_RESPONSE,
     MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_RESPONSE_NORHTGATE,
     MockNorthgateRequestForm,
@@ -57,11 +58,15 @@ def handle_payment(request):
         params = build_response(request_form.cleaned_data)
         requests.get(url=request_form.cleaned_data["returnurl"], params=params)
 
-    return JsonResponse(status=200, data=params)
+        return JsonResponse(status=200, data=params)
 
 
 def build_response(request: dict) -> dict:
-    outcome_response_map = {"success": MOCK_SUCCESS_RESPONSE_NORHTGATE, "failure": MOCK_NORTHGATE_FAILURE_RESPONSE}
+    outcome_response_map = {
+        "success": MOCK_SUCCESS_RESPONSE_NORHTGATE,
+        "failure": MOCK_NORTHGATE_FAILURE_RESPONSE,
+        "cancel": MOCK_NORTHGATE_CANCEL_RESPONSE,
+    }
 
     xml_record_root = ET.fromstring(request.get("recordxml", ""))
     outcome = xml_record_root.findtext(".//reference")

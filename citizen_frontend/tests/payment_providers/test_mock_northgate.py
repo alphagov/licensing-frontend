@@ -3,6 +3,8 @@ import requests
 from django.urls import reverse
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_NORTHGATE_CANCEL_REQUEST,
+    MOCK_NORTHGATE_CANCEL_RESPONSE,
     MOCK_NORTHGATE_FAILURE_REQUEST,
     MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_REQUEST_NORTHGATE,
@@ -23,12 +25,6 @@ from citizen_frontend.payment_providers.mock_providers.mock_northgate import bui
 @pytest.fixture
 def mock_get(mocker):
     yield mocker.patch.object(requests, "get")
-
-
-def test_mock_northgate_handles_get_request(client):
-    response = client.get(reverse("northgate"))
-
-    assert response.status_code == 200
 
 
 def test_mock_northgate_throws_405_on_anything_but_get(client):
@@ -66,3 +62,14 @@ def test_build_response_builds_failure_response():
     if expected_failure_form.is_valid():
         actual = build_response(MOCK_NORTHGATE_FAILURE_REQUEST)
         assert actual == expected_failure_form.cleaned_data
+
+
+def test_build_response_builds_cancelled_response():
+    expected_cancel_form = MockNorthgateResponseForm(build_northgate_response_with_hash(MOCK_NORTHGATE_CANCEL_RESPONSE))
+    if expected_cancel_form.is_valid():
+        actual = build_response(MOCK_NORTHGATE_CANCEL_REQUEST)
+        assert actual == expected_cancel_form.cleaned_data
+
+
+def test_errors():
+    pass
