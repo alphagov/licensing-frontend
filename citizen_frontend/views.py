@@ -31,7 +31,9 @@ def _get_correct_url_for_legislation(licence_details: LicenceDetail, published_c
 
 def licence_must_be_applied_for_locally(request, authority_url=None):
     return render(
-        request, "citizen_frontend/licence_must_be_applied_for_locally_page.html", {"authority_url": authority_url}
+        request,
+        "citizen_frontend/licence_must_be_applied_for_locally_page.html",
+        {"title": "This licence must be applied for locally", "authority_url": authority_url},
     )
 
 

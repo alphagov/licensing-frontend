@@ -1,11 +1,12 @@
 {% extends "citizen_frontend/base.html" %}
 
 {% block content %}
+    <h3 class="govuk-heading-s">To obtain this licence, you need to contact the authority directly</h3>
     {% if authority_url %}
         <p class="govuk-body">To continue go to
             <a href="{{ authority_url }}"
                data-testid="authority_url"
-               class="govuk-link">{{ authority_url }}</a>
+               class="govuk-link govuk-!-display-block">{{ authority_url }}</a>
         </p>
     {% else %}
         <p class="govuk-body" data-testid="no_authority_link">
