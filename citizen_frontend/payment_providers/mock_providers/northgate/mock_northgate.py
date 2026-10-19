@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 
 import requests
 from django.http import JsonResponse
+from django.urls import reverse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
@@ -19,10 +20,13 @@ from citizen_frontend.payment_providers.mock_providers.northgate.mock_responses 
 
 @require_GET
 def handle_payment(request):
+    callback_url = "http://" + request.get_host() + reverse("northgateCallback")
+
     request_form = NorthgateRequestForm(request.GET)
 
     if request_form.is_valid():
         params = build_response(request_form.cleaned_data)
+        request_form.cleaned_data["returnurl"] = callback_url
         requests.get(url=request_form.cleaned_data["returnurl"], params=params)
 
         return JsonResponse(status=200, data=params)

@@ -9,9 +9,9 @@ MOCK_SUCCESS_RESPONSE_NORTHGATE = {
     "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
     "merchantnumber": "random merchant number",
     "authorisationcode": "random authorization code",
-    "recipientnumber": "random recipient number",
+    "receiptnumber": "random recipient number",
     "date": "a date",
-    "merchanttid": "random merchant ID",
+    "merchantid": "random merchant ID",
     "serviceprocessed": "true",
     "administrationcharge": "0.00",
 }

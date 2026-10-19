@@ -79,7 +79,7 @@ class NorthgateResponseForm(forms.Form):
     merchantnumber = forms.CharField(required=False)
     authorisationcode = forms.CharField(required=False)
     date = forms.CharField(required=False)
-    merchanttid = forms.CharField(required=False)
+    merchantid = forms.CharField(required=False)
     serviceprocessed = forms.CharField()
     receiptnumber = forms.CharField(required=False)
     hash = forms.CharField()
