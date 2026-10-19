@@ -57,7 +57,7 @@ def handle_payment(request):
         params = build_response(request_form.cleaned_data)
         requests.get(url=request_form.cleaned_data["returnurl"], params=params)
 
-    return JsonResponse(status=200, data={})
+    return JsonResponse(status=200, data=params)
 
 
 def build_response(request: dict) -> dict:
