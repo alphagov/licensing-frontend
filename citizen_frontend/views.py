@@ -29,8 +29,10 @@ def _get_correct_url_for_legislation(licence_details: LicenceDetail, published_c
     return published_customisation.information_url or licence_details.authority_url
 
 
-def licence_must_be_applied_for_locally(request):
-    return render(request, "citizen_frontend/licence_must_be_applied_for_locally_page.html", {})
+def licence_must_be_applied_for_locally(request, authority_url=None):
+    return render(
+        request, "citizen_frontend/licence_must_be_applied_for_locally_page.html", {"authority_url": authority_url}
+    )
 
 
 def begin_application_steps(
@@ -46,7 +48,7 @@ def begin_application_steps(
         )
 
         if not licence_details.can_apply_via_licensify:
-            licence_must_be_applied_for_locally(request)
+            return licence_must_be_applied_for_locally(request, licence_details.authority_url)
 
         published_customisation = _get_published_customisation_or_redirect(
             authority_slug, licence.licence_code, interaction

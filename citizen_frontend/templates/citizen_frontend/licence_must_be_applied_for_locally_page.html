@@ -1,5 +1,16 @@
 {% extends "citizen_frontend/base.html" %}
 
 {% block content %}
-    <h2 class="govuk-heading-m" data-testid="action-heading">Submit the application</h2>
+    {% if authority_url %}
+        <p class="govuk-body">To continue go to
+            <a href="{{ authority_url }}"
+               data-testid="authority_url"
+               class="govuk-link">{{ authority_url }}</a>
+        </p>
+    {% else %}
+        <p class="govuk-body" data-testid="no_authority_link">
+            Unfortunately, we don't have a direct link for this Authority, try searching for it on your favourite search
+            engine
+        </p>
+    {% endif %}
 {% endblock %}
