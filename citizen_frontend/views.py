@@ -29,6 +29,14 @@ def _get_correct_url_for_legislation(licence_details: LicenceDetail, published_c
     return published_customisation.information_url or licence_details.authority_url
 
 
+def licence_must_be_applied_for_locally(request, authority_url=None):
+    return render(
+        request,
+        "citizen_frontend/licence_must_be_applied_for_locally_page.html",
+        {"title": "This licence must be applied for locally", "authority_url": authority_url},
+    )
+
+
 def begin_application_steps(
     request, licence_slug: str, authority_slug: str, interaction_id: str, interaction_sub_id: int
 ):
@@ -42,7 +50,7 @@ def begin_application_steps(
         )
 
         if not licence_details.can_apply_via_licensify:
-            raise Http404("Unhandled licence") from None
+            return licence_must_be_applied_for_locally(request, licence_details.authority_url)
 
         published_customisation = _get_published_customisation_or_redirect(
             authority_slug, licence.licence_code, interaction
