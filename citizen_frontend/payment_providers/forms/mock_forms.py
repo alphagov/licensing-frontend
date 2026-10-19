@@ -93,7 +93,7 @@ class MockNorthgateResponseForm(forms.Form):
 
 # how often does this happen if this is here? once?, alot?
 with open("citizen_frontend/payment_providers/mock_providers/mock_success_record.xml", encoding="utf-8") as f:
-    success_record = f.read().strip()
+    success_record = f.read()
 
 MOCK_SUCCESS_REQUEST_NORTHGATE = {
     "data": "we send this and then expect it back",
@@ -116,6 +116,29 @@ MOCK_SUCCESS_RESPONSE_NORHTGATE = {
     "merchanttid": "random merchant ID",
     "serviceprocessed": "true",
     "administrationcharge": "0.00",
+}
+
+with open("citizen_frontend/payment_providers/mock_providers/mock_failure_record.xml", encoding="utf-8") as f:
+    failure_record = f.read()
+
+
+MOCK_NORTHGATE_FAILURE_REQUEST = {
+    "data": "we send this and then expect it back",
+    "returnurl": "http://testserver/fake/payment/northgateCallback",
+    "returntext": "take me back",
+    "amount": "10.00",
+    "recordxml": failure_record,
+    "payforbasketmode": "true",
+    "ignoreconfirmation": "true",
+}
+
+MOCK_NORTHGATE_FAILURE_RESPONSE = {
+    "transactiontype": "B2",
+    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "merchantid": "random merchant number",
+    "date": "a date",
+    "serviceprocessed": "false",
+    "authorisationcode": "failed",
 }
 
 

@@ -3,6 +3,8 @@ import requests
 from django.urls import reverse
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_NORTHGATE_FAILURE_REQUEST,
+    MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_REQUEST_NORTHGATE,
     MOCK_SUCCESS_RESPONSE_NORHTGATE,
     MockNorthgateResponseForm,
@@ -45,7 +47,7 @@ def test_mock_northgate_calls_callback_with_correct_args_valid_request(client, m
     if expected_success_form.is_valid():
         data = expected_success_form.cleaned_data
 
-    mock_get.assert_called_with(url=MOCK_SUCCESS_REQUEST_NORTHGATE["returnurl"], data=data)
+    mock_get.assert_called_with(url=MOCK_SUCCESS_REQUEST_NORTHGATE["returnurl"], params=data)
 
 
 def test_build_response_builds_success_response():
@@ -53,5 +55,14 @@ def test_build_response_builds_success_response():
         build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORHTGATE)
     )
     if expected_success_form.is_valid():
-        actual = build_response()
+        actual = build_response(MOCK_SUCCESS_REQUEST_NORTHGATE)
         assert actual == expected_success_form.cleaned_data
+
+
+def test_build_response_builds_failure_response():
+    expected_failure_form = MockNorthgateResponseForm(
+        build_northgate_response_with_hash(MOCK_NORTHGATE_FAILURE_RESPONSE)
+    )
+    if expected_failure_form.is_valid():
+        actual = build_response(MOCK_NORTHGATE_FAILURE_REQUEST)
+        assert actual == expected_failure_form.cleaned_data

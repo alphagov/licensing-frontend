@@ -32,11 +32,14 @@
 # C - 14 - 25 - 32 - FA - 5
 # F - A8 - BB - D3 - E0 - C1
 # * /
+import xml.etree.ElementTree as ET
+
 import requests
 from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
+    MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_RESPONSE_NORHTGATE,
     MockNorthgateRequestForm,
     MockNorthgateResponseForm,
@@ -51,14 +54,19 @@ def handle_payment(request):
     request_form = MockNorthgateRequestForm(request.GET)
 
     if request_form.is_valid():
-        data = build_response()
-        requests.get(url=request_form.cleaned_data["returnurl"], data=data)
+        params = build_response(request_form.cleaned_data)
+        requests.get(url=request_form.cleaned_data["returnurl"], params=params)
 
     return JsonResponse(status=200, data={})
 
 
-def build_response() -> dict:
-    response_form = MockNorthgateResponseForm(build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORHTGATE))
+def build_response(request: dict) -> dict:
+    outcome_response_map = {"success": MOCK_SUCCESS_RESPONSE_NORHTGATE, "failure": MOCK_NORTHGATE_FAILURE_RESPONSE}
+
+    xml_record_root = ET.fromstring(request.get("recordxml", ""))
+    outcome = xml_record_root.findtext(".//reference")
+
+    response_form = MockNorthgateResponseForm(build_northgate_response_with_hash(outcome_response_map.get(outcome)))
     if response_form.is_valid():
         return response_form.cleaned_data
 
