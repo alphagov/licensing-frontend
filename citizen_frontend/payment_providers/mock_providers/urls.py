@@ -1,6 +1,7 @@
 from django.urls import path
 
-from citizen_frontend.payment_providers.mock_providers import mock_northgate, mock_worldpay, mock_worldpay_callback
+from citizen_frontend.payment_providers.mock_providers import mock_worldpay, mock_worldpay_callback
+from citizen_frontend.payment_providers.mock_providers.northgate import mock_northgate
 
 urlpatterns = [
     path("payment/worldpay", mock_worldpay.handle_payment, name="worldpay"),

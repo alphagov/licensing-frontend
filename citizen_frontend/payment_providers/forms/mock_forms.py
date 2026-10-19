@@ -1,4 +1,3 @@
-import hashlib
 import json
 from copy import deepcopy
 
@@ -62,9 +61,7 @@ NORTHGATE
 """
 
 
-# Do we need to use forms in this instance?
-# Yes it's an easy way to bind and validate querystring params on a GET request.
-class MockNorthgateRequestForm(forms.Form):
+class NorthgateRequestForm(forms.Form):
     amount = forms.CharField()
     returnurl = forms.CharField()
     returntext = forms.CharField()
@@ -74,7 +71,7 @@ class MockNorthgateRequestForm(forms.Form):
     recordxml = forms.CharField()
 
 
-class MockNorthgateResponseForm(forms.Form):
+class NorthgateResponseForm(forms.Form):
     transactiontype = forms.CharField(required=False)
     amount = forms.CharField(required=False)
     administrationcharge = forms.CharField(required=False)
@@ -89,111 +86,3 @@ class MockNorthgateResponseForm(forms.Form):
     authorisationstatus = forms.CharField(required=False)
     reason = forms.CharField(required=False)
     error = forms.CharField(required=False)
-
-
-# how often does this happen if this is here? once?, alot?
-with open("citizen_frontend/payment_providers/mock_providers/mock_success_record.xml", encoding="utf-8") as f:
-    success_record = f.read()
-
-MOCK_SUCCESS_REQUEST_NORTHGATE = {
-    "data": "we send this and then expect it back",
-    "returnurl": "http://testserver/fake/payment/northgateCallback",
-    "returntext": "take me back",
-    "amount": "10.00",
-    "recordxml": success_record,
-    "payforbasketmode": "true",
-    "ignoreconfirmation": "true",
-}
-
-MOCK_SUCCESS_RESPONSE_NORHTGATE = {
-    "transactiontype": "B2",
-    "amount": MOCK_SUCCESS_REQUEST_NORTHGATE["amount"],
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
-    "merchantnumber": "random merchant number",
-    "authorisationcode": "random authorization code",
-    "recipientnumber": "random recipient number",
-    "date": "a date",
-    "merchanttid": "random merchant ID",
-    "serviceprocessed": "true",
-    "administrationcharge": "0.00",
-}
-
-with open("citizen_frontend/payment_providers/mock_providers/mock_failure_record.xml", encoding="utf-8") as f:
-    failure_record = f.read()
-
-MOCK_NORTHGATE_FAILURE_REQUEST = {
-    "data": "we send this and then expect it back",
-    "returnurl": "http://testserver/fake/payment/northgateCallback",
-    "returntext": "take me back",
-    "amount": "10.00",
-    "recordxml": failure_record,
-    "payforbasketmode": "true",
-    "ignoreconfirmation": "true",
-}
-
-MOCK_NORTHGATE_FAILURE_RESPONSE = {
-    "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
-    "merchantid": "random merchant number",
-    "date": "a date",
-    "serviceprocessed": "false",
-    "authorisationcode": "failed",
-}
-
-with open("citizen_frontend/payment_providers/mock_providers/mock_cancel_record.xml", encoding="utf-8") as f:
-    cancel_record = f.read()
-
-
-MOCK_NORTHGATE_CANCEL_REQUEST = {
-    "data": "we send this and then expect it back",
-    "returnurl": "http://testserver/fake/payment/northgateCallback",
-    "returntext": "take me back",
-    "amount": "10.00",
-    "recordxml": cancel_record,
-    "payforbasketmode": "true",
-    "ignoreconfirmation": "true",
-}
-
-MOCK_NORTHGATE_CANCEL_RESPONSE = {
-    "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
-    "merchantid": "random merchant number",
-    "date": "a date",
-    "serviceprocessed": "false",
-    "reason": "cancel",
-}
-
-with open("citizen_frontend/payment_providers/mock_providers/mock_error_record.xml", encoding="utf-8") as f:
-    error_record = f.read()
-
-
-MOCK_NORTHGATE_ERROR_REQUEST = {
-    "data": "we send this and then expect it back",
-    "returnurl": "http://testserver/fake/payment/northgateCallback",
-    "returntext": "take me back",
-    "amount": "10.00",
-    "recordxml": error_record,
-    "payforbasketmode": "true",
-    "ignoreconfirmation": "true",
-}
-
-MOCK_NORTHGATE_ERROR_RESPONSE = {
-    "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
-    "merchantid": "random merchant number",
-    "date": "a date",
-    "serviceprocessed": "false",
-    "error": "there was an error",
-}
-
-
-def build_northgate_response_with_hash(response_dict):
-    string_to_hash = ""
-    for key, value in response_dict.items():
-        string_to_hash += f"{key}={value}"
-    string_to_hash += "sharedSecret"
-
-    dict_to_return = deepcopy(response_dict)
-    dict_to_return["hash"] = hashlib.sha256(string_to_hash.encode("utf-8")).hexdigest()
-
-    return dict_to_return
