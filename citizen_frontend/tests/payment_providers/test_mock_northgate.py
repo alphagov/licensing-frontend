@@ -5,6 +5,8 @@ from django.urls import reverse
 from citizen_frontend.payment_providers.forms.mock_forms import (
     MOCK_NORTHGATE_CANCEL_REQUEST,
     MOCK_NORTHGATE_CANCEL_RESPONSE,
+    MOCK_NORTHGATE_ERROR_REQUEST,
+    MOCK_NORTHGATE_ERROR_RESPONSE,
     MOCK_NORTHGATE_FAILURE_REQUEST,
     MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_REQUEST_NORTHGATE,
@@ -71,5 +73,8 @@ def test_build_response_builds_cancelled_response():
         assert actual == expected_cancel_form.cleaned_data
 
 
-def test_errors():
-    pass
+def test_build_response_builds_error_response():
+    expected_error_form = MockNorthgateResponseForm(build_northgate_response_with_hash(MOCK_NORTHGATE_ERROR_RESPONSE))
+    if expected_error_form.is_valid():
+        actual = build_response(MOCK_NORTHGATE_ERROR_REQUEST)
+        assert actual == expected_error_form.cleaned_data

@@ -40,6 +40,7 @@ from django.views.decorators.http import require_GET
 
 from citizen_frontend.payment_providers.forms.mock_forms import (
     MOCK_NORTHGATE_CANCEL_RESPONSE,
+    MOCK_NORTHGATE_ERROR_RESPONSE,
     MOCK_NORTHGATE_FAILURE_RESPONSE,
     MOCK_SUCCESS_RESPONSE_NORHTGATE,
     MockNorthgateRequestForm,
@@ -66,6 +67,7 @@ def build_response(request: dict) -> dict:
         "success": MOCK_SUCCESS_RESPONSE_NORHTGATE,
         "failure": MOCK_NORTHGATE_FAILURE_RESPONSE,
         "cancel": MOCK_NORTHGATE_CANCEL_RESPONSE,
+        "error": MOCK_NORTHGATE_ERROR_RESPONSE,
     }
 
     xml_record_root = ET.fromstring(request.get("recordxml", ""))

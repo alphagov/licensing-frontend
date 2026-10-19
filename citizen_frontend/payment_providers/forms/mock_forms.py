@@ -121,7 +121,6 @@ MOCK_SUCCESS_RESPONSE_NORHTGATE = {
 with open("citizen_frontend/payment_providers/mock_providers/mock_failure_record.xml", encoding="utf-8") as f:
     failure_record = f.read()
 
-
 MOCK_NORTHGATE_FAILURE_REQUEST = {
     "data": "we send this and then expect it back",
     "returnurl": "http://testserver/fake/payment/northgateCallback",
@@ -162,6 +161,29 @@ MOCK_NORTHGATE_CANCEL_RESPONSE = {
     "date": "a date",
     "serviceprocessed": "false",
     "reason": "cancel",
+}
+
+with open("citizen_frontend/payment_providers/mock_providers/mock_error_record.xml", encoding="utf-8") as f:
+    error_record = f.read()
+
+
+MOCK_NORTHGATE_ERROR_REQUEST = {
+    "data": "we send this and then expect it back",
+    "returnurl": "http://testserver/fake/payment/northgateCallback",
+    "returntext": "take me back",
+    "amount": "10.00",
+    "recordxml": error_record,
+    "payforbasketmode": "true",
+    "ignoreconfirmation": "true",
+}
+
+MOCK_NORTHGATE_ERROR_RESPONSE = {
+    "transactiontype": "B2",
+    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "merchantid": "random merchant number",
+    "date": "a date",
+    "serviceprocessed": "false",
+    "error": "there was an error",
 }
 
 
