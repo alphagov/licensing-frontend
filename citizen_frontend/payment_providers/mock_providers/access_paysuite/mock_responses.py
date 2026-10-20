@@ -37,5 +37,14 @@ unknown_failure_response = {
     "status": unknown_failure_xml_string,
 }
 
+card_decline_xml_string = single_line_xml(
+    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_card_declined.xml"
+)
+
+card_declined_response = {
+    "hash": hash_xml(card_decline_xml_string),
+    "status": card_decline_xml_string,
+}
+
 MOCK_ACCESS_PAYSUITE_SUCCESS_FORM = AccessPaymentProviderResponseForm(success_response)
 MOCK_ACCESS_PAYSUITE_KNOWN_FAILURE_FORM = AccessPaymentProviderResponseForm(known_failure_response)

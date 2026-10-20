@@ -1,0 +1,12 @@
+<xml>
+    <statusCode>2001</statusCode>
+    <statusCodeDescription>DECLINED</statusCodeDescription>
+    <authCode>123</authCode>
+    <payments>
+        <payment>
+            <authDetail>
+                <amountInMinorUnits>100</amountInMinorUnits>
+            </authDetail>
+        </payment>
+    </payments>
+</xml>

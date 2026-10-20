@@ -20,5 +20,10 @@ urlpatterns = [
         mock_access_paysuite.handle_unknown_failure,
         name="access_paysuite_unknown_failure",
     ),
+    path(
+        "payment/access-paysuite-card-declined",
+        mock_access_paysuite.handle_card_declined,
+        name="access_paysuite_card_declined",
+    ),
     path("payment/accessPaysuiteCallback", mock_access_paysuite.call_back, name="accessPaysuiteCallback"),
 ]

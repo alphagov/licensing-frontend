@@ -11,6 +11,7 @@ from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_requ
 from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_responses import (
     MOCK_ACCESS_PAYSUITE_KNOWN_FAILURE_FORM,
     MOCK_ACCESS_PAYSUITE_SUCCESS_FORM,
+    card_declined_response,
     unknown_failure_response,
 )
 
@@ -49,6 +50,14 @@ def test_mock_access_paysuite_handles_known_failures(client, mock_redirect):
 def test_mock_access_paysuite_handles_cancellation(client, mock_redirect):
     client.post(reverse("access_paysuite_unknown_failure"), data=mock_access_paysuite_request)
     expected_data = unknown_failure_response
+
+    encoded_params = urlencode(expected_data)
+    mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback?" + encoded_params)
+
+
+def test_mock_access_paysuite_handles_card_declined(client, mock_redirect):
+    client.post(reverse("access_paysuite_card_declined"), data=mock_access_paysuite_request)
+    expected_data = card_declined_response
 
     encoded_params = urlencode(expected_data)
     mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback?" + encoded_params)
