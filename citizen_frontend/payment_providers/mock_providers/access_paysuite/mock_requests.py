@@ -1,7 +1,5 @@
-# TODO hash request? => we send both the xml request as a string and hash it using account secret as key
-
 from citizen_frontend.payment_providers.forms.access_paysuite import AccessPaysuiteRequestForm
-from citizen_frontend.payment_providers.mock_providers.access_paysuite.utils import hash_xml, single_line_xml
+from citizen_frontend.payment_providers.mock_providers.utils import hash_xml, single_line_xml
 
 xml_string = single_line_xml("citizen_frontend/payment_providers/mock_providers/access_paysuite/request.xml")
 

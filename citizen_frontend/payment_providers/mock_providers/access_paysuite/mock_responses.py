@@ -1,4 +1,4 @@
-from citizen_frontend.payment_providers.mock_providers.access_paysuite.utils import hash_xml, single_line_xml
+from citizen_frontend.payment_providers.mock_providers.utils import hash_xml, single_line_xml
 
 success_xml_string = single_line_xml(
     "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_success_response.xml"
