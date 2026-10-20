@@ -3,6 +3,7 @@ from copy import deepcopy
 
 import bson
 import pytest
+from bs4 import BeautifulSoup
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
@@ -54,6 +55,24 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
     pass
+
+
+@pytest.fixture
+def get_dom_parser(client):
+    def _get(url=None, html_content=None):
+        content = None
+        if url:
+            res = client.get(url)
+            content = res.content
+        elif html_content:
+            content = html_content
+        if not content:
+            raise ValueError("No HTML to parse")
+        soup = BeautifulSoup(content, "html.parser")
+        soup.get_by_test_id = lambda tid: soup.find(attrs={"data-testid": tid})
+        return soup
+
+    return _get
 
 
 @pytest.fixture
