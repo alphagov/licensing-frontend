@@ -6,6 +6,11 @@ import pytest
 import requests
 from django.urls import reverse
 
+from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_requests import mock_access_paysuite_request
+from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_responses import (
+    MOCK_ACCESS_PAYSUITE_SUCCESS_FORM,
+)
+
 
 @pytest.fixture
 def mock_get(mocker):
@@ -13,8 +18,12 @@ def mock_get(mocker):
 
 
 def test_mock_access_paysuite_handles_success(client, mock_get):
-    response = client.post(reverse("access_paysuite_success"))
+    response = client.post(reverse("access_paysuite_success"), data=mock_access_paysuite_request)
+    expected_date = MOCK_ACCESS_PAYSUITE_SUCCESS_FORM
 
-    mock_get.assert_called_with(url="http://testserver/fake/payment/accessPaysuiteCallback")
+    if expected_date.is_valid():
+        data = expected_date.cleaned_data
+
+    mock_get.assert_called_with(url="http://testserver/fake/payment/accessPaysuiteCallback", params=data)
 
     assert response.status_code == 200

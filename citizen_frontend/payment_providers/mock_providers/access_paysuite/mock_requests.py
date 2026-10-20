@@ -10,12 +10,12 @@ with open("citizen_frontend/payment_providers/mock_providers/access_paysuite/req
 
 
 def hash_xml(string):
-    signature = hmac.new(b"super_secret", msg=string, digestmod=hashlib.sha256).digest()
+    signature = hmac.new(b"super_secret", msg=string.encode("utf-8"), digestmod=hashlib.sha256).digest()
 
     return base64.b64encode(signature).decode("utf-8")
 
 
-request = {
+mock_access_paysuite_request = {
     "portal_id": "this is the merchant id from account",
     "hash": hash_xml(xml_string),
     "portalReq": xml_string,
@@ -23,4 +23,4 @@ request = {
 }
 
 
-MOCK_ACCESS_PAYSUITE_REQUEST_FORM = AccessPaysuiteRequestForm(request)
+MOCK_ACCESS_PAYSUITE_REQUEST_FORM = AccessPaysuiteRequestForm(mock_access_paysuite_request)
