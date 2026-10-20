@@ -1,12 +1,20 @@
 from copy import deepcopy
 
 import pytest
+from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from django.core.exceptions import ValidationError
 from django.db import models
 from django_mongodb_backend.fields import EmbeddedModelField
 from django_mongodb_backend.models import EmbeddedModel
 
+# interaction-customisaton - publishedcustomisation(customisation) - fixed_fee_amount  (paymentAmount)
+# interaction-customisaton - pendingcustomisation(customisation) - fixed_fee_amount  (paymentAmount)
+# licence - licenceinteractions - form (licenceForm)
+# licence - licenceinteractions - fee (paymentAmount)
+# licence_application - applicationPdf(supportingDocument) - definition (SupportingDocumentDefinition)
 
+
+# embeddedmodelarrayfields seem happy as [] which is default = list
 class GrandchildModel(EmbeddedModel):
     identifier = models.CharField(max_length=255)
 
@@ -119,3 +127,15 @@ def test_required_grandchildren_are_required_without_patch(monkeypatch):
     local_parent.required_child.required_grandchild = None
     with pytest.raises(ValidationError, match="This field cannot be null."):
         local_parent.full_clean()
+
+
+# -------------------------------------------------------------------------
+
+
+def test_show_data_ruining():
+    new_customisation = InteractionCustomisation(
+        published_customisation=Customisation(department="6ad6454edd68821b7ff6f224")
+    )
+    new_customisation.save()
+    # pk = new_customisation.pk
+    # print(pk)
