@@ -3,6 +3,8 @@ import base64
 import hashlib
 import hmac
 
+from citizen_frontend.payment_providers.forms.access_paysuite import AccessPaysuiteRequestForm
+
 with open("citizen_frontend/payment_providers/mock_providers/access_paysuite/request.xml", encoding="utf-8") as f:
     xml_string = f.read()
 
@@ -19,3 +21,6 @@ request = {
     "portalReq": xml_string,
     "schemaId": "APPXML_V2",
 }
+
+
+MOCK_ACCESS_PAYSUITE_REQUEST_FORM = AccessPaysuiteRequestForm(request)
