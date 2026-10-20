@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 from citizen_frontend.payment_providers.forms.access_paysuite import AccessPaysuiteRequestForm
 from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_responses import (
@@ -14,6 +15,7 @@ from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_resp
 
 
 # current mock does redirects...?
+@csrf_exempt
 def handle_success(request):
     call_back_url = "http://" + request.get_host() + reverse("accessPaysuiteCallback")
 
@@ -25,6 +27,7 @@ def handle_success(request):
         return HttpResponse("success")
 
 
+@csrf_exempt
 def handle_known_failure(request):
     call_back_url = "http://" + request.get_host() + reverse("accessPaysuiteCallback")
     request_form = AccessPaysuiteRequestForm(request.POST)
@@ -36,6 +39,7 @@ def handle_known_failure(request):
         return HttpResponse("known failure")
 
 
+@csrf_exempt
 def handle_unknown_failure(request):
     call_back_url = "http://" + request.get_host() + reverse("accessPaysuiteCallback")
     request_form = AccessPaysuiteRequestForm(request.POST)
@@ -47,6 +51,7 @@ def handle_unknown_failure(request):
         return HttpResponse("unknown failure")
 
 
+@csrf_exempt
 def handle_card_declined(request):
     call_back_url = "http://" + request.get_host() + reverse("accessPaysuiteCallback")
     request_form = AccessPaysuiteRequestForm(request.POST)
@@ -55,7 +60,7 @@ def handle_card_declined(request):
         encoded_params = urlencode(card_declined_response)
         redirect(to=f"{call_back_url}?{encoded_params}")
 
-        return HttpResponse("unknown failure")
+        return HttpResponse("card declined")
 
 
 def call_back(request):
