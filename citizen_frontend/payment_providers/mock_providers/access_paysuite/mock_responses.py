@@ -1,13 +1,4 @@
-import xml.etree.ElementTree as ET
-
-from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_requests import hash_xml
-
-
-def single_line_xml(file):
-    tree = ET.parse(file)
-    root = tree.getroot()
-    return ET.tostring(root, encoding="utf-8", method="xml").decode("utf-8")
-
+from citizen_frontend.payment_providers.mock_providers.access_paysuite.utils import hash_xml, single_line_xml
 
 success_xml_string = single_line_xml(
     "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_success_response.xml"

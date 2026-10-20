@@ -1,19 +1,9 @@
 # TODO hash request? => we send both the xml request as a string and hash it using account secret as key
-import base64
-import hashlib
-import hmac
 
 from citizen_frontend.payment_providers.forms.access_paysuite import AccessPaysuiteRequestForm
+from citizen_frontend.payment_providers.mock_providers.access_paysuite.utils import hash_xml, single_line_xml
 
-with open("citizen_frontend/payment_providers/mock_providers/access_paysuite/request.xml", encoding="utf-8") as f:
-    xml_string = f.read()
-
-
-def hash_xml(string):
-    signature = hmac.new(b"super_secret", msg=string.encode("utf-8"), digestmod=hashlib.sha256).digest()
-
-    return base64.b64encode(signature).decode("utf-8")
-
+xml_string = single_line_xml("citizen_frontend/payment_providers/mock_providers/access_paysuite/request.xml")
 
 mock_access_paysuite_request = {
     "portal_id": "this is the merchant id from account",
