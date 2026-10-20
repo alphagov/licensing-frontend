@@ -1,6 +1,5 @@
 import xml.etree.ElementTree as ET
 
-from citizen_frontend.payment_providers.forms.access_paysuite import AccessPaymentProviderResponseForm
 from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_requests import hash_xml
 
 
@@ -45,6 +44,3 @@ card_declined_response = {
     "hash": hash_xml(card_decline_xml_string),
     "status": card_decline_xml_string,
 }
-
-MOCK_ACCESS_PAYSUITE_SUCCESS_FORM = AccessPaymentProviderResponseForm(success_response)
-MOCK_ACCESS_PAYSUITE_KNOWN_FAILURE_FORM = AccessPaymentProviderResponseForm(known_failure_response)
