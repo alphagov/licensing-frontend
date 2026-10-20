@@ -15,17 +15,26 @@ success_xml_string = single_line_xml(
 )
 
 success_response = {
-    "status": success_xml_string,
     "hash": hash_xml(success_xml_string),
+    "status": success_xml_string,
 }
 
 known_failure_xml_string = single_line_xml(
-    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_failure_response.xml"
+    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_known_failure_response.xml"
 )
 
 known_failure_response = {
-    "status": known_failure_xml_string,
     "hash": hash_xml(known_failure_xml_string),
+    "status": known_failure_xml_string,
+}
+
+unknown_failure_xml_string = single_line_xml(
+    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_unknow_failure_response.xml"
+)
+
+unknown_failure_response = {
+    "hash": hash_xml(unknown_failure_xml_string),
+    "status": unknown_failure_xml_string,
 }
 
 MOCK_ACCESS_PAYSUITE_SUCCESS_FORM = AccessPaymentProviderResponseForm(success_response)
