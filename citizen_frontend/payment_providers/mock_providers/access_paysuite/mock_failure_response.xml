@@ -1,0 +1,12 @@
+<xml>
+    <statusCode>99</statusCode>
+    <statusCodeDescription>error in the Access Paysuite system</statusCodeDescription>
+    <authCode>123</authCode>
+    <payments>
+        <payment>
+            <authDetail>
+                <amountInMinorUnits>100</amountInMinorUnits>
+            </authDetail>
+        </payment>
+    </payments>
+</xml>

@@ -8,6 +8,7 @@ from django.urls import reverse
 
 from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_requests import mock_access_paysuite_request
 from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_responses import (
+    MOCK_ACCESS_PAYSUITE_KNOWN_FAILURE_FORM,
     MOCK_ACCESS_PAYSUITE_SUCCESS_FORM,
 )
 
@@ -19,10 +20,22 @@ def mock_get(mocker):
 
 def test_mock_access_paysuite_handles_success(client, mock_get):
     response = client.post(reverse("access_paysuite_success"), data=mock_access_paysuite_request)
-    expected_date = MOCK_ACCESS_PAYSUITE_SUCCESS_FORM
+    expected_data = MOCK_ACCESS_PAYSUITE_SUCCESS_FORM
 
-    if expected_date.is_valid():
-        data = expected_date.cleaned_data
+    if expected_data.is_valid():
+        data = expected_data.cleaned_data
+
+    mock_get.assert_called_with(url="http://testserver/fake/payment/accessPaysuiteCallback", params=data)
+
+    assert response.status_code == 200
+
+
+def test_mock_access_paysuite_handles_known_failures(client, mock_get):
+    response = client.post(reverse("access_paysuite_known_failure"), data=mock_access_paysuite_request)
+
+    expected_data = MOCK_ACCESS_PAYSUITE_KNOWN_FAILURE_FORM
+    if expected_data.is_valid():
+        data = expected_data.cleaned_data
 
     mock_get.assert_called_with(url="http://testserver/fake/payment/accessPaysuiteCallback", params=data)
 

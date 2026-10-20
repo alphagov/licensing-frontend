@@ -10,5 +10,10 @@ urlpatterns = [
     path("payment/northgate", mock_northgate.handle_payment, name="northgate"),
     path("payment/northgateCallback", mock_northgate.callback, name="northgateCallback"),
     path("payment/access-paysuite-sucess", mock_access_paysuite.handle_success, name="access_paysuite_success"),
+    path(
+        "payment/access-paysuite-known-failure",
+        mock_access_paysuite.handle_known_failure,
+        name="access_paysuite_known_failure",
+    ),
     path("payment/accessPaysuiteCallback", mock_access_paysuite.call_back, name="accessPaysuiteCallback"),
 ]
