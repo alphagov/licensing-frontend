@@ -1,7 +1,6 @@
 from urllib.parse import urlencode
 
-from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET
@@ -21,17 +20,17 @@ from citizen_frontend.payment_providers.mock_providers.northgate.mock_responses 
 
 @csrf_exempt
 @require_GET
-def handle_success(request):
+def handle_payment(request):
     callback_url = "http://" + request.get_host() + reverse("northgateCallback")
+    scenario = request.path.split("-")[1]
 
     request_form = NorthgateRequestForm(request.GET)
     if request_form.is_valid():
-        params = build_response("success")
+        params = build_response(scenario)
         encoded_params = urlencode(params)
         redirect_url = f"{callback_url}?{encoded_params}"
-        redirect(to=redirect_url)
 
-        return JsonResponse(f"success: redirected to {redirect_url}", safe=False)
+        return HttpResponseRedirect(redirect_url)
 
 
 def build_response(outcome: str) -> dict:

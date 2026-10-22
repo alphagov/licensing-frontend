@@ -1,12 +1,12 @@
 import hashlib
 from copy import deepcopy
 
-from citizen_frontend.payment_providers.mock_providers.northgate.mock_requests import MOCK_SUCCESS_REQUEST_NORTHGATE
+from citizen_frontend.payment_providers.mock_providers.northgate.mock_requests import MOCK_REQUEST_NORTHGATE
 
 MOCK_SUCCESS_RESPONSE_NORTHGATE = {
     "transactiontype": "B2",
-    "amount": MOCK_SUCCESS_REQUEST_NORTHGATE["amount"],
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "amount": MOCK_REQUEST_NORTHGATE["amount"],
+    "data": MOCK_REQUEST_NORTHGATE["data"],
     "merchantnumber": "random merchant number",
     "authorisationcode": "random authorization code",
     "receiptnumber": "random recipient number",
@@ -18,7 +18,7 @@ MOCK_SUCCESS_RESPONSE_NORTHGATE = {
 
 MOCK_NORTHGATE_FAILURE_RESPONSE = {
     "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "data": MOCK_REQUEST_NORTHGATE["data"],
     "merchantid": "random merchant number",
     "date": "a date",
     "serviceprocessed": "false",
@@ -27,7 +27,7 @@ MOCK_NORTHGATE_FAILURE_RESPONSE = {
 
 MOCK_NORTHGATE_CANCEL_RESPONSE = {
     "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "data": MOCK_REQUEST_NORTHGATE["data"],
     "merchantid": "random merchant number",
     "date": "a date",
     "serviceprocessed": "false",
@@ -36,7 +36,7 @@ MOCK_NORTHGATE_CANCEL_RESPONSE = {
 
 MOCK_NORTHGATE_ERROR_RESPONSE = {
     "transactiontype": "B2",
-    "data": MOCK_SUCCESS_REQUEST_NORTHGATE["data"],
+    "data": MOCK_REQUEST_NORTHGATE["data"],
     "merchantid": "random merchant number",
     "date": "a date",
     "serviceprocessed": "false",

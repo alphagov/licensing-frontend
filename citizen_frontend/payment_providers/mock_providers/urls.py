@@ -7,7 +7,10 @@ from citizen_frontend.payment_providers.mock_providers.northgate import mock_nor
 urlpatterns = [
     path("payment/worldpay", mock_worldpay.handle_payment, name="worldpay"),
     path("payment/worldpayCallback", mock_worldpay_callback.callback, name="worldpayCallback"),
-    path("payment/northgate-success", mock_northgate.handle_success, name="northgate_success"),
+    path("payment/northgate-success", mock_northgate.handle_payment, name="northgate_success"),
+    path("payment/northgate-failure", mock_northgate.handle_payment, name="northgate_failure"),
+    path("payment/northgate-cancel", mock_northgate.handle_payment, name="northgate_cancel"),
+    path("payment/northgate-error", mock_northgate.handle_payment, name="northgate_error"),
     path("payment/northgateCallback", mock_northgate.callback, name="northgateCallback"),
     path("payment/access-paysuite-success", mock_access_paysuite.handle_success, name="access_paysuite_success"),
     path(
