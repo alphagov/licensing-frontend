@@ -1,0 +1,22 @@
+{% extends "citizen_frontend/base.html" %}
+
+{% block content %}
+    <p class="govuk-body">
+        Unfortunately, this licence is currently not available online. If you have any questions, please contact
+        <span class="govuk-!-font-weight-bold">{{ authority_name }}</span>.
+    </p>
+    <p class="govuk-body"><span class="govuk-!-font-weight-bold">Tel: </span>{{ contact_information.phone_number }}</p>
+    {% if contact_information.email %}
+        <p class="govuk-body"><span class="govuk-!-font-weight-bold">Email: </span><a
+                href="mailto:{{ contact_information.email }}"
+                class="govuk-link">{{ contact_information.email }}</a>
+        </p>
+    {% endif %}
+    <p class="govuk-body"><span class="govuk-!-font-weight-bold ">Address: </span>
+        <br/>{{ contact_information.line_one }}
+        <br/>{{ contact_information.line_two }}
+        <br/>{{ contact_information.line_three }}
+        <br/>{{ contact_information.city }}
+        <br/>{{ contact_information.post_code }}
+    </p>
+{% endblock %}

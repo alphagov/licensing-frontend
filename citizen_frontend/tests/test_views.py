@@ -55,8 +55,8 @@ def test_begin_application_steps_redirects_to_suspended_licence_when_no_publishe
 ):
     mock_find_published_customisation_with_fixed_fee.return_value = None
     response = client.get(get_begin_application_steps_url())
-    assert response.status_code == 404
-    assert response.context["exception"].lower() == "suspended"
+    assert response.status_code == http.HTTPStatus.OK
+    assertTemplateUsed(response, "citizen_frontend/licence_not_available_online_page.html")
 
 
 def test_begin_application_steps_reaches_correct_page_when_all_data_exists(
