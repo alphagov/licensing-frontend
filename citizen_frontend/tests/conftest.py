@@ -392,9 +392,9 @@ def mock_find_published_customisation_with_no_fee(mocker):
 
 @pytest.fixture
 def mock_find_published_customisation_returns_none(mocker):
-    mock_find_published_customisation_with_no_fee = mocker.patch.object(
+    mock_find_published_customisation = mocker.patch.object(
         citizen_frontend.views.interaction_customisation_repository,
         "find_published_customisation",
         autospec=True,
     )
-    mock_find_published_customisation_with_no_fee.return_value = None
+    mock_find_published_customisation.return_value = None
