@@ -16,44 +16,25 @@ from citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_resp
 )
 
 
-@pytest.fixture
-def mock_redirect(mocker):
-    yield mocker.patch(
-        "citizen_frontend.payment_providers.mock_providers.access_paysuite.mock_access_paysuite.redirect"
-    )
+@pytest.mark.parametrize(
+    "route, expected_response",
+    [
+        ("access_paysuite_success", success_response),
+        ("access_paysuite_known_failure", known_failure_response),
+        ("access_paysuite_unknown_failure", unknown_failure_response),
+        ("access_paysuite_card_declined", card_declined_response),
+    ],
+)
+def test_mock_access_paysuite_handles_different_scenarios(client, route, expected_response):
+    response = client.post(reverse(route), data=mock_access_paysuite_request)
 
-
-def test_mock_access_paysuite_handles_success(client, mock_redirect):
-    response = client.post(reverse("access_paysuite_success"), data=mock_access_paysuite_request)
-
-    data = success_response
+    data = expected_response
     encoded_params = urlencode(data)
-    mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback" + "?" + encoded_params)
-
-    assert response.status_code == 200
-
-
-def test_mock_access_paysuite_handles_known_failures(client, mock_redirect):
-    response = client.post(reverse("access_paysuite_known_failure"), data=mock_access_paysuite_request)
-
-    data = known_failure_response
-    encoded_params = urlencode(data)
-    mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback" + "?" + encoded_params)
-
-    assert response.status_code == 200
+    assert response.status_code == 302
+    assert response.url == "http://testserver/fake/payment/accessPaysuiteCallback" + "?" + encoded_params
 
 
-def test_mock_access_paysuite_handles_cancellation(client, mock_redirect):
-    client.post(reverse("access_paysuite_unknown_failure"), data=mock_access_paysuite_request)
-    expected_data = unknown_failure_response
+def test_mock_access_paysuite_returns_400_invalid_request(client):
+    response = client.post(reverse("access_paysuite_success"), data={"invalid": "request"})
 
-    encoded_params = urlencode(expected_data)
-    mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback?" + encoded_params)
-
-
-def test_mock_access_paysuite_handles_card_declined(client, mock_redirect):
-    client.post(reverse("access_paysuite_card_declined"), data=mock_access_paysuite_request)
-    expected_data = card_declined_response
-
-    encoded_params = urlencode(expected_data)
-    mock_redirect.assert_called_with(to="http://testserver/fake/payment/accessPaysuiteCallback?" + encoded_params)
+    assert response.status_code == 400
