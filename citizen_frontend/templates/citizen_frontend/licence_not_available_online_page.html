@@ -8,6 +8,7 @@
     <p class="govuk-body"><span class="govuk-!-font-weight-bold">Tel: </span>{{ contact_information.phone_number }}</p>
     {% if contact_information.email %}
         <p class="govuk-body"><span class="govuk-!-font-weight-bold">Email: </span><a
+                data-testid="email_link"
                 href="mailto:{{ contact_information.email }}"
                 class="govuk-link">{{ contact_information.email }}</a>
         </p>

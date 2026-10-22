@@ -125,7 +125,15 @@ TEST_AUTHORITY = Authority(
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
     authority_url="https://test-authority.com",
-    contact_details=ContactInformation(),
+    contact_details=ContactInformation(
+        line_one="A building",
+        line_two="A street",
+        line_three="A line three",
+        city="London",
+        phone_number="01234 567 890",
+        post_code="a12 21a",
+        email="anauthorityemail@gov.uk",
+    ),
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(
@@ -380,3 +388,13 @@ def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
     mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
     return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_returns_none(mocker):
+    mock_find_published_customisation_with_no_fee = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_no_fee.return_value = None
