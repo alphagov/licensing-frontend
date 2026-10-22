@@ -42,29 +42,17 @@ def test_mock_northgate_success_calls_callback_with_correct_args_valid_request(c
         mock_redirect.assert_called_with(to=f"{MOCK_SUCCESS_REQUEST_NORTHGATE['returnurl']}?{encoded_params}")
 
 
-def test_build_response_builds_success_response():
-    expected_success_form = NorthgateResponseForm(build_northgate_response_with_hash(MOCK_SUCCESS_RESPONSE_NORTHGATE))
-    if expected_success_form.is_valid():
-        actual = build_response("success")
-        assert actual == expected_success_form.cleaned_data
-
-
-def test_build_response_builds_failure_response():
-    expected_failure_form = NorthgateResponseForm(build_northgate_response_with_hash(MOCK_NORTHGATE_FAILURE_RESPONSE))
-    if expected_failure_form.is_valid():
-        actual = build_response("failure")
-        assert actual == expected_failure_form.cleaned_data
-
-
-def test_build_response_builds_cancelled_response():
-    expected_cancel_form = NorthgateResponseForm(build_northgate_response_with_hash(MOCK_NORTHGATE_CANCEL_RESPONSE))
-    if expected_cancel_form.is_valid():
-        actual = build_response("cancel")
-        assert actual == expected_cancel_form.cleaned_data
-
-
-def test_build_response_builds_error_response():
-    expected_error_form = NorthgateResponseForm(build_northgate_response_with_hash(MOCK_NORTHGATE_ERROR_RESPONSE))
-    if expected_error_form.is_valid():
-        actual = build_response("error")
-        assert actual == expected_error_form.cleaned_data
+@pytest.mark.parametrize(
+    "response, expected",
+    [
+        ("success", MOCK_SUCCESS_RESPONSE_NORTHGATE),
+        ("failure", MOCK_NORTHGATE_FAILURE_RESPONSE),
+        ("cancel", MOCK_NORTHGATE_CANCEL_RESPONSE),
+        ("error", MOCK_NORTHGATE_ERROR_RESPONSE),
+    ],
+)
+def test_build_response_builds_success_response(response, expected):
+    expected_form = NorthgateResponseForm(build_northgate_response_with_hash(expected))
+    if expected_form.is_valid():
+        actual = build_response(response)
+        assert actual == expected_form.cleaned_data
