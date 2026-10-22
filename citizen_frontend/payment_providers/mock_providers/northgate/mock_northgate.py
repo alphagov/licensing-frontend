@@ -32,6 +32,8 @@ def handle_payment(request):
 
         return HttpResponseRedirect(redirect_url)
 
+    return JsonResponse(status=400, data="Invalid request", safe=False)
+
 
 def build_response(outcome: str) -> dict:
     outcome_response_map = {

@@ -19,9 +19,9 @@ from citizen_frontend.payment_providers.mock_providers.northgate.mock_responses 
 )
 
 
-@pytest.fixture
-def mock_redirect(mocker):
-    yield mocker.patch("citizen_frontend.payment_providers.mock_providers.northgate.mock_northgate.redirect")
+def test_mock_northgate_returns_400_invalid_request(client):
+    response = client.get(reverse("northgate_success"), {"invalid": "request"})
+    assert response.status_code == 400
 
 
 @pytest.mark.parametrize("route", ["northgate_success", "northgate_failure"])
