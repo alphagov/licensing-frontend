@@ -49,13 +49,8 @@ def begin_application_steps(
         if not licence_details.can_apply_via_licensify:
             return display_licence_must_be_applied_for_locally(request, licence_details.authority_url)
 
-        published_customisation = published_customisation = (
-            interaction_customisation_repository.find_published_customisation(
-                authority_slug,
-                licence.licence_code,
-                interaction.interaction_id,
-                interaction.interaction_sub_id,
-            )
+        published_customisation = interaction_customisation_repository.find_published_customisation(
+            authority_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id
         )
         if not published_customisation:
             return display_licence_unavailable_online(request, authority)
