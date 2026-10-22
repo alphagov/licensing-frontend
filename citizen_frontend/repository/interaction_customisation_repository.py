@@ -46,8 +46,8 @@ def find_interaction_customisation(
         )
 
         if customisation:
-            customisation.full_clean()
             return customisation
+    except InteractionCustomisation.DoesNotExist:
         return None
     except ValidationError as e:
         logger.error(e)
