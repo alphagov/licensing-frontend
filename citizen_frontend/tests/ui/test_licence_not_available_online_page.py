@@ -19,8 +19,8 @@ def test_email_not_visible_when_authority_doesnt_have_email(
     _, authority, _, _ = mock_get_licence_interaction_context.return_value
     authority.contact_details.email = ""
     dom = get_dom_parser(test_introduction_page_url)
-    anchor_tag = dom.get_by_test_id("email_link")
-    assert not anchor_tag
+    email_anchor_tag = dom.get_by_test_id("email_link")
+    assert not email_anchor_tag
 
 
 def test_expected_data_displayed(
@@ -37,6 +37,7 @@ def test_expected_data_displayed(
     assert authority.contact_details.line_three in page_text
     assert authority.contact_details.city in page_text
     assert authority.contact_details.phone_number in page_text
+    assert authority.contact_details.post_code in page_text
 
 
 def test_page_displays_when_only_partial_details_available(
