@@ -31,5 +31,7 @@ urlpatterns = [
     ),
     path("payment/accessPaysuiteCallback", mock_access_paysuite.call_back, name="accessPaysuiteCallback"),
     path("payment/civica-success", mock_civica.handle_payment, name="civica_success"),
+    path("payment/civica-failure", mock_civica.handle_payment, name="civica_failure"),
+    path("payment/civica-goback", mock_civica.handle_payment, name="civica_goback"),
     path("payment/civicaCallback", mock_civica.callback, name="civicaCallback"),
 ]
