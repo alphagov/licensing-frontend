@@ -19,7 +19,7 @@ known_failure_response = {
 }
 
 unknown_failure_xml_string = single_line_xml(
-    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_unknow_failure_response.xml"
+    "citizen_frontend/payment_providers/mock_providers/access_paysuite/mock_unknown_failure_response.xml"
 )
 
 unknown_failure_response = {

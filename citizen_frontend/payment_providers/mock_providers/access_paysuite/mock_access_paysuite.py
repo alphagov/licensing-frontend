@@ -28,7 +28,7 @@ def handle_payment(request):
     }
 
     if request_form.is_valid():
-        encoded_params = urlencode(responses.get(scenario))
+        encoded_params = urlencode(responses.get(scenario, ""))
         return HttpResponseRedirect(f"{call_back_url}?{encoded_params}")
 
     return JsonResponse(status=400, data="Invalid request", safe=False)
