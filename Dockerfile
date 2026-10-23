@@ -44,4 +44,4 @@ RUN DJANGO_SECRET_KEY="dummy-key" python /app/manage.py collectstatic --noinput
 
 EXPOSE ${CITIZEN_FRONTEND_PORT}
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "config.wsgi:application", "-c", "config/gunicorn.conf.py"]
