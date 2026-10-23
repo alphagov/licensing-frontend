@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 def get_licence_by_url_slug(url_slug: str) -> Licence:
     try:
         licence = Licence.objects.get(url_slug=url_slug)
-        licence.full_clean()
+        licence.clean()
         return licence
     except ValidationError as e:
         logger.error("Licence does not match model")
@@ -28,14 +28,10 @@ def get_licence_by_url_slug(url_slug: str) -> Licence:
 def get_all_licences() -> list[Licence]:
     try:
         licences = list(Licence.objects.all())
-
-        for licence in licences:
-            licence.full_clean()
-
         return licences
     except ValidationError as e:
-        logger.error(e.message)
-        raise DataIntegrityError(f"Licence validation error: {e.message}") from e
+        logger.error(e.messages)
+        raise DataIntegrityError(f"Licence validation error: {e.messages}") from e
     except DatabaseError as e:
         logger.error(e)
         raise DocumentDBError("DocumentDB error fetching all licences") from e
@@ -46,7 +42,6 @@ def get_licence_by_licence_code(licence_code: str) -> Licence | None:
         logger.info("Getting licence by licence code: %s", licence_code)
         licence = Licence.objects.get(licence_code=licence_code)
         if licence:
-            licence.full_clean()
             return licence
     except Licence.DoesNotExist:
         logger.info("No licence found for licence code: %s", licence_code)
@@ -55,8 +50,8 @@ def get_licence_by_licence_code(licence_code: str) -> Licence | None:
         logger.error("Multiple licences with licence code: %s", licence_code)
         raise DataIntegrityError(f"More than one licence found for licence code: {licence_code}") from e
     except ValidationError as e:
-        logger.error(e.message)
-        raise DataIntegrityError(f"Licence validation error: {e.message}") from e
+        logger.error(e.messages)
+        raise DataIntegrityError(f"Licence validation error: {e.messages}") from e
     except DatabaseError as e:
         logger.error("An error occurred while getting licence with code %s: %s", licence_code, e)
         raise DocumentDBError(f"DocumentDB error fetching licence: {licence_code}") from e
