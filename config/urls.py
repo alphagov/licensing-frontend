@@ -15,6 +15,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+import os
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -26,5 +28,7 @@ urlpatterns = [
     path("apply-for-a-licence/", include("citizen_frontend.urls")),
     path("assets/<path:path>", RedirectView.as_view(url="/static/assets/%(path)s", permanent=False)),
     path("api/", include("citizen_frontend.api.urls")),
-    path("fake/", include("citizen_frontend.payment_providers.mock_providers.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+if os.environ.get("IS_PRODUCTION", "true").lower() not in ["true", "1"]:
+    urlpatterns.append(path("fake/", include("citizen_frontend.payment_providers.mock_providers.urls")))
