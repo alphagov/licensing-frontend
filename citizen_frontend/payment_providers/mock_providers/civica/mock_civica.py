@@ -1,6 +1,6 @@
 from urllib.parse import urlencode
 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import reverse
 
 from citizen_frontend.payment_providers.forms.civica import CivicaRequestForm
@@ -20,6 +20,8 @@ def handle_payment(request):
     if request_form.is_valid():
         encoded_params = urlencode(responses.get(scenario))
         return HttpResponseRedirect(f"{call_back_url}?{encoded_params}")
+
+    return JsonResponse(status=400, data="Invalid request", safe=False)
 
 
 def callback(request):

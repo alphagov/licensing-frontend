@@ -8,7 +8,7 @@ from citizen_frontend.payment_providers.mock_providers.civica.mock_request impor
 from citizen_frontend.payment_providers.mock_providers.civica.mock_responses import mock_success_response
 
 
-def test_civica_handles_successful_payment(client):
+def test_mock_civica_handles_successful_payment(client):
     response = client.post(reverse("civica_success"), data=mock_request)
 
     expected_response = mock_success_response
@@ -16,3 +16,9 @@ def test_civica_handles_successful_payment(client):
 
     assert response.status_code == 302
     assert response.url == "http://testserver/fake/payment/civicaCallback" + "?" + encoded_params
+
+
+def test_mock_civica_returns_400_invalid_request(client):
+    response = client.post(reverse("civica_success"), data={"invalid": "request"})
+
+    assert response.status_code == 400
