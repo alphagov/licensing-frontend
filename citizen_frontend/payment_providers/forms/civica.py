@@ -8,7 +8,7 @@ class CivicaRequestForm(forms.Form):
     BackButtonURL = forms.CharField()
     PaymentSourceCode = forms.CharField(initial="01")
     Payment_1 = forms.CharField()
-    PaymentData_1 = forms.CharField()
+    PaymentData_1 = forms.CharField(required=False)
     CallingApplicationTransactionReference = forms.CharField()
 
 

@@ -2,6 +2,7 @@ from django.urls import path
 
 from citizen_frontend.payment_providers.mock_providers import mock_worldpay, mock_worldpay_callback
 from citizen_frontend.payment_providers.mock_providers.access_paysuite import mock_access_paysuite
+from citizen_frontend.payment_providers.mock_providers.civica import mock_civica
 from citizen_frontend.payment_providers.mock_providers.northgate import mock_northgate
 
 urlpatterns = [
@@ -29,4 +30,6 @@ urlpatterns = [
         name="access_paysuite_card_declined",
     ),
     path("payment/accessPaysuiteCallback", mock_access_paysuite.call_back, name="accessPaysuiteCallback"),
+    path("payment/civica-success", mock_civica.handle_payment, name="civica_success"),
+    path("payment/civicaCallback", mock_civica.callback, name="civicaCallback"),
 ]
