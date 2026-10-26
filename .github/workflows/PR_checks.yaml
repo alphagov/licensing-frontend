@@ -14,9 +14,14 @@ jobs:
     with:
       build_branch: ${{ github.event.pull_request.head.ref }}
 
-
   test_ui:
-    name: Playwright Tests
+    name: UI Tests
     uses: ./.github/workflows/playwright.yaml
     with:
       build_branch: ${{ github.event.pull_request.head.ref }}
+
+  test_api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test API
+        run: make test-api
