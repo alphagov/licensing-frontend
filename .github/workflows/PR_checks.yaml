@@ -21,7 +21,7 @@ jobs:
       build_branch: ${{ github.event.pull_request.head.ref }}
 
   test_api:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Test API
-        run: make test-api
+    name: Test API
+    uses: ./.github/workflows/test_api.yaml
+    with:
+      build_branch: ${{ github.event.pull_request.head.ref }}
