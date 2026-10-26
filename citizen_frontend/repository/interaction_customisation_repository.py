@@ -46,7 +46,7 @@ def find_interaction_customisation(
         )
 
         if customisation:
-            # customisation.full_clean()
+            customisation.clean_fields()
             return customisation
         return None
     except ValidationError as e:

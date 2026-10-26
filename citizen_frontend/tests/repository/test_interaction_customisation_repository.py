@@ -101,12 +101,12 @@ def test_find_published_customisation_doesnt_return_suspended_published_customis
     assert customisation is None
 
 
-def test_find_published_customisation_throws_error_full_clean_failure(mock_interaction_customisation_get, mocker):
+def test_find_published_customisation_throws_error_clean_fields_failure(mock_interaction_customisation_get, mocker):
     instance = TEST_CUSTOMISATION_FIXED_FEE
 
     mock_interaction_customisation_get.return_value = instance
 
-    mocker.patch.object(instance, "full_clean", side_effect=ValidationError("field error"))
+    mocker.patch.object(instance, "clean_fields", side_effect=ValidationError("field error"))
 
     with pytest.raises(DataIntegrityError) as e:
         interaction_customisation_repository.find_interaction_customisation(

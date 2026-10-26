@@ -13,7 +13,7 @@ logger.setLevel(logging.INFO)
 def get_licence_by_url_slug(url_slug: str) -> Licence:
     try:
         licence = Licence.objects.get(url_slug=url_slug)
-        # licence.full_clean()
+        licence.clean_fields()
         return licence
     except ValidationError as e:
         logger.error("Licence does not match model")
@@ -29,8 +29,8 @@ def get_all_licences() -> list[Licence]:
     try:
         licences = list(Licence.objects.all())
 
-        # for licence in licences:
-        #     # licence.full_clean()
+        for licence in licences:
+            licence.clean_fields()
 
         return licences
     except ValidationError as e:
@@ -46,7 +46,7 @@ def get_licence_by_licence_code(licence_code: str) -> Licence | None:
         logger.info("Getting licence by licence code: %s", licence_code)
         licence = Licence.objects.get(licence_code=licence_code)
         if licence:
-            # licence.full_clean()
+            licence.clean_fields()
             return licence
     except Licence.DoesNotExist:
         logger.info("No licence found for licence code: %s", licence_code)
