@@ -46,6 +46,7 @@ def find_interaction_customisation(
         )
 
         if customisation:
+            customisation.clean_fields()
             return customisation
     except InteractionCustomisation.DoesNotExist:
         return None
