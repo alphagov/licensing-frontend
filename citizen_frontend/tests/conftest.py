@@ -3,6 +3,7 @@ from copy import deepcopy
 
 import bson
 import pytest
+from bs4 import BeautifulSoup
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
@@ -57,6 +58,24 @@ def django_db_setup():
 
 
 @pytest.fixture
+def get_dom_parser(client):
+    def _get(url=None, html_content=None):
+        content = None
+        if url:
+            res = client.get(url)
+            content = res.content
+        elif html_content:
+            content = html_content
+        if not content:
+            raise ValueError("No HTML to parse")
+        soup = BeautifulSoup(content, "html.parser")
+        soup.get_by_test_id = lambda tid: soup.find(attrs={"data-testid": tid})
+        return soup
+
+    return _get
+
+
+@pytest.fixture
 def test_introduction_page_url(live_server):
     return f"{live_server.url}/apply-for-a-licence/test-licence/test-authority/apply-1"
 
@@ -106,7 +125,15 @@ TEST_AUTHORITY = Authority(
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
     authority_url="https://test-authority.com",
-    contact_details=ContactInformation(),
+    contact_details=ContactInformation(
+        line_one="A building",
+        line_two="A street",
+        line_three="A line three",
+        city="London",
+        phone_number="01234 567 890",
+        post_code="a12 21a",
+        email="anauthorityemail@gov.uk",
+    ),
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(
@@ -361,3 +388,13 @@ def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
     mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
     return mock_find_published_customisation_with_fixed_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_returns_none(mocker):
+    mock_find_published_customisation = mocker.patch.object(
+        citizen_frontend.views.interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation.return_value = None

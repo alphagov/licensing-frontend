@@ -1,6 +1,5 @@
-from common.models.authority import LicenceDetail
+from common.models.authority import Authority, LicenceDetail
 from common.models.interaction_customisation import Customisation
-from common.models.licence import LicenceInteraction
 from django.http import Http404
 from django.shortcuts import render
 
@@ -11,22 +10,28 @@ from citizen_frontend.mocks import get_mocked_context
 from citizen_frontend.services import licence_lookup_service
 
 
-def _get_published_customisation_or_redirect(
-    authority_slug: str, licence_code: str, interaction: LicenceInteraction
-) -> Customisation:
-    published_customisation = interaction_customisation_repository.find_published_customisation(
-        authority_slug,
-        licence_code,
-        interaction.interaction_id,
-        interaction.interaction_sub_id,
+def display_licence_unavailable_online(request, authority: Authority):
+    return render(
+        request,
+        "citizen_frontend/licence_not_available_online_page.html",
+        {
+            "title": "This licence is currently not available online",
+            "contact_information": authority.contact_details,
+            "authority_name": authority.full_name,
+        },
     )
-    if not published_customisation:
-        raise Http404("suspended") from None
-    return published_customisation
 
 
 def _get_correct_url_for_legislation(licence_details: LicenceDetail, published_customisation: Customisation):
     return published_customisation.information_url or licence_details.authority_url
+
+
+def display_licence_must_be_applied_for_locally(request, authority_url=None):
+    return render(
+        request,
+        "citizen_frontend/licence_must_be_applied_for_locally_page.html",
+        {"title": "This licence must be applied for locally", "authority_url": authority_url},
+    )
 
 
 def begin_application_steps(
@@ -42,11 +47,13 @@ def begin_application_steps(
         )
 
         if not licence_details.can_apply_via_licensify:
-            raise Http404("Unhandled licence") from None
+            return display_licence_must_be_applied_for_locally(request, licence_details.authority_url)
 
-        published_customisation = _get_published_customisation_or_redirect(
-            authority_slug, licence.licence_code, interaction
+        published_customisation = interaction_customisation_repository.find_published_customisation(
+            authority_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id
         )
+        if not published_customisation:
+            return display_licence_unavailable_online(request, authority)
         fixed_fee_amount = 0
         if published_customisation.is_fee_required and published_customisation.fixed_fee_amount:
             fixed_fee_amount = published_customisation.fixed_fee_amount

@@ -1,3 +1,5 @@
+import http
+
 import pytest
 from django.core.exceptions import ObjectDoesNotExist
 from django.test import Client
@@ -35,14 +37,14 @@ def test_begin_application_steps_redirects_to_not_found_when_no_licence_context_
     assert response.context["exception"] == expected_error_message
 
 
-def test_begin_application_steps_redirects_to_not_handled_when_not_handled_by_licensify(
+def test_begin_application_steps_displays_licence_must_be_applied_for_locally_when_cant_apply_with_licensify(
     client: Client, mock_get_licence_interaction_context, get_begin_application_steps_url
 ):
     index_of_licence_detail = 3
     mock_get_licence_interaction_context.return_value[index_of_licence_detail].using_gov_uk = False
     response = client.get(get_begin_application_steps_url())
-    assert response.status_code == 404
-    assert response.context["exception"] == "Unhandled licence"
+    assert response.status_code == http.HTTPStatus.OK
+    assertTemplateUsed(response, "citizen_frontend/licence_must_be_applied_for_locally_page.html")
 
 
 def test_begin_application_steps_redirects_to_suspended_licence_when_no_published_customisation(
@@ -53,8 +55,8 @@ def test_begin_application_steps_redirects_to_suspended_licence_when_no_publishe
 ):
     mock_find_published_customisation_with_fixed_fee.return_value = None
     response = client.get(get_begin_application_steps_url())
-    assert response.status_code == 404
-    assert response.context["exception"].lower() == "suspended"
+    assert response.status_code == http.HTTPStatus.OK
+    assertTemplateUsed(response, "citizen_frontend/licence_not_available_online_page.html")
 
 
 def test_begin_application_steps_reaches_correct_page_when_all_data_exists(
