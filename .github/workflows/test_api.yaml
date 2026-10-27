@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  playwright:
-    name: Playwright testing
+  api:
+    name: API testing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
