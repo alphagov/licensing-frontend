@@ -86,6 +86,7 @@ def get_licence_authorities_and_interactions(licence_code: str, snac_code: str |
         raise LicenceLookupError(e.args[0]) from e
     except ValidationError as e:
         logger.error("Failed to build: %s", e.title)
+        logger.error(e)
         raise LicenceLookupError(f"{e.title} validation error") from e
 
 
@@ -99,9 +100,9 @@ def get_authority_licence_interaction_details(authority: Authority, licence: Lic
         authority_name=authority.full_name,
         authority_slug=authority.url_slug,
         authority_contact=AuthorityContactInformation(
-            website=authority.authority_url,
-            email=contact_details.email,
-            phone=contact_details.phone_number,
+            website=authority.authority_url if authority.authority_url else "",
+            email=contact_details.email if contact_details.email else "",
+            phone=contact_details.phone_number if contact_details.phone_number else "",
             address=postal_address,
         ),
         authority_interactions=interactions,
