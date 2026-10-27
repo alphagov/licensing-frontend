@@ -49,3 +49,6 @@ test-views: prepare
 
 test-repo: prepare
 	pytest citizen_frontend/tests/repository
+
+test-payment: prepare
+	pytest citizen_frontend/tests/payment_providers
