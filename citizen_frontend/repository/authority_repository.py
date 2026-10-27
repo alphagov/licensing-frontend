@@ -19,12 +19,12 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
         )
 
         for authority in authorities:
-            authority.full_clean()
+            authority.clean_fields()
 
         return authorities
     except ValidationError as e:
         logger.error("Authority does not match model")
-        raise DataIntegrityError(f"Authority validation error: {e.message}") from e
+        raise DataIntegrityError(f"Authority validation error: {e.messages}") from e
     except DatabaseError as e:
         logger.error("There was a database error: %s", e)
         raise DocumentDBError("There was a database error accessing Authorities collection") from e
@@ -33,11 +33,11 @@ def get_licence_offering_authorities_by_licence_code(licence_code: str) -> list[
 def find_authority_by_url_slug(url_slug: str) -> Authority | None:
     try:
         authority = Authority.objects.get(url_slug=url_slug)
-        authority.full_clean()
+        authority.clean_fields()
         return authority
     except ValidationError as e:
         logger.error("Authority does not match model")
-        raise DataIntegrityError(f"Authority validation error: {e.message}") from e
+        raise DataIntegrityError(f"Authority validation error: {e.messages}") from e
     except DatabaseError as e:
         logger.error("There was a database error: %s", e)
         raise DocumentDBError("There was a database error accessing Authorities collection") from e
