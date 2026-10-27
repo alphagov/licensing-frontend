@@ -121,3 +121,13 @@ def submit_form(request, licence_slug: str, authority_slug: str, interaction_id:
 
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
+
+
+def payment_licence_callback(request):
+    licence = "A test licence interaction from GDS which requires a small fee."
+    authority = "GDS Test Authority"
+    return render(
+        request,
+        "citizen_frontend/licence_submission_sucess_page.html",
+        {"licence_name": licence, "authority_name": authority},
+    )

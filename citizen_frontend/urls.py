@@ -13,4 +13,9 @@ urlpatterns = [
         views.submit_form,
         name="submit",
     ),
+    path(
+        "payment/licenceCallback",
+        views.payment_licence_callback,
+        name="payment_licence_callback",
+    ),
 ]
