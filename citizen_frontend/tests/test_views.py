@@ -35,6 +35,7 @@ def test_begin_application_steps_redirects_to_not_found_when_no_licence_context_
     response = client.get(get_begin_application_steps_url())
     assert response.status_code == 404
     assert response.context["exception"] == expected_error_message
+    assertTemplateUsed(response, "404.html")
 
 
 def test_begin_application_steps_displays_licence_must_be_applied_for_locally_when_cant_apply_with_licensify(
@@ -106,3 +107,4 @@ def test_begin_application_steps_returns_error_when_no_licence_interaction_found
     response = client.get(get_begin_application_steps_url(interaction_id=non_existent_interaction_id))
     assert response.status_code == 404
     assert response.context["exception"] == "Invalid interaction ID"
+    assertTemplateUsed(response, "404.html")

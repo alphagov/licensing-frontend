@@ -40,6 +40,6 @@ class LicenceAuthoritiesAndInteractionsResponse(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, validate_by_name=True)
 
     is_location_specific: bool
-    is_offered_by_county: bool
+    is_offered_by_county: bool | None
     geographical_availability: list[str]
     issuing_authorities: list[IssuingAuthority]

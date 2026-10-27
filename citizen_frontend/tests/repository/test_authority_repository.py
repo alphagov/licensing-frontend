@@ -38,7 +38,7 @@ def test_get_licence_offering_authorities_by_licence_code_throws_error_validatio
     instance = TEST_AUTHORITY
     mock_authority_model_filter.return_value = [instance]
 
-    mocker.patch.object(instance, "full_clean", side_effect=[ValidationError("field error")])
+    mocker.patch.object(instance, "clean_fields", side_effect=[ValidationError("field error")])
 
     expected_error_message = "Authority validation error: field error"
 
@@ -71,11 +71,11 @@ def test_find_authority_by_url_slug_calls_database_with_correct_method_and_args(
     )
 
 
-def test_find_authority_by_url_slug_throws_error_on_full_clean_failure(mock_authority_model_get, mocker):
+def test_find_authority_by_url_slug_throws_error_on_clean_fields_failure(mock_authority_model_get, mocker):
     instance = TEST_AUTHORITY
     mock_authority_model_get.return_value = instance
 
-    mocker.patch.object(instance, "full_clean", side_effect=[ValidationError("field error")])
+    mocker.patch.object(instance, "clean_fields", side_effect=[ValidationError("field error")])
 
     expected_error_message = "Authority validation error: field error"
 

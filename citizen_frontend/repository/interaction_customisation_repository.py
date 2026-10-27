@@ -46,12 +46,13 @@ def find_interaction_customisation(
         )
 
         if customisation:
-            customisation.full_clean()
+            customisation.clean_fields()
             return customisation
+    except InteractionCustomisation.DoesNotExist:
         return None
     except ValidationError as e:
         logger.error(e)
-        raise DataIntegrityError(f"InteractionCustomisation validation error: {e.message}") from e
+        raise DataIntegrityError(f"InteractionCustomisation validation error: {e.messages}") from e
     except InteractionCustomisation.MultipleObjectsReturned as e:
         logger.error(e)
         raise DataIntegrityError(
