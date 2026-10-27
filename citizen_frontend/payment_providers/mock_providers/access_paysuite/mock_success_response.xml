@@ -1,0 +1,11 @@
+<xml>
+    <statusCode>0</statusCode>
+    <authCode>123</authCode>
+    <payments>
+        <payment>
+            <authDetail>
+                <amountInMinorUnits>10.00</amountInMinorUnits>
+            </authDetail>
+        </payment>
+    </payments>
+</xml>

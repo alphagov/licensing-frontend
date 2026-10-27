@@ -1,0 +1,68 @@
+from urllib.parse import urlencode
+
+import pytest
+from django.urls import reverse
+
+from citizen_frontend.payment_providers.forms.mock_forms import (
+    NorthgateResponseForm,
+)
+from citizen_frontend.payment_providers.mock_providers.northgate.mock_northgate import build_response
+from citizen_frontend.payment_providers.mock_providers.northgate.mock_requests import (
+    MOCK_REQUEST_NORTHGATE,
+)
+from citizen_frontend.payment_providers.mock_providers.northgate.mock_responses import (
+    MOCK_NORTHGATE_CANCEL_RESPONSE,
+    MOCK_NORTHGATE_ERROR_RESPONSE,
+    MOCK_NORTHGATE_FAILURE_RESPONSE,
+    MOCK_SUCCESS_RESPONSE_NORTHGATE,
+    build_northgate_response_with_hash,
+)
+
+
+def test_mock_northgate_returns_400_invalid_request(client):
+    response = client.get(reverse("northgate_success"), {"invalid": "request"})
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize("route", ["northgate_success", "northgate_failure"])
+def test_mock_northgate_throws_405_on_anything_but_get(client, route):
+    response = client.post(reverse(route), data={"hello": "world"})
+
+    assert response.status_code == 405
+
+
+@pytest.mark.parametrize(
+    "route, expected_response",
+    [
+        ("northgate_success", MOCK_SUCCESS_RESPONSE_NORTHGATE),
+        ("northgate_failure", MOCK_NORTHGATE_FAILURE_RESPONSE),
+        ("northgate_cancel", MOCK_NORTHGATE_CANCEL_RESPONSE),
+        ("northgate_error", MOCK_NORTHGATE_ERROR_RESPONSE),
+    ],
+)
+def test_mock_northgate_success_calls_callback_with_correct_args_valid_request(client, route, expected_response):
+    response = client.get(reverse(route), data=MOCK_REQUEST_NORTHGATE)
+
+    assert response.status_code == 302
+    expected_success_form = NorthgateResponseForm(build_northgate_response_with_hash(expected_response))
+    if expected_success_form.is_valid():
+        data = expected_success_form.cleaned_data
+        encoded_params = urlencode(data)
+
+    assert response.url == f"{MOCK_REQUEST_NORTHGATE['returnurl']}?{encoded_params}"
+
+
+@pytest.mark.parametrize(
+    "response, expected",
+    [
+        ("success", MOCK_SUCCESS_RESPONSE_NORTHGATE),
+        ("failure", MOCK_NORTHGATE_FAILURE_RESPONSE),
+        ("cancel", MOCK_NORTHGATE_CANCEL_RESPONSE),
+        ("error", MOCK_NORTHGATE_ERROR_RESPONSE),
+    ],
+)
+def test_build_response_builds_success_response(response, expected):
+    expected_form = NorthgateResponseForm(build_northgate_response_with_hash(expected))
+    if expected_form.is_valid():
+        actual = build_response(response)
+        assert actual == expected_form.cleaned_data
