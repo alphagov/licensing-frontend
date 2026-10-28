@@ -1,7 +1,13 @@
 from copy import deepcopy
 
 import pytest
-from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_VARIABLE_FEE, TEST_LICENCE
+from conftest import (
+    TEST_AUTHORITY,
+    TEST_CUSTOMISATION_FIXED_FEE,
+    TEST_CUSTOMISATION_VARIABLE_FEE,
+    TEST_LICENCE,
+    TEST_LICENCE_APPLICATION,
+)
 
 
 @pytest.fixture
@@ -62,8 +68,16 @@ def test_page_application_confirmation_when_no_licence_fee_defined(
     assert "We have received your application" in text
 
 
-def test_page_has_correct_email_for_confirmation():
-    pass
+def test_page_has_correct_email_for_confirmation(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    email_text = dom.get_by_test_id("email-confirmation").get_text()
+
+    assert "test@email.com" in email_text
 
 
 def test_page_has_payment_reference_when_licence_has_a_fee():

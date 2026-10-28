@@ -8,5 +8,8 @@
             and have been notified that the fee has been paid
         {% endif %}.
     </p>
+    <p class="govuk-body" data-testid="email-confirmation">We will send a confirmation email to:
+        <br>{{ licence_application.applicant_email }}
+    </p>
 
 {% endblock %}
