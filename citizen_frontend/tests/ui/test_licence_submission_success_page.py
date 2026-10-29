@@ -7,6 +7,7 @@ from conftest import (
     TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_LICENCE,
     TEST_LICENCE_APPLICATION,
+    TEST_PAYMENT,
 )
 
 
@@ -80,12 +81,39 @@ def test_page_has_correct_email_for_confirmation(
     assert "test@email.com" in email_text
 
 
-def test_page_has_payment_reference_when_licence_has_a_fee():
-    pass
+def test_page_has_payment_reference_for_provider_when_licence_has_a_paid_fee(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
+        "is_paid": True,
+        "payment": TEST_PAYMENT,
+        "transaction_id_exists": True,
+        "payment_provider_exists": True,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    payment_reference_text = dom.get_by_test_id("payment-reference").get_text()
+
+    assert "WorldPay" in payment_reference_text
+    assert "test transaction id" in payment_reference_text
 
 
-def test_page_has_no_payment_reference_when_licence_has_no_fee():
-    pass
+def test_page_has_no_payment_reference_when_licence_has_no_fee(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    customisation_no_fee = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    customisation_no_fee.is_fee_required = False
+    mock_context.return_value = {
+        "customisation": customisation_no_fee,
+        "is_paid": False,
+        "transaction_id_exists": False,
+        "payment_provider_exists": False,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    payment_reference_text = dom.get_by_test_id("payment-reference").get_text()
+
+    assert "WorldPay" not in payment_reference_text
+    assert "test transaction id" not in payment_reference_text
 
 
 def test_page_has_application_reference():

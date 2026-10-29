@@ -11,5 +11,11 @@
     <p class="govuk-body" data-testid="email-confirmation">We will send a confirmation email to:
         <br>{{ licence_application.applicant_email }}
     </p>
+    <p class="govuk-body" data-testid="payment-reference">
+        {% if transaction_id_exists and payment_provider_exists %}
+            Your {{ payment.payment_provider }} reference is:
+            <br>{{ payment.transaction_id }}
+        {% endif %}
+    </p>
 
 {% endblock %}

@@ -8,11 +8,13 @@ from bs4 import BeautifulSoup
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
+from common.enums.payment_status import PaymentStatuses
 from common.enums.virus_check_status import VirusCheckStatus
 from common.models.authority import Authority, ContactInformation, LicenceDetail
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.licence_application import ApplicationStatus, LicenceApplication, SupportingDocument
+from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 from django.utils.timezone import now
@@ -348,6 +350,16 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     application_form_metadata="test form metadata",
     collected_by="test@authority.com",
     under_process_by="test@authority.com",
+)
+
+TEST_PAYMENT = Payment(
+    payment_account_id="test account id",
+    payment_provider="WorldPay",
+    application_reference="test application reference",
+    payment_status=PaymentStatus(status=PaymentStatuses.COMPLETED),
+    transaction_id="test transaction id",
+    callback_url="https://example.com",
+    request_url="https://example.com",
 )
 
 
