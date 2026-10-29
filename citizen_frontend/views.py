@@ -39,7 +39,6 @@ def begin_application_steps(
             authority,
             interaction,
             interaction_id,
-            interaction_sub_id,
             licence,
             licence_details,
             published_customisation,
@@ -56,7 +55,6 @@ def build_context(
     authority: Authority,
     interaction: LicenceInteraction,
     interaction_id: str,
-    interaction_sub_id: int,
     licence: Licence,
     licence_details: LicenceDetail,
     published_customisation: Customisation,
@@ -149,3 +147,7 @@ def submit_form(request, licence_slug: str, authority_slug: str, interaction_id:
 
     except Exception as e:
         raise Http404("Incorrect licence, or authority does not exist") from e
+
+
+def generate_form():
+    return None

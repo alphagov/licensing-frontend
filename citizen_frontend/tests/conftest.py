@@ -77,7 +77,7 @@ def get_dom_parser(client):
 
 @pytest.fixture
 def test_introduction_page_url(live_server):
-    return f"{live_server.url}/apply-for-a-licence/test-licence/test-authority/apply-1"
+    return f"{live_server.url}/{SERVICE_SLUG}/test-licence/test-authority/apply-1"
 
 
 @pytest.fixture
@@ -325,20 +325,10 @@ def mock_lookup_service(mocker):
 
 
 @pytest.fixture
-def mock_authority():
-    return deepcopy(TEST_AUTHORITY)
-
-
-@pytest.fixture
-def mock_licence():
-    return deepcopy(TEST_LICENCE)
-
-
-@pytest.fixture
-def licence_interaction_context(mock_licence, mock_authority):
+def licence_interaction_context():
     return (
-        mock_licence,
-        mock_authority,
+        deepcopy(TEST_LICENCE),
+        deepcopy(TEST_AUTHORITY),
         deepcopy(TEST_LICENCE_INTERACTION),
         deepcopy(TEST_LICENCE_DETAIL),
     )

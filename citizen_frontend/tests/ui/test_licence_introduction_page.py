@@ -1,6 +1,8 @@
 import os
 from urllib.parse import urlparse
 
+from conftest import SERVICE_SLUG
+
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 
@@ -84,8 +86,15 @@ def test_page_has_download_pdf_inset(
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
+    live_server,
 ):
     dom = get_dom_parser(test_introduction_page_url)
+    licence, authority, interaction, detail = mock_get_licence_interaction_context.return_value
+    expected_form_url = urlparse(
+        f"{live_server}/{SERVICE_SLUG}/forms/"
+        f"{authority.url_slug}/{licence.url_slug}/"
+        f"{licence.licence_code},{interaction.interaction_id}-{interaction.interaction_sub_id}"
+    ).path
 
     adobe_download_link = dom.get_by_test_id("adobe-download")
     pdf_download_link = dom.get_by_test_id("pdf-download")
@@ -94,7 +103,7 @@ def test_page_has_download_pdf_inset(
     assert adobe_download_link.name == "a"
     assert adobe_download_link["href"] == "https://get.adobe.com/uk/reader/"
     assert pdf_download_link.name == "a"
-    assert pdf_download_link["href"] == "#"
+    assert pdf_download_link["href"] == expected_form_url
 
 
 def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(

@@ -13,4 +13,9 @@ urlpatterns = [
         views.submit_form,
         name="submit",
     ),
+    path(
+        "forms/<str:authority_slug>/<str:licence_slug>/<str:licence_code>,<int:interaction_id>-<int:interaction_sub_id>",
+        views.generate_form,
+        name="generate_form",
+    ),
 ]
