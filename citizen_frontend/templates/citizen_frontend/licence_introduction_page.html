@@ -28,6 +28,6 @@
         {% include "citizen_frontend/partials/before_you_apply.html" %}
     {% endif %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
-    <a href="{% url 'submit' licence_slug authority_slug interaction_id interaction_sub_id %}" class="govuk-button"
+    <a href="{% url 'submit' licence.url_slug authority.url_slug interaction_id interaction.interaction_sub_id %}" class="govuk-button"
        data-testid="submit-button">Submit application</a>
 {% endblock %}

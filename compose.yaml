@@ -26,7 +26,7 @@ services:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:
       watch:
-        - action: sync
+        - action: sync+restart
           path: ./citizen_frontend
           target: app/citizen_frontend/
           ignore:

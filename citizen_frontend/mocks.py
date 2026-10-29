@@ -35,8 +35,12 @@ def get_mocked_context(licence, authority, interaction, interaction_sub_id):
     is_fee_required, fee_amount = get_fee(licence)
     steps = 4 if is_fee_required else 3
 
+    mock_auth = {
+        "full_name": authority,
+    }
+
     context = {
-        "authority_name": authority.capitalize(),
+        "authority": mock_auth,
         "licence_name": licence.replace("-", " ").title(),
         "interaction_sub_id": interaction_sub_id,
         "interaction": interaction,
