@@ -2,6 +2,10 @@ import pytest
 from conftest import BASE_URL, TEST_FOOD_PREMISES_APPLY_FORM_URL, TEST_TEMP_EVENT_APPLY_FORM_URL
 from playwright.sync_api import Page, expect
 
+"""
+This requires a seeded_db to run
+"""
+
 
 def test_page_has_correct_headings(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
