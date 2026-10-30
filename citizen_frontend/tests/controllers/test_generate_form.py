@@ -26,3 +26,8 @@ def test_generate_form_returns_file_response(client, generate_form_url):
 
     assert type(response) is FileResponse
     assert response.status_code == 200
+
+
+def test_generate_form_calls_licence_lookup_service_for_form_details(client, generate_form_url):
+    # response = client.get(generate_form_url())
+    pass
