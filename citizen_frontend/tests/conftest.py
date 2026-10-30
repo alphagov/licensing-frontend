@@ -280,7 +280,7 @@ TEST_ISSUING_AUTHORITY = IssuingAuthority(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
-        address="",
+        address="A building\nA street\nA line three\nLondon\na12 21a",
     ),
     authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
 )
@@ -326,7 +326,7 @@ def mock_lookup_service(mocker):
 
 @pytest.fixture
 def licence_interaction_context():
-    return (
+    yield (
         deepcopy(TEST_LICENCE),
         deepcopy(TEST_AUTHORITY),
         deepcopy(TEST_LICENCE_INTERACTION),
@@ -377,7 +377,7 @@ def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
     mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
     mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
-    return mock_find_published_customisation_with_no_fee
+    return mock_find_published_customisation_with_fixed_fee
 
 
 @pytest.fixture
