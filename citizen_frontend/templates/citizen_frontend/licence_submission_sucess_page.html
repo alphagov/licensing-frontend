@@ -26,7 +26,26 @@
     <h2 class="govuk-heading-s">What happens next?</h2>
     {% if licence_application.has_supporting_documents_online %}
         <p class="govuk-body" data-testid="what-next">
-            {{ licence_application.authority }} has been notified of your application.
+            {{ licence_application.authority }} has been notified of your application. Assuming the form
+            {% if has_supporting_documents %}
+                {% if all_supporting_documents_required %}
+                    and supporting documents
+                {% else %}
+                    and supporting documents, where applicable,
+                {% endif %}
+                are
+            {% else %}
+                is
+            {% endif %}
+            valid they'll contact you with a decision
+            {% if has_expected_processing_date %}
+                by {{ expected_processing_date }}.
+                {% if application.tacitConsent %}
+                    If you haven't had a decision by this date you can assume it's been approved as tacit consent applies.
+                {% endif %}
+            {% else %}
+                within 30 days.
+            {% endif %}
         </p>
     {% endif %}
 {% endblock %}

@@ -136,8 +136,33 @@ def test_page_has_notified_authority(get_dom_parser, test_licence_submission_suc
     assert TEST_AUTHORITY.name in what_next_text
 
 
-def test_page_references_online_supporting_documents_when_not_all_are_required():
-    pass
+def test_page_references_online_supporting_documents_when_all_are_required(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+        "all_supporting_documents_required": True,
+        "has_supporting_documents": True,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "and supporting documents" in what_next_text
+    assert "where applicable" not in what_next_text
+
+
+def test_page_references_online_supporting_documents_when_not_all_are_required(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+        "all_supporting_documents_required": False,
+        "has_supporting_documents": True,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "and supporting documents, where applicable," in what_next_text
 
 
 def test_page_does_not_reference_online_supporting_documents_when_none_provided():
