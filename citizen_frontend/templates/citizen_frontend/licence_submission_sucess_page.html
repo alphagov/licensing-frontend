@@ -22,4 +22,11 @@
         <p class="govuk-body">Keep this safe as you'll need it in any correspondence with the licencing authority or if you want to change
             or renew the licence.</p>
     </div>
+
+    <h2 class="govuk-heading-s">What happens next?</h2>
+    {% if licence_application.has_supporting_documents_online %}
+        <p class="govuk-body" data-testid="what-next">
+            {{ licence_application.authority }} has been notified of your application.
+        </p>
+    {% endif %}
 {% endblock %}

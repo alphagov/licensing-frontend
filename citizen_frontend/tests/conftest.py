@@ -325,7 +325,7 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
 
 TEST_LICENCE_APPLICATION = LicenceApplication(
     applicant_email="test@email.com",
-    authority=TEST_AUTHORITY.name,
+    authority=TEST_AUTHORITY.full_name,
     licence=TEST_LICENCE.id,
     has_supporting_documents_online=True,
     application_pdf=SupportingDocument(

@@ -126,8 +126,14 @@ def test_page_has_application_reference(get_dom_parser, test_licence_submission_
     assert "test application reference number" in application_reference_text
 
 
-def test_page_references_online_supporting_documents_when_all_are_required():
-    pass
+def test_page_has_notified_authority(get_dom_parser, test_licence_submission_success_page_url, mock_context):
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert TEST_AUTHORITY.name in what_next_text
 
 
 def test_page_references_online_supporting_documents_when_not_all_are_required():
