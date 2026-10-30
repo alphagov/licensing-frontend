@@ -128,6 +128,7 @@ def test_page_has_application_reference(get_dom_parser, test_licence_submission_
 
 def test_page_has_notified_authority(get_dom_parser, test_licence_submission_success_page_url, mock_context):
     mock_context.return_value = {
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "licence_application": TEST_LICENCE_APPLICATION,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
@@ -140,7 +141,7 @@ def test_page_references_online_supporting_documents_when_all_are_required(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "all_supporting_documents_required": True,
         "has_supporting_documents": True,
     }
@@ -155,7 +156,7 @@ def test_page_references_online_supporting_documents_when_not_all_are_required(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "all_supporting_documents_required": False,
         "has_supporting_documents": True,
     }
@@ -168,9 +169,8 @@ def test_page_references_online_supporting_documents_when_not_all_are_required(
 def test_page_does_not_reference_online_supporting_documents_when_none_provided(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-
     mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "all_supporting_documents_required": False,
         "has_supporting_documents": False,
     }
@@ -185,7 +185,7 @@ def test_page_has_expected_processing_date_in_correct_format_when_one_exists(
 ):
     formatted_date = TEST_LICENCE_APPLICATION.expected_processing_date.strftime("%d %B %Y")
     mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "has_expected_processing_date": True,
         "expected_processing_date": TEST_LICENCE_APPLICATION.expected_processing_date.strftime("%d %B %Y"),
     }
@@ -200,7 +200,7 @@ def test_page_has_30_day_processing_date_when_no_expected_processing_date_exists
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
         "has_expected_processing_date": False,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
@@ -212,7 +212,16 @@ def test_page_has_30_day_processing_date_when_no_expected_processing_date_exists
 def test_page_refers_to_tacit_consent_when_applicable(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    pass
+    mock_context.return_value = {
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
+        "has_expected_processing_date": True,
+        "expected_processing_date": TEST_LICENCE_APPLICATION.expected_processing_date.strftime("%d %B %Y"),
+        "application_has_tacit_consent": TEST_LICENCE_APPLICATION.has_tacit_consent,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "tacit consent applies" in what_next_text
 
 
 def test_page_has_instructions_for_posting_supporting_documents_when_not_provided_online(

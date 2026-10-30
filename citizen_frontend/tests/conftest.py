@@ -342,7 +342,7 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     application_reference_number="test application reference number",
     authority_application_reference="test application reference",
     expected_processing_date=now() + timedelta(days=7),
-    has_tacit_consent=False,
+    has_tacit_consent=True,
     required_payment_amount=PaymentAmount(),
     is_fee_required=False,
     has_variable_fee=False,
