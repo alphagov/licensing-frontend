@@ -116,8 +116,14 @@ def test_page_has_no_payment_reference_when_licence_has_no_fee(
     assert "test transaction id" not in payment_reference_text
 
 
-def test_page_has_application_reference():
-    pass
+def test_page_has_application_reference(get_dom_parser, test_licence_submission_success_page_url, mock_context):
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    application_reference_text = dom.get_by_test_id("application-reference").get_text()
+
+    assert "test application reference number" in application_reference_text
 
 
 def test_page_references_online_supporting_documents_when_all_are_required():

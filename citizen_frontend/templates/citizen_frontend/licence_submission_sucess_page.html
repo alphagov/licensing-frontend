@@ -17,5 +17,9 @@
             <br>{{ payment.transaction_id }}
         {% endif %}
     </p>
-
+    <div class="govuk-inset-text" data-testid="application-reference">
+        <p class="govuk-body">Your application reference is: <strong> {{ licence_application.application_reference_number }}</strong></p>
+        <p class="govuk-body">Keep this safe as you'll need it in any correspondence with the licencing authority or if you want to change
+            or renew the licence.</p>
+    </div>
 {% endblock %}
