@@ -1,3 +1,5 @@
+import logging
+
 from django.http import Http404
 from django.shortcuts import render
 
@@ -6,6 +8,9 @@ from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def generate_application_form(
@@ -80,4 +85,5 @@ def generate_application_form(
         return render(request, "citizen_frontend/licence_submission_page.html", context)
 
     except Exception as e:
+        logger.error(e)
         raise Http404("Incorrect licence, or authority does not exist") from e
