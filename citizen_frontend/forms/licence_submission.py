@@ -1,5 +1,6 @@
 import logging
 
+from common.models.interaction_customisation import Customisation
 from crispy_forms_gds.helper import FormHelper
 from crispy_forms_gds.layout import HTML, Button, Fieldset, Layout
 from django import forms
@@ -47,7 +48,7 @@ class ApplicationSubmissionForm(forms.Form):
         ),
     )
 
-    def __init__(self, *args, supporting_documents, default_declarations, fee, **kwargs):
+    def __init__(self, *args, published_customisation: Customisation, **kwargs):
         super().__init__(*args, **kwargs)
 
         logger.info("Building Application Submission Form")
@@ -56,19 +57,23 @@ class ApplicationSubmissionForm(forms.Form):
             Fieldset("application_upload", accept=".pdf", legend="Application form", legend_tag="h2", legend_size="s"),
         ]
 
-        if supporting_documents:
+        if published_customisation.supporting_document_definitions:
             (
                 layout_items.append(
-                    self.build_supporting_documents_fieldset({"supporting_documents": supporting_documents})
+                    self.build_supporting_documents_fieldset(
+                        {"supporting_documents": published_customisation.supporting_document_definitions}
+                    )
                 )
             )
 
-        if default_declarations:
-            layout_items.append(self.build_declarations_fieldset({"default_declarations": default_declarations}))
+        if published_customisation.declarations:
+            layout_items.append(
+                self.build_declarations_fieldset({"default_declarations": published_customisation.declarations})
+            )
 
         layout_items.append(HTML(render_to_string("citizen_frontend/partials/submission_statement.html")))
 
-        submit_button_text = "Continue to pay fee" if fee else "Continue"
+        submit_button_text = "Continue to pay fee" if published_customisation.is_fee_required else "Continue"
 
         layout_items.append(
             Button.primary(

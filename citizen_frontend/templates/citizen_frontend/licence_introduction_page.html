@@ -24,7 +24,7 @@
     {% if additional_info_exists %}
         {% include "citizen_frontend/partials/additional_information.html" %}
     {% endif %}
-    {% if before_you_apply_required %}
+    {% if published_customisation.is_fee_required or published_customisation.supporting_document_definitions %}
         {% include "citizen_frontend/partials/before_you_apply.html" %}
     {% endif %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
