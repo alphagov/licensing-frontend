@@ -1,3 +1,5 @@
+import logging
+
 from crispy_forms_gds.helper import FormHelper
 from crispy_forms_gds.layout import HTML, Button, Fieldset, Layout
 from django import forms
@@ -5,6 +7,9 @@ from django.core.validators import FileExtensionValidator
 from django.template.loader import render_to_string
 
 from citizen_frontend.enums.accepted_file_extension import SupportedDocumentFileExtensions
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 class ApplicationSubmissionForm(forms.Form):
@@ -45,6 +50,7 @@ class ApplicationSubmissionForm(forms.Form):
     def __init__(self, *args, supporting_documents, default_declarations, fee, **kwargs):
         super().__init__(*args, **kwargs)
 
+        logger.info("Building Application Submission Form")
         layout_items = [
             Fieldset("email", "confirmation_email", legend="Email address", legend_tag="h2", legend_size="s"),
             Fieldset("application_upload", accept=".pdf", legend="Application form", legend_tag="h2", legend_size="s"),
@@ -62,7 +68,7 @@ class ApplicationSubmissionForm(forms.Form):
 
         layout_items.append(HTML(render_to_string("citizen_frontend/partials/submission_statement.html")))
 
-        submit_button_text = "Continue to pay fee" if fee else "Submit Application"
+        submit_button_text = "Continue to pay fee" if fee else "Continue"
 
         layout_items.append(
             Button.primary(
@@ -75,6 +81,7 @@ class ApplicationSubmissionForm(forms.Form):
         self.helper.layout = Layout(*layout_items)
 
     def build_supporting_documents_fieldset(self, context):
+        logger.info("Building Supporting Documents Fieldset")
         accepted_file_extensions = SupportedDocumentFileExtensions.list()
         context.update({"accepted_file_extensions": accepted_file_extensions})
 
@@ -89,12 +96,11 @@ class ApplicationSubmissionForm(forms.Form):
         supporting_documents = context["supporting_documents"]
 
         for index, document in enumerate(supporting_documents):
-            label = document["name"] if document["is_mandatory"] else f"{document['name']}(optional)"
-
+            label = document.name if document.is_mandatory else f"{document.name}(optional)"
             self.fields[f"supporting_document_{index}"] = forms.FileField(
                 label=label,
-                help_text=document.get("description"),
-                required=document["is_mandatory"],
+                help_text=document.description,
+                required=document.is_mandatory,
                 error_messages={"required": "Please submit mandatory supporting document"},
                 widget=forms.FileInput(
                     attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
@@ -107,6 +113,7 @@ class ApplicationSubmissionForm(forms.Form):
         return Fieldset(*fieldset_additions, legend="Supporting Documents", legend_tag="h2", legend_size="s")
 
     def build_declarations_fieldset(self, context):
+        logger.info("Building Declarations Fieldset")
         fieldset_additions = [HTML(render_to_string("citizen_frontend/partials/declarations.html", context=context))]
 
         self.fields["declaration"] = forms.BooleanField(

@@ -2,6 +2,10 @@ import pytest
 from conftest import BASE_URL, TEST_FOOD_PREMISES_APPLY_FORM_URL, TEST_TEMP_EVENT_APPLY_FORM_URL
 from playwright.sync_api import Page, expect
 
+"""
+This requires a seeded_db to run
+"""
+
 
 def test_page_has_correct_headings(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
@@ -74,7 +78,7 @@ def test_page_has_correct_elements_supporting_documents_required(page: Page):
 def test_optional_supporting_documents_are_marked_optional(page: Page):
     page.goto(f"{BASE_URL}{TEST_FOOD_PREMISES_APPLY_FORM_URL}")
 
-    optional_upload = page.get_by_label("Additional information for section 9 of the form(optional)")
+    optional_upload = page.get_by_label("Additonal information for section 9 of the form(optional)")
     expect(optional_upload).to_be_visible()
     expect(optional_upload).to_have_role("button")
 
