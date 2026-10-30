@@ -165,33 +165,58 @@ def test_page_references_online_supporting_documents_when_not_all_are_required(
     assert "and supporting documents, where applicable," in what_next_text
 
 
-def test_page_does_not_reference_online_supporting_documents_when_none_provided():
+def test_page_does_not_reference_online_supporting_documents_when_none_provided(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+
+    mock_context.return_value = {
+        "licence_application": TEST_LICENCE_APPLICATION,
+        "all_supporting_documents_required": False,
+        "has_supporting_documents": False,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "and supporting documents, where applicable," not in what_next_text
+
+
+def test_page_has_expected_processing_date_in_correct_format_when_one_exists(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_has_expected_processing_date_in_correct_format_when_one_exists():
+def test_page_has_30_day_processing_date_when_no_expected_processing_date_exists(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_has_30_day_processing_date_when_no_expected_processing_date_exists():
+def test_page_refers_to_tacit_consent_when_applicable(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_refers_to_tacit_consent_when_applicable():
+def test_page_has_instructions_for_posting_supporting_documents_when_not_provided_online(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_has_instructions_for_posting_supporting_documents_when_not_provided_online():
+def test_page_has_processing_time_for_when_posting_supporting_documents_when_not_provided_online(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_has_processing_time_for_when_posting_supporting_documents_when_not_provided_online():
+def test_page_displays_department_contact_details(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
 
 
-def test_page_displays_department_contact_details():
-    pass
-
-
-def test_page_displays_licence_finder_url_under_next_steps():
+def test_page_displays_licence_finder_url_under_next_steps(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
     pass
