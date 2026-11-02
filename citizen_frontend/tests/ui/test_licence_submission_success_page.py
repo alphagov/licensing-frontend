@@ -236,19 +236,38 @@ def test_page_does_not_refer_to_tacit_consent_when_not_applicable(
 def test_page_has_instructions_for_posting_supporting_documents_when_not_provided_online(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    pass
+    mock_context.return_value = {
+        "authority_name": TEST_LICENCE_APPLICATION.authority,
+        "application_has_supporting_documents_online": False,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert TEST_LICENCE_APPLICATION.authority in what_next_text
+    assert "You must now send in any supporting documentation to the address below." in what_next_text
 
 
 def test_page_has_processing_time_for_when_posting_supporting_documents_when_not_provided_online(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    pass
+    mock_context.return_value = {
+        "processing_days": "30 working days",
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "30 working days" in what_next_text
+
+
+# TODO: Add mock for this logic
 
 
 def test_page_displays_department_contact_details(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    pass
+    mock_context.return_value = {
+        # TODO:  Add mock for department contact detail logic
+    }
 
 
 def test_page_displays_licence_finder_url_under_next_steps(

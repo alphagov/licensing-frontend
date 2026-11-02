@@ -24,9 +24,10 @@
     </div>
 
     <h2 class="govuk-heading-s">What happens next?</h2>
-    {% if application_has_supporting_documents_online %}
-        <p class="govuk-body" data-testid="what-next">
-            {{ authority_name }} has been notified of your application. Assuming the form
+    <p class="govuk-body" data-testid="what-next">
+        {{ authority_name }} has been notified of your application.
+        {% if application_has_supporting_documents_online %}
+            Assuming the form
             {% if has_supporting_documents %}
                 {% if all_supporting_documents_required %}
                     and supporting documents
@@ -46,6 +47,12 @@
             {% else %}
                 within 30 days.
             {% endif %}
+        </p>
+    {% else %}
+        <p><strong>You must now send in any supporting documentation to the address below.</strong></p>
+        <p>
+            They'll contact you with a decision within {{ processing_days }} days after they've received a full,
+            valid set of supporting documents.
         </p>
     {% endif %}
 {% endblock %}
