@@ -26,10 +26,21 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
 
 
 def generate_form(
-    request, authority_slug: str, licence_slug: str, licence_code: str, interaction_id: str, interaction_sub_id: int
+    request, authority_slug: str, licence_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
 ):
 
-    licence_lookup_service.lookup_form_details()
+    # TODO we want to get form details, and only if they exist should we get the customisation.
+    #   feels like this could be wrapped in a service.
+    #   e.g PDFFormProvider that is made up of licencelookup and PDF generation.
+    #   licencelooup is already made up of auth_repo, licence_repo, and customisation_repo
+    #   perhaps refactor to class based, can leverage composition, DI, etc more module code.
+
+    licence_lookup_service.lookup_form_details(
+        authority_slug=authority_slug,
+        licence_slug=licence_slug,
+        interaction_id=interaction_id,
+        interaction_sub_id=interaction_sub_id,
+    )
 
     with open("citizen_frontend/tests/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
         return FileResponse(f.read(), content_type="application/pdf")

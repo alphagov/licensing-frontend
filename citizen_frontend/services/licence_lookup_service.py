@@ -207,5 +207,5 @@ def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
     return grouped_interactions
 
 
-def lookup_form_details():
+def lookup_form_details(authority_slug: str, licence_slug: str, interaction_id: int, interaction_sub_id: int):
     pass

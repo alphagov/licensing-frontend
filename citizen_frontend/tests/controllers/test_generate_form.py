@@ -1,5 +1,5 @@
 import pytest
-from conftest import TEST_INTERACTION_ID, TEST_LICENCE_CODE
+from conftest import TEST_AUTHORITY, TEST_LICENCE
 from django.http import FileResponse
 from django.urls import reverse
 
@@ -10,11 +10,11 @@ from citizen_frontend.services import licence_lookup_service
 def generate_form_url():
     def _url(**overrides) -> str:
         defaults = {
-            "licence_slug": "string",
-            "authority_slug": "string",
-            "licence_code": TEST_LICENCE_CODE,
-            "interaction_id": TEST_INTERACTION_ID,
-            "interaction_sub_id": 5,
+            "licence_slug": TEST_LICENCE.url_slug,
+            "authority_slug": TEST_AUTHORITY.url_slug,
+            "licence_code": TEST_LICENCE.licence_code,
+            "interaction_id": TEST_LICENCE.licence_interactions[0].interaction_id,
+            "interaction_sub_id": TEST_LICENCE.licence_interactions[0].interaction_sub_id,
         }
 
         merged_kwargs = {**defaults, **overrides}
@@ -35,9 +35,14 @@ def test_generate_form_returns_file_response(client, generate_form_url):
     assert response.status_code == 200
 
 
-def test_generate_form_calls_licence_lookup_service_for_form_details(
+def test_generate_form_calls_licence_lookup_service_for_form_details_with_correct_args(
     client, generate_form_url, mock_lookup_form_details
 ):
     client.get(generate_form_url())
 
-    mock_lookup_form_details.assert_called()
+    mock_lookup_form_details.assert_called_with(
+        authority_slug=TEST_AUTHORITY.url_slug,
+        licence_slug=TEST_LICENCE.url_slug,
+        interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
+        interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
+    )
