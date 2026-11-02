@@ -42,6 +42,13 @@ def generate_form(
         interaction_sub_id=interaction_sub_id,
     )
 
+    licence_lookup_service.interaction_customisation_repository.find_published_customisation(
+        authority_url_slug=authority_slug,
+        licence_code=licence_code,
+        interaction_sub_id=interaction_sub_id,
+        interaction_id=interaction_id,
+    )
+
     with open("citizen_frontend/tests/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
         return FileResponse(f.read(), content_type="application/pdf")
     return HttpResponse("hello world")

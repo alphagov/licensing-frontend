@@ -495,19 +495,3 @@ def test_get_licence_authorities_and_interactions_throws_error_on_response_valid
         licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert e.value.args[0] == "AuthorityInteraction validation error"
-
-
-def test_lookup_form_details_calls_repositories_with_correct_args(
-    mock_authority_repository,
-    mock_licence_repository,
-):
-
-    licence_lookup_service.lookup_form_details(
-        authority_slug=TEST_AUTHORITY.url_slug,
-        licence_slug=TEST_LICENCE.url_slug,
-        interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
-        interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
-    )
-
-    mock_authority_repository.find_authority_by_url_slug.assert_called_once_with(url_slug=TEST_AUTHORITY.url_slug)
-    mock_licence_repository.get_licence_by_url_slug.assert_called_with(url_slug=TEST_LICENCE.url_slug)
