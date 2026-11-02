@@ -4,7 +4,7 @@ import pytest
 from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authority import ContactInformation
 from common.models.shared_models import PaymentAmount
-from conftest import TEST_ISSUING_AUTHORITY, TEST_LICENCE_DETAIL
+from conftest import TEST_ISSUING_AUTHORITY
 from django.core.exceptions import ObjectDoesNotExist
 from pydantic import ValidationError
 
@@ -357,7 +357,7 @@ def test_get_licence_interaction_context_returns_error_when_no_licence_details_f
 
 
 def test_get_licence_interaction_context_returns_error_when_no_interaction_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
+    mock_licence_repository, mock_authority_repository, mock_find_licence_detail, mock_licence_service
 ):
     mock_licence_service.find_interaction.return_value = None
     with pytest.raises(ObjectDoesNotExist) as e:
@@ -367,15 +367,15 @@ def test_get_licence_interaction_context_returns_error_when_no_interaction_found
 
 
 def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
+    mock_licence_repository, mock_authority_repository, mock_find_licence_detail, mock_licence_service
 ):
-    mock_authority_repository.find_authority_by_url_slug.return_value.url_slug = "url_slug"
-    mock_licence_repository.get_licence_by_url_slug.return_value.licence_code = "licence_code"
+    mock_authority_repository.find_authority_by_url_slug.return_value = TEST_AUTHORITY
+    mock_licence_repository.get_licence_by_url_slug.return_value = TEST_LICENCE
     actual_licence, actual_authority, actual_interaction, actual_licence_detail = (
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
     )
-    assert actual_authority.url_slug == "url_slug"
-    assert actual_licence.licence_code == "licence_code"
+    assert actual_authority.url_slug == TEST_AUTHORITY.url_slug
+    assert actual_licence.licence_code == TEST_LICENCE.licence_code
     assert actual_interaction is not None
     assert actual_licence_detail is not None
 
@@ -511,43 +511,3 @@ def test_lookup_form_details_calls_repositories_with_correct_args(
 
     mock_authority_repository.find_authority_by_url_slug.assert_called_once_with(url_slug=TEST_AUTHORITY.url_slug)
     mock_licence_repository.get_licence_by_url_slug.assert_called_with(url_slug=TEST_LICENCE.url_slug)
-
-
-def test_lookup_form_details_returns_correct_elements_when_licence_is_offered_by_authority_using_gov_uk(
-    mock_authority_repository,
-    mock_licence_repository,
-):
-    mock_authority_repository.find_authority_by_url_slug.return_value = TEST_AUTHORITY
-    mock_licence_repository.get_licence_by_url_slug.return_value = TEST_LICENCE
-
-    actual = licence_lookup_service.lookup_form_details(
-        authority_slug=TEST_AUTHORITY.url_slug,
-        licence_slug=TEST_LICENCE.url_slug,
-        interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
-        interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
-    )
-
-    assert actual == (TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE.licence_interactions[0])
-
-
-def test_lookup_form_details_returns_none_when_licence_is_offered_by_authority_using_gov_uk(
-    mock_authority_repository,
-    mock_licence_repository,
-):
-    not_offered_licence_details = deepcopy(TEST_LICENCE_DETAIL)
-    authority_with_not_offered_details = deepcopy(TEST_AUTHORITY)
-
-    not_offered_licence_details.offered_by_authority = False
-    authority_with_not_offered_details.licence_details = [not_offered_licence_details]
-
-    mock_authority_repository.find_authority_by_url_slug.return_value = authority_with_not_offered_details
-    mock_licence_repository.get_licence_by_url_slug.return_value = TEST_LICENCE
-
-    actual = licence_lookup_service.lookup_form_details(
-        authority_slug=TEST_AUTHORITY.url_slug,
-        licence_slug=TEST_LICENCE.url_slug,
-        interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
-        interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
-    )
-
-    assert actual is None

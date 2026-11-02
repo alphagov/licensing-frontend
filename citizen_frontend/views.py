@@ -1,5 +1,5 @@
 from common.models.authority import Authority
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
@@ -35,12 +35,13 @@ def generate_form(
     #   licencelooup is already made up of auth_repo, licence_repo, and customisation_repo
     #   perhaps refactor to class based, can leverage composition, DI, etc more module code.
 
-    licence_lookup_service.lookup_form_details(
-        authority_slug=authority_slug,
-        licence_slug=licence_slug,
-        interaction_id=interaction_id,
+    licence_lookup_service.get_licence_interaction_context(
+        authority_url_slug=authority_slug,
+        licence_url_slug=licence_slug,
+        interaction=interaction_id,
         interaction_sub_id=interaction_sub_id,
     )
 
     with open("citizen_frontend/tests/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
         return FileResponse(f.read(), content_type="application/pdf")
+    return HttpResponse("hello world")

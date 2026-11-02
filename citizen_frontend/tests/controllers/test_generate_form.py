@@ -24,32 +24,27 @@ def generate_form_url():
 
 
 @pytest.fixture
-def mock_lookup_form_details(mocker):
-    yield mocker.patch.object(licence_lookup_service, "lookup_form_details")
+def mock_get_licence_interaction_context(mocker):
+    yield mocker.patch.object(licence_lookup_service, "get_licence_interaction_context")
 
 
 def test_generate_form_returns_file_response(
-    client, generate_form_url, mock_authority_repository, mock_licence_repository
+    client, generate_form_url, mock_authority_repository, mock_licence_repository, mock_get_licence_interaction_context
 ):
     response = client.get(generate_form_url())
-
-    mock_authority_repository.find_authority_by_url_slug.return_value = TEST_AUTHORITY
-    mock_licence_repository.get_licence_by_url_slug.return_value = TEST_LICENCE
 
     assert type(response) is FileResponse
     assert response.status_code == 200
 
 
-def test_generate_form_calls_licence_lookup_service_for_form_details_with_correct_args(
-    client,
-    generate_form_url,
-    mock_lookup_form_details,
+def test_generate_form_calls_licence_lookup_service_for_context(
+    client, generate_form_url, mock_get_licence_interaction_context
 ):
     client.get(generate_form_url())
 
-    mock_lookup_form_details.assert_called_with(
-        authority_slug=TEST_AUTHORITY.url_slug,
-        licence_slug=TEST_LICENCE.url_slug,
-        interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
+    mock_get_licence_interaction_context.assert_called_with(
+        authority_url_slug=TEST_AUTHORITY.url_slug,
+        licence_url_slug=TEST_LICENCE.url_slug,
+        interaction=TEST_LICENCE.licence_interactions[0].interaction_id,
         interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
     )
