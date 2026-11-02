@@ -224,6 +224,21 @@ def test_page_refers_to_tacit_consent_when_applicable(
     assert "tacit consent applies" in what_next_text
 
 
+def test_page_does_not_refer_to_tacit_consent_when_not_applicable(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
+        "has_expected_processing_date": True,
+        "expected_processing_date": TEST_LICENCE_APPLICATION.expected_processing_date.strftime("%d %B %Y"),
+        "application_has_tacit_consent": False,
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    what_next_text = dom.get_by_test_id("what-next").get_text()
+
+    assert "tacit consent applies" not in what_next_text
+
+
 def test_page_has_instructions_for_posting_supporting_documents_when_not_provided_online(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
