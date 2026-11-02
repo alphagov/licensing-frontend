@@ -55,4 +55,10 @@
             valid set of supporting documents.
         </p>
     {% endif %}
+    <p class="govuk-body">If you have any other questions about your application, please contact the licencing authority, quoting the
+        application reference above.</p>
+    @departmentContact(department)
+
+    <h1 class="govuk-heading-s">Next steps</h1>
+    <p class="govuk-body" data-testid="next-steps"><a href="{{ licence_finder_url }}" class="govuk-link">Search for other licences</a></p>
 {% endblock %}
