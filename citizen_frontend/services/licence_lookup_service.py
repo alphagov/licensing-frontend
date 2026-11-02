@@ -208,4 +208,14 @@ def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
 
 
 def lookup_form_details(authority_slug: str, licence_slug: str, interaction_id: int, interaction_sub_id: int):
-    pass
+
+    authority = authority_repository.find_authority_by_url_slug(url_slug=authority_slug)
+    licence = licence_repository.get_licence_by_url_slug(url_slug=licence_slug)
+
+    matching_details = authority_service.find_licence_detail(authority, licence.licence_code)
+    interaction = licence_service.find_interaction(licence, interaction_id, interaction_sub_id)
+
+    if not matching_details or not matching_details.can_apply_via_licensify:
+        return None
+
+    return authority, licence, interaction

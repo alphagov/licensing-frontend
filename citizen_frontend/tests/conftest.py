@@ -105,6 +105,16 @@ def mock_get_licence(mocker):
     yield mock_get
 
 
+@pytest.fixture
+def mock_authority_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
+
+
+@pytest.fixture
+def mock_licence_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
+
+
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
@@ -187,7 +197,7 @@ TEST_LICENCE = Licence(
         ),
         LicenceInteraction(
             interaction_id=InteractionIdCodes.APPLY.value,
-            interaction_sub_id=1,
+            interaction_sub_id=2,
             licence_interaction_name="Application for a Test Licence",
             form=LicenceForm(
                 name="Test Licence Form 2",
