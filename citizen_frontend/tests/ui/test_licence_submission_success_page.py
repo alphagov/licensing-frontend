@@ -69,9 +69,7 @@ def test_page_application_confirmation_when_no_licence_fee_defined(
 def test_page_has_correct_email_for_confirmation(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
-    }
+    mock_context.return_value = {"applicant_email": TEST_LICENCE_APPLICATION.applicant_email}
     dom = get_dom_parser(test_licence_submission_success_page_url)
     email_text = dom.get_by_test_id("email-confirmation").get_text()
 
@@ -84,9 +82,10 @@ def test_page_has_payment_reference_for_provider_when_licence_has_a_paid_fee(
     mock_context.return_value = {
         "fee_required": True,
         "is_paid": True,
-        "payment": TEST_PAYMENT,
+        "transaction_id": TEST_PAYMENT.transaction_id,
         "transaction_id_exists": True,
         "payment_provider_exists": True,
+        "payment_provider": TEST_PAYMENT.payment_provider,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
     payment_reference_text = dom.get_by_test_id("payment-reference").get_text()
@@ -114,9 +113,7 @@ def test_page_has_no_payment_reference_when_licence_has_no_fee(
 
 
 def test_page_has_application_reference(get_dom_parser, test_licence_submission_success_page_url, mock_context):
-    mock_context.return_value = {
-        "licence_application": TEST_LICENCE_APPLICATION,
-    }
+    mock_context.return_value = {"application_reference_number": TEST_LICENCE_APPLICATION.application_reference_number}
     dom = get_dom_parser(test_licence_submission_success_page_url)
     application_reference_text = dom.get_by_test_id("application-reference").get_text()
 
