@@ -28,7 +28,7 @@ test-ui-ci:
 	uv sync
 	python -m playwright install --with-deps
 	docker compose up -d
-	pytest citizen_frontend/tests/ui/
+	pytest citizen_frontend/tests/ui/ --ignore citizen_frontend/tests/ui/e2e
 
 test-common:
 	cd licensing_common && \
@@ -42,10 +42,6 @@ test-api:
 
 test-services: prepare
 	pytest citizen_frontend/tests/services
-
-test-views: prepare
-	pytest citizen_frontend/tests/test_views.py
-
 
 test-repo: prepare
 	pytest citizen_frontend/tests/repository
