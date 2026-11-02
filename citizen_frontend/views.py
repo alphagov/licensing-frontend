@@ -2,6 +2,8 @@ from common.models.authority import Authority
 from django.http import FileResponse
 from django.shortcuts import render
 
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+
 
 def display_licence_unavailable_online(request, authority: Authority):
     return render(
@@ -26,6 +28,8 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
 def generate_form(
     request, authority_slug: str, licence_slug: str, licence_code: str, interaction_id: str, interaction_sub_id: int
 ):
+
+    licence_lookup_service.lookup_form_details()
 
     with open("citizen_frontend/tests/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
         return FileResponse(f.read(), content_type="application/pdf")

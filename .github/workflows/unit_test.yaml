@@ -1,4 +1,4 @@
-name: API Tests
+name: Unit Tests
 on:
   workflow_call:
     inputs:
@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  api:
-    name: API testing
+  unit_test:
+    name: Unit testing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

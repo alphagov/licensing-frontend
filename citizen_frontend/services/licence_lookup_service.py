@@ -205,3 +205,7 @@ def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
         ).value
         grouped_interactions[interaction_type].append(interaction)
     return grouped_interactions
+
+
+def lookup_form_details():
+    pass
