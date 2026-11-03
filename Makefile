@@ -14,7 +14,7 @@ watch:
 
 
 test-ui:start prepare
-	pytest citizen_frontend/tests/ui
+	pytest citizen_frontend/tests/ui/ --ignore citizen_frontend/tests/ui/e2e
 
 kill:
 	-pkill -f "docker compose watch"

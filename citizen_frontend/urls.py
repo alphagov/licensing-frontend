@@ -2,6 +2,7 @@ from django.urls import path
 
 from citizen_frontend.controllers.application_form import generate_application_form
 from citizen_frontend.controllers.begin_application import begin_application_steps
+from citizen_frontend.controllers.payment_licence_callback import payment_licence_callback
 
 from . import views
 
@@ -20,5 +21,10 @@ urlpatterns = [
         "forms/<str:authority_slug>/<str:licence_slug>/<str:licence_code>,<int:interaction_id>-<int:interaction_sub_id>",
         views.generate_form,
         name="generate_form",
+    ),
+    path(
+        "payment/licenceCallback",
+        payment_licence_callback,
+        name="payment_licence_callback",
     ),
 ]

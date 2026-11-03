@@ -1,0 +1,19 @@
+
+<div class="address" data-testid="department-contact">
+        <p class="govuk-body"><strong>Tel: </strong> {{ department.helpline_phone_number }}</p>
+
+        {% if department.helpline_email_address %}
+        <p class="govuk-body"><strong>Email: </strong>
+            <a class="govuk-link" href="mailto:{{ department.helpline_email_address }}">{{ department.helpline_email_address }}</a>
+        </p>
+        {% endif %}
+
+        <p class="govuk-body"><strong>Address: </strong>
+            <br/>{{ department.name }}
+            <br/>{{ department.address_line_1 }}
+            <br/>{{ department.address_line_2 }}
+            <br/>{{ department.address_line_3 }}
+            <br/>{{ department.address_line_4 }}
+            <br/>{{ department.postcode }}
+        </p>
+</div>
