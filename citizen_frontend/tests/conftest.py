@@ -99,12 +99,6 @@ def mock_find_interaction_customisation(mocker):
     yield mock_find_interaction_customisation
 
 
-@pytest.fixture
-def mock_get_licence(mocker):
-    mock_get = mocker.patch.object(Licence.objects, "get")
-    yield mock_get
-
-
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
