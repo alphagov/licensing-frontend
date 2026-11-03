@@ -1,0 +1,9 @@
+<records>
+   <record>
+     <fund>12345</fund>
+     <reference>general ledger code</reference>
+     <amount>10.00</amount>
+     <memo>cartid</memo>
+     <notes>cartid</notes>
+   </record>
+</records>

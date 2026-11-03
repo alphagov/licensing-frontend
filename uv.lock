@@ -291,6 +291,7 @@ dependencies = [
     { name = "gunicorn" },
     { name = "licensing-common" },
     { name = "pydantic" },
+    { name = "requests" },
     { name = "whitenoise" },
 ]
 
@@ -310,6 +311,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "licensing-common", virtual = "licensing_common" },
     { name = "pydantic", specifier = ">=2.13.4" },
+    { name = "requests", specifier = ">=2.34.2" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
 

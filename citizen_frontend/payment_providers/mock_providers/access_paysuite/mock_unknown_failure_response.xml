@@ -1,0 +1,12 @@
+<xml>
+    <statusCode>1020</statusCode>
+    <statusCodeDescription>new undocumented error code</statusCodeDescription>
+    <authCode>123</authCode>
+    <payments>
+        <payment>
+            <authDetail>
+                <amountInMinorUnits>100</amountInMinorUnits>
+            </authDetail>
+        </payment>
+    </payments>
+</xml>

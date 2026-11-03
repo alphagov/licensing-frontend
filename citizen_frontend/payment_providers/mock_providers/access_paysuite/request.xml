@@ -1,0 +1,42 @@
+<portalApacsAPIReq xmlns="http://www.capita-software-services.com/portal-api">
+        <header>
+          <sourceDetails>
+            <systemCode>APP</systemCode>
+            <uniqueTranID>uniqueTranId</uniqueTranID>
+            <merchantCode>sliced merchantCode</merchantCode>}
+            <sourceCode>I</sourceCode>
+          </sourceDetails>
+          <portalOnly>
+            <backURL>accessPaySuiteBackUrl</backURL>
+            <returnURL>accessPaySuiteCompleteUrl</returnURL>
+            <cancelURL>accessPaySuiteCancelledUrl</cancelURL>
+            <applySurcharge>false</applySurcharge>
+            <cardMnemonic>VISA</cardMnemonic>
+            <cardMnemonic>DELT</cardMnemonic>
+            <cardMnemonic>MCRD</cardMnemonic>
+            <cardMnemonic>MSTO</cardMnemonic>
+            <cardMnemonic>ELEC</cardMnemonic>
+            <cardMnemonic>MOTO</cardMnemonic>
+            <stageIndicator>
+              <firstPortalStage>4</firstPortalStage>
+              <totalStages>7</totalStages>
+            </stageIndicator>
+          </portalOnly>
+        </header>
+        <invoice>
+          <items>
+            <item>
+              <fundCode>sliced fund code or 0</fundCode>
+              <reference>applicationRefNo</reference>
+              <amountInMinorUnits>10.00</amountInMinorUnits>
+              <fundDescription>50 chars of fund description if present or Not provided</fundDescription>
+              <referenceDescription>50 char slice of description</referenceDescription>
+              <additionalReference>generalLedgerCode if present</additionalReference>}
+              <additionalInfo>
+                <userString1>50 char slice of purchase code if present</userString1>}
+                <userString5>BIS</userString5>
+              </additionalInfo>
+            </item>
+          </items>
+        </invoice>
+      </portalApacsAPIReq>

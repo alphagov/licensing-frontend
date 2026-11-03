@@ -9,7 +9,7 @@
             <a href="https://get.adobe.com/uk/reader/" class="govuk-link" rel="noreferrer noopener" target="_blank"
                data-testid="adobe-download">
                 Adobe Reader (opens in new tab)</a> is required to view it.</p>
-        <p class="govuk-body"><a href="#" class="govuk-link" data-testid="pdf-download">Download the application form
+        <p class="govuk-body"><a href="{% url 'generate_form' authority.url_slug licence.url_slug licence.licence_code interaction.interaction_id interaction.interaction_sub_id %}" class="govuk-link" data-testid="pdf-download">Download the application form
             (PDF)</a></p>
     </div>
     <h3 class="govuk-heading-s" data-testid="fill-in-heading">Next, fill in the application form on your computer</h3>
@@ -28,6 +28,6 @@
         {% include "citizen_frontend/partials/before_you_apply.html" %}
     {% endif %}
     <h3 class="govuk-heading-s" data-testid="submit-heading">Now, submit the application</h3>
-    <a href="{% url 'submit' licence_slug authority_slug interaction_id interaction_sub_id %}" class="govuk-button"
+    <a href="{% url 'submit' licence.url_slug authority.url_slug interaction_id interaction.interaction_sub_id %}" class="govuk-button"
        data-testid="submit-button">Submit application</a>
 {% endblock %}
