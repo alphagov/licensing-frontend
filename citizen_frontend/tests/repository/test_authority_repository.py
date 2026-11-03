@@ -24,7 +24,6 @@ def mock_authority_model_get(mocker):
 def test_get_offering_authorities_by_licence_code_calls_database_with_correct_method_and_args(
     mock_authority_model_filter,
 ):
-
     get_licence_offering_authorities_by_licence_code(licence_code=TEST_LICENCE_CODE)
 
     mock_authority_model_filter.assert_called_with(

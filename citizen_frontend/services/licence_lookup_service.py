@@ -20,10 +20,23 @@ from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
 from citizen_frontend.repository import authority_repository, interaction_customisation_repository, licence_repository
+from citizen_frontend.repository.base_repo import LicenceRepo
 from citizen_frontend.services import authority_service, licence_service
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+class LicenceLookup:
+    def __init__(self, licence_repo):
+        self.licence_repository = licence_repo
+
+    def go_get_lcie(self):
+        self.licence_repository.get_licence_by_url_slug()
+
+
+licence_repo = LicenceRepo()
+lookup = LicenceLookup(licence_repo)
 
 
 # previously lookupLicence

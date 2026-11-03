@@ -2,8 +2,7 @@ from common.models.authority import Authority
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
-from citizen_frontend.repository.base_repo import DepartmentRepo
+from citizen_frontend.services.pdf_provider import PdfGenerator
 
 
 def display_licence_unavailable_online(request, authority: Authority):
@@ -37,22 +36,41 @@ def generate_form(
     #   licencelooup is already made up of auth_repo, licence_repo, and customisation_repo
     #   perhaps refactor to class based, can leverage composition, DI, etc more modular code.
 
-    licence, authority, interaction, _ = licence_lookup_service.get_licence_interaction_context(
-        authority_url_slug=authority_slug,
-        licence_url_slug=licence_slug,
-        interaction=interaction_id,
-        interaction_sub_id=interaction_sub_id,
-    )
+    # licence, authority, interaction, _ = licence_lookup_service.get_licence_interaction_context(
+    #     authority_url_slug=authority_slug,
+    #     licence_url_slug=licence_slug,
+    #     interaction=interaction_id,
+    #     interaction_sub_id=interaction_sub_id,
+    # )
+    #
+    # published_customisation = licence_lookup_service.interaction_customisation_repository.
+    # find_published_customisation(
+    #     authority_url_slug=authority_slug,
+    #     licence_code=licence_code,
+    #     interaction_sub_id=interaction_sub_id,
+    #     interaction_id=interaction_id,
+    # )
+    # department_repo = DepartmentRepo()
+    # department = department_repo.get_by_id(department_id=published_customisation.department)
 
-    published_customisation = licence_lookup_service.interaction_customisation_repository.find_published_customisation(
-        authority_url_slug=authority_slug,
+    # pdf_provider = APTOPdfProvider()
+    # pdf_provider.generate_pdf(
+    #     authority=authority,
+    #     licence=licence,
+    #     customisation=published_customisation,
+    #     department=department,
+    #     return_url=""
+    # )
+
+    pdf_generator = PdfGenerator()
+
+    file, file_name = pdf_generator.handle_request(
+        authority_slug=authority_slug,
+        licence_slug=licence_slug,
         licence_code=licence_code,
-        interaction_sub_id=interaction_sub_id,
         interaction_id=interaction_id,
+        interaction_sub_id=interaction_sub_id,
     )
-    department_repo = DepartmentRepo()
-    department_repo.get_by_id(department_id=published_customisation.department)
 
-    with open("citizen_frontend/tests/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
-        return FileResponse(f.read(), content_type="application/pdf")
+    return FileResponse(file, content_type="application/pdf", filename=file_name, as_attachment=True)
     return HttpResponse("hello world")

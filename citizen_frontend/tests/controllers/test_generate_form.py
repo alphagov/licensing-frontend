@@ -6,6 +6,7 @@ from django.http import FileResponse
 from django.urls import reverse
 
 from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.services.pdf_provider import APTOPdfProvider
 
 
 @pytest.fixture
@@ -28,6 +29,13 @@ def generate_form_url():
 @pytest.fixture
 def mock_get_licence_interaction_context(mocker):
     yield mocker.patch.object(licence_lookup_service, "get_licence_interaction_context")
+
+
+@pytest.fixture
+def mock_apto_pdf_provider(mocker):
+    mocker.patch("citizen_frontend.services.pdf_provider.APTOPdfProvider.generate_pdf")
+    instance = APTOPdfProvider()
+    yield instance
 
 
 def test_generate_form_returns_file_response(
@@ -134,3 +142,27 @@ def test_generate_form_gets_department(client, generate_form_url, mock_get_licen
 
     client.get(generate_form_url())
     mock_get.assert_called()
+
+
+def test_generate_form_uses_pdf_provider(
+    client, generate_form_url, mocker, mock_get_licence_interaction_context, mock_apto_pdf_provider
+):
+    mock_get_licence_interaction_context.return_value = (
+        TEST_AUTHORITY,
+        TEST_LICENCE,
+        TEST_CUSTOMISATION_FIXED_FEE,
+        None,
+    )
+
+    mocker.patch.object(
+        licence_lookup_service.interaction_customisation_repository,
+        "find_published_customisation",
+        return_value=TEST_CUSTOMISATION_FIXED_FEE,
+    )
+
+    mock_get = mocker.patch.object(Department.objects, "get")
+    mock_get.return_value = Department(_id=ObjectId("50c8520393867870cb0d775f"), authority_slug=TEST_AUTHORITY.url_slug)
+
+    client.get(generate_form_url())
+
+    mock_apto_pdf_provider.generate_pdf.assert_called()
