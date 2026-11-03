@@ -1,3 +1,4 @@
+from common.models.authority import Authority
 from common.models.department import Department
 from django.shortcuts import render
 
@@ -21,9 +22,14 @@ def mock_payment_licence_callback_context():
         notification_email_address="notify@email.com",
         default_privacy_notice_url="test-privacy-notice-url",
     )
+    authority = Authority(
+        name="Test Authority",
+    )
     return {
         "licence_name": "Test Licence",
-        "authority_name": "Test Authority",
+        "authority": authority,
+        "step": "4",
+        "steps": "4",
         "fee_required": True,
         "is_paid": True,
         "applicant_email": "test@email.com",

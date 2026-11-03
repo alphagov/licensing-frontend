@@ -33,11 +33,31 @@ def test_page_has_correct_headings(get_dom_parser, test_licence_submission_succe
 def test_page_has_4_steps_when_licence_has_a_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    pass
+    mock_context.return_value = {
+        "fee_required": True,
+        "is_paid": True,
+        "step": "4",
+        "steps": "4",
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    steps_text = dom.get_by_test_id("steps").get_text()
+
+    assert "Step 4 of 4" in steps_text
 
 
-def test_page_has_3_steps_when_licence_has_no_fee():
-    pass
+def test_page_has_3_steps_when_licence_has_no_fee(
+    get_dom_parser, test_licence_submission_success_page_url, mock_context
+):
+    mock_context.return_value = {
+        "fee_required": False,
+        "is_paid": False,
+        "step": "3",
+        "steps": "3",
+    }
+    dom = get_dom_parser(test_licence_submission_success_page_url)
+    steps_text = dom.get_by_test_id("steps").get_text()
+
+    assert "Step 3 of 3" in steps_text
 
 
 def test_page_application_confirmation_when_licence_fee_defined(
