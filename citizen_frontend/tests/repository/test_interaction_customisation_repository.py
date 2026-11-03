@@ -13,8 +13,8 @@ from conftest import (
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
-import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
+from citizen_frontend.repository.interaction_customisation_repository import CustomisationRepository
 
 interaction_customisation_with_unset_published_customisation = InteractionCustomisation(
     interaction_id=TEST_INTERACTION_ID,
@@ -34,13 +34,18 @@ interaction_customisations_with_published_customisation_of_none = deepcopy(
 interaction_customisations_with_published_customisation_of_none.published_customisation = None
 
 
-def test_get_offering_authorities_by_licence_code_calls_database_with_correct_method_and_args(
-    mock_interaction_customisation_get,
-):
-    interaction_customisation_repository.find_interaction_customisation(
+@pytest.fixture()
+def repository(mocker):
+    repo = CustomisationRepository()
+    mocker.patch.object(repo.model.objects, "get")
+    yield repo
+
+
+def test_get_offering_authorities_by_licence_code_calls_database_with_correct_method_and_args(repository):
+    repository.find_interaction_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
-    mock_interaction_customisation_get.assert_called_with(
+    repository.model.objects.get.assert_called_with(
         authority_url_slug=TEST_AUTH_SLUG,
         licence_code=TEST_LICENCE_CODE,
         interaction_id=TEST_INTERACTION_ID,
@@ -48,78 +53,76 @@ def test_get_offering_authorities_by_licence_code_calls_database_with_correct_me
     )
 
 
-def test_find_published_customisation_correctly_returns_published_customisation(mock_find_interaction_customisation):
-    mock_find_interaction_customisation.return_value = interaction_customisation_with_published_customisation
+def test_find_published_customisation_correctly_returns_published_customisation(repository):
+    repository.model.objects.get.return_value = interaction_customisation_with_published_customisation
 
-    customisation = interaction_customisation_repository.find_published_customisation(
+    customisation = repository.find_published_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation == TEST_CUSTOMISATION_FIXED_FEE
 
 
 def test_find_published_customisation_returns_none_when_interaction_customisation_has_no_published_customisation(
-    mock_find_interaction_customisation,
+    repository,
 ):
-    mock_find_interaction_customisation.return_value = interaction_customisation_with_unset_published_customisation
-    customisation = interaction_customisation_repository.find_published_customisation(
+    repository.model.objects.get.return_value = interaction_customisation_with_unset_published_customisation
+    customisation = repository.find_published_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation is None
 
 
-def test_find_published_customisation_returns_none_when_interaction_customisation_not_found(
-    mock_find_interaction_customisation,
-):
-    mock_find_interaction_customisation.return_value = None
-    customisation = interaction_customisation_repository.find_published_customisation(
+def test_find_published_customisation_returns_none_when_interaction_customisation_not_found(repository, mocker):
+    mocker.patch.object(repository, "find_interaction_customisation").return_value = None
+    customisation = repository.find_published_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation is None
 
 
 def test_find_published_customisation_returns_none_when_interaction_customisation_has_published_customisation_of_none(
-    mock_find_interaction_customisation,
+    repository, mocker
 ):
-    mock_find_interaction_customisation.return_value = interaction_customisations_with_published_customisation_of_none
-    customisation = interaction_customisation_repository.find_published_customisation(
+    mocker.patch.object(
+        repository, "find_interaction_customisation"
+    ).return_value = interaction_customisations_with_published_customisation_of_none
+    customisation = repository.find_published_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation is None
 
 
-def test_find_published_customisation_doesnt_return_suspended_published_customisation(
-    mock_find_interaction_customisation,
-):
+def test_find_published_customisation_doesnt_return_suspended_published_customisation(repository, mocker):
     interaction_customisation_with_suspended_customisation = deepcopy(
         interaction_customisation_with_published_customisation
     )
     interaction_customisation_with_suspended_customisation.published_customisation.suspended_at = datetime.now()
-    mock_find_interaction_customisation.return_value = interaction_customisation_with_suspended_customisation
-    customisation = interaction_customisation_repository.find_published_customisation(
+    mocker.patch.object(
+        repository, "find_interaction_customisation"
+    ).return_value = interaction_customisation_with_suspended_customisation
+    customisation = repository.find_published_customisation(
         TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
     )
     assert customisation is None
 
 
-def test_find_published_customisation_throws_error_clean_fields_failure(mock_interaction_customisation_get, mocker):
+def test_find_published_customisation_throws_error_clean_fields_failure(repository, mocker):
     instance = TEST_CUSTOMISATION_FIXED_FEE
 
-    mock_interaction_customisation_get.return_value = instance
+    repository.model.objects.get.return_value = instance
 
     mocker.patch.object(instance, "clean_fields", side_effect=ValidationError("field error"))
 
     with pytest.raises(DataIntegrityError) as e:
-        interaction_customisation_repository.find_interaction_customisation(
+        repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
 
     assert e.value.args[0] == "InteractionCustomisation validation error: field error"
 
 
-def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found(
-    mock_interaction_customisation_get,
-):
-    mock_interaction_customisation_get.side_effect = InteractionCustomisation.MultipleObjectsReturned
+def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found(repository):
+    repository.model.objects.get.side_effect = InteractionCustomisation.MultipleObjectsReturned
 
     expected_error_message = (
         f"More than one InteractionCustomisations found for the following arguments:"
@@ -128,19 +131,19 @@ def test_find_published_customisation_throws_error_more_than_one_interaction_cus
     )
 
     with pytest.raises(DataIntegrityError) as e:
-        interaction_customisation_repository.find_interaction_customisation(
+        repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
 
     assert e.value.args[0] == expected_error_message
 
 
-def test_find_published_customisation_throws_error_generic_database_error(mock_interaction_customisation_get):
-    mock_interaction_customisation_get.side_effect = DatabaseError()
+def test_find_published_customisation_throws_error_generic_database_error(repository):
+    repository.model.objects.get.side_effect = DatabaseError()
 
     expected_error_message = "There was a database error accessing InteractionCustomisations collection"
     with pytest.raises(DocumentDBError) as e:
-        interaction_customisation_repository.find_interaction_customisation(
+        repository.find_interaction_customisation(
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
 
