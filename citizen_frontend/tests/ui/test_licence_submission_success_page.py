@@ -19,11 +19,11 @@ def test_licence_submission_success_page_url(live_server):
 
 @pytest.fixture
 def mock_context(mocker):
-    yield mocker.patch("citizen_frontend.views.mock_payment_licence_callback_context")
+    yield mocker.patch("citizen_frontend.controllers.payment_licence_callback.mock_payment_licence_callback_context")
 
 
 def test_page_has_correct_headings(get_dom_parser, test_licence_submission_success_page_url, mock_context):
-    mock_context.return_value = {"licence_name": TEST_LICENCE.name, "authority_name": TEST_AUTHORITY.full_name}
+    mock_context.return_value = {"licence_name": TEST_LICENCE.name, "authority": TEST_AUTHORITY}
     dom = get_dom_parser(test_licence_submission_success_page_url)
     heading_text = dom.get_by_test_id("page-heading").get_text()
 
@@ -125,7 +125,7 @@ def test_page_has_application_reference(get_dom_parser, test_licence_submission_
 def test_page_has_notified_authority(get_dom_parser, test_licence_submission_success_page_url, mock_context):
     mock_context.return_value = {
         "application_has_supporting_documents_online": TEST_LICENCE_APPLICATION.has_supporting_documents_online,
-        "authority_name": TEST_LICENCE_APPLICATION.authority,
+        "authority_full_name": TEST_LICENCE_APPLICATION.authority,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
     what_next_text = dom.get_by_test_id("what-next").get_text()
@@ -239,7 +239,7 @@ def test_page_has_instructions_for_posting_supporting_documents_when_not_provide
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "authority_name": TEST_LICENCE_APPLICATION.authority,
+        "authority_full_name": TEST_LICENCE_APPLICATION.authority,
         "application_has_supporting_documents_online": False,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)

@@ -24,12 +24,3 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
 
 def generate_form():
     return None
-
-
-def payment_licence_callback(request):
-    context = mock_payment_licence_callback_context()
-    return render(request, "citizen_frontend/licence_submission_sucess_page.html", context)
-
-
-def mock_payment_licence_callback_context():
-    pass

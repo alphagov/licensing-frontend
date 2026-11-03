@@ -4,9 +4,7 @@
     {% include "citizen_frontend/partials/page_heading.html" %}
     <h2 class="govuk-heading-m" data-testid="action-heading">Thank you</h2>
     <p class="govuk-body" data-testid="application-confirmation">We have received your application
-        {% if fee_required and is_paid %}
-            and have been notified that the fee has been paid
-        {% endif %}.
+        {% if fee_required and is_paid %} and have been notified that the fee has been paid{% endif %}.
     </p>
     <p class="govuk-body" data-testid="email-confirmation">We will send a confirmation email to:
         <br>{{ applicant_email }}
@@ -25,7 +23,7 @@
 
     <h2 class="govuk-heading-s">What happens next?</h2>
     <p class="govuk-body" data-testid="what-next">
-        {{ authority_name }} has been notified of your application.
+        {{ authority_full_name }} has been notified of your application.
         {% if application_has_supporting_documents_online %}
             Assuming the form
             {% if has_supporting_documents %}
@@ -48,13 +46,13 @@
                 within 30 days.
             {% endif %}
         </p>
-    {% else %}
-        <p><strong>You must now send in any supporting documentation to the address below.</strong></p>
-        <p>
-            They'll contact you with a decision within {{ processing_days }} days after they've received a full,
-            valid set of supporting documents.
-        </p>
-    {% endif %}
+        {% else %}
+            <p class="govuk-body" ><strong>You must now send in any supporting documentation to the address below.</strong></p>
+            <p class="govuk-body" >
+                They'll contact you with a decision within {{ processing_days }} days after they've received a full,
+                valid set of supporting documents.
+            </p>
+        {% endif %}
     <p class="govuk-body">If you have any other questions about your application, please contact the licencing authority, quoting the
         application reference above.</p>
     {% include "citizen_frontend/partials/department_contact.html" %}
