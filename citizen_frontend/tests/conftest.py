@@ -27,7 +27,6 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.repository.interaction_customisation_repository import CustomisationRepository
 from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
@@ -363,32 +362,32 @@ def lookup_service(mocker):
 
 
 @pytest.fixture
-def mock_get_licence_interaction_context(mocker, lookup_service):
-    mock_get_context = mocker.patch.object(
-        lookup_service,
-        "get_licence_interaction_context",
+def mock_get_licence_interaction_context(mocker):
+    service = mocker.MagicMock()
+    lookup_service = mocker.patch(
+        "citizen_frontend.controllers.begin_application.LicenceLookupService", return_value=service
     )
-    mock_get_context.return_value = LICENCE_INTERACTION_CONTEXT
-    return lookup_service.get_licence_interaction_context.return_value
+    lookup_service.get_licence_interaction_context.return_value = deepcopy(LICENCE_INTERACTION_CONTEXT)
+    yield lookup_service.get_licence_interaction_context.return_value
 
 
 @pytest.fixture
 def mock_customisation_repository(mocker):
-    repo = CustomisationRepository()
-    mocker.patch.object(repo, "find_published_customisation")
+    repo = mocker.MagicMock()
+    mocker.patch("citizen_frontend.controllers.begin_application.CustomisationRepository", return_value=repo)
     yield repo
 
 
 @pytest.fixture
 def mock_find_published_customisation_with_fixed_fee(mock_customisation_repository):
     mock_customisation_repository.find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
-    yield mock_customisation_repository
+    yield mock_customisation_repository.find_published_customisation.return_value
 
 
 @pytest.fixture
 def mock_find_published_customisation_with_variable_fee(mock_customisation_repository):
     mock_customisation_repository.find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    yield mock_customisation_repository
+    yield mock_customisation_repository.find_published_customisation.return_value
 
 
 @pytest.fixture
@@ -400,10 +399,10 @@ def mock_find_published_customisation_with_no_fee(mock_customisation_repository)
     mock_customisation_repository.find_published_customisation.return_value = (
         mock_find_published_customisation_with_no_fee
     )
-    yield mock_customisation_repository
+    yield mock_customisation_repository.find_published_customisation.return_value
 
 
 @pytest.fixture
 def mock_find_published_customisation_returns_none(mock_customisation_repository):
     mock_customisation_repository.find_published_customisation.return_value = None
-    yield mock_customisation_repository
+    yield mock_customisation_repository.find_published_customisation.return_value

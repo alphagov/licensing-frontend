@@ -96,7 +96,6 @@ def test_begin_application_steps_returns_published_customisation_information_url
     client: Client,
     mock_lookup_service,
     mock_customisation_repository,
-    mock_get_licence_interaction_context,
     get_begin_application_steps_url,
     mock_find_published_customisation_with_fixed_fee,
 ):
