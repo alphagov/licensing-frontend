@@ -4,11 +4,11 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_GET
 from pydantic import ValidationError
 
-import citizen_frontend.repository.licence_repository as licence_repository
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.decorators import handle_exceptions
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError, LicenceLookupError
+from citizen_frontend.repository.licence_repository import LicenceRepository
+from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,6 +19,7 @@ logger.setLevel(logging.INFO)
 def get_all_licences(request):
     try:
         logger.info("Fetching all licences")
+        licence_repository = LicenceRepository()
         licences = licence_repository.get_all_licences()
 
         if not licences:
@@ -42,6 +43,7 @@ def get_all_licences(request):
 @handle_exceptions
 def get_licence_authorities_and_interactions(request, licence_code: str, snac_code: str | None = None):
     try:
+        licence_lookup_service = LicenceLookupService()
         result = licence_lookup_service.get_licence_authorities_and_interactions(
             licence_code=licence_code, snac_code=snac_code
         )
