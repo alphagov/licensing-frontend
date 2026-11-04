@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 class CustomisationRepository:
     def __init__(self):
-        self.model = Customisation
+        self.model = InteractionCustomisation
 
     def find_published_customisation(
         self, authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
