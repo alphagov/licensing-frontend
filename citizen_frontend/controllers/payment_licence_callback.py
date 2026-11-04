@@ -8,6 +8,15 @@ def payment_licence_callback(request):
     return render(request, "citizen_frontend/licence_submission_sucess_page.html", context)
 
 
+def payment_licence_callback_cancelled(request):
+    context = mock_payment_licence_callback_cancelled_context()
+    return render(request, "citizen_frontend/licence_submission_cancelled_page.html", context)
+
+
+def mock_payment_licence_callback_cancelled_context():
+    pass
+
+
 def mock_payment_licence_callback_context():
     department = Department(
         authority_slug="TEST_AUTHORITY.url_slug",
