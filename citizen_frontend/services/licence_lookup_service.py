@@ -127,7 +127,7 @@ class LicenceLookupService:
         uses_gov_uk = getattr(licence_details, "using_gov_uk", False)
         offered_by_auth = getattr(licence_details, "offered_by_authority", False)
 
-        grouped_interactions = group_interactions(licence)
+        grouped_interactions = self.group_interactions(licence)
 
         result = defaultdict(list)
         for interaction_type, interactions in grouped_interactions.items():
@@ -208,13 +208,12 @@ class LicenceLookupService:
             authorities = self.authority_service.get_authorities_for_licence(licence.licence_code)
         return authorities
 
-
-def group_interactions(licence: Licence) -> dict[str, list[LicenceInteraction]]:
-    logger.info("Grouping interactions for licence: %s", licence.id)
-    grouped_interactions = defaultdict(list)
-    for interaction in licence.licence_interactions:
-        interaction_type = INTERACTION_ID_WORD_MAPPING.get(
-            interaction.interaction_id, LicenceInteractions.UNKNOWN
-        ).value
-        grouped_interactions[interaction_type].append(interaction)
-    return grouped_interactions
+    def group_interactions(self, licence: Licence) -> dict[str, list[LicenceInteraction]]:
+        logger.info("Grouping interactions for licence: %s", licence.id)
+        grouped_interactions = defaultdict(list)
+        for interaction in licence.licence_interactions:
+            interaction_type = INTERACTION_ID_WORD_MAPPING.get(
+                interaction.interaction_id, LicenceInteractions.UNKNOWN
+            ).value
+            grouped_interactions[interaction_type].append(interaction)
+        return grouped_interactions

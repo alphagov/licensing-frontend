@@ -274,7 +274,7 @@ TEST_ISSUING_AUTHORITY = IssuingAuthority(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
-        address="",
+        address="A building\nA street\nA line three\nLondon\na12 21a",
     ),
     authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
 )
