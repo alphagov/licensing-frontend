@@ -27,7 +27,6 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
-from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -351,24 +350,11 @@ LICENCE_INTERACTION_CONTEXT = (
 
 
 @pytest.fixture
-def lookup_service(mocker):
-    service = LicenceLookupService()
-    mocker.patch.object(service, "licence_service")
-    mocker.patch.object(service.authority_service, "repository")
-    mocker.patch.object(service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE)
-    mocker.patch.object(service, "authority_repository")
-    mocker.patch.object(service, "interaction_customisation_repository")
-    yield service
-
-
-@pytest.fixture
 def mock_get_licence_interaction_context(mocker):
     service = mocker.MagicMock()
-    lookup_service = mocker.patch(
-        "citizen_frontend.controllers.begin_application.LicenceLookupService", return_value=service
-    )
-    lookup_service.get_licence_interaction_context.return_value = deepcopy(LICENCE_INTERACTION_CONTEXT)
-    yield lookup_service.get_licence_interaction_context.return_value
+    mocker.patch("citizen_frontend.controllers.begin_application.LicenceLookupService", return_value=service)
+    service.get_licence_interaction_context.return_value = deepcopy(LICENCE_INTERACTION_CONTEXT)
+    yield service
 
 
 @pytest.fixture
@@ -399,10 +385,4 @@ def mock_find_published_customisation_with_no_fee(mock_customisation_repository)
     mock_customisation_repository.find_published_customisation.return_value = (
         mock_find_published_customisation_with_no_fee
     )
-    yield mock_customisation_repository.find_published_customisation.return_value
-
-
-@pytest.fixture
-def mock_find_published_customisation_returns_none(mock_customisation_repository):
-    mock_customisation_repository.find_published_customisation.return_value = None
     yield mock_customisation_repository.find_published_customisation.return_value

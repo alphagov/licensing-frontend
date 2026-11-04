@@ -16,6 +16,7 @@ from citizen_frontend.api.models.api_responses import (
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DocumentDBError, LicenceLookupError
+from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.tests.conftest import (
     BASE_URL,
     TEST_AUTHORITY,
@@ -28,6 +29,17 @@ from citizen_frontend.tests.conftest import (
 )
 
 TEST_AUTHORITY_INTERACTIONS_FOR_APPLY = {LicenceInteractions.APPLY.value: [TEST_AUTHORITY_INTERACTION]}
+
+
+@pytest.fixture
+def lookup_service(mocker):
+    service = LicenceLookupService()
+    mocker.patch.object(service, "licence_service")
+    mocker.patch.object(service.authority_service, "repository")
+    mocker.patch.object(service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE)
+    mocker.patch.object(service, "authority_repository")
+    mocker.patch.object(service, "interaction_customisation_repository")
+    yield service
 
 
 def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_found(lookup_service):
