@@ -4,66 +4,71 @@ import re
 from common.models.authority import Authority, LicenceDetail
 from common.models.licence import Licence
 
-import citizen_frontend.repository.authority_repository as authority_repository
 from citizen_frontend.api.utils import COUNTRY_TO_GSS_CODE, COUNTRY_TO_SNAC_CODE
 from citizen_frontend.exceptions import DataIntegrityError
+from citizen_frontend.repository.authority_repository import AuthorityRepository
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def get_authorities_for_licence(licence_code: str) -> list[Authority]:
-    logger.info("Retrieving authorities that offer licence for licence code: %s", licence_code)
-    return authority_repository.get_licence_offering_authorities_by_licence_code(licence_code=licence_code)
+class AuthorityService:
+    def __init__(self):
+        self.repository = AuthorityRepository()
 
+    def get_authorities_for_licence(self, licence_code: str) -> list[Authority]:
+        logger.info("Retrieving authorities that offer licence for licence code: %s", licence_code)
+        return self.repository.get_licence_offering_authorities_by_licence_code(licence_code=licence_code)
 
-def get_authorities_for_licence_with_geographical_locator(locator: str, licence: Licence) -> list[Authority] | None:
-    country = get_country_from_geographical_locator(locator=locator)
-    if not country:
+    def get_authorities_for_licence_with_geographical_locator(
+        self, locator: str, licence: Licence
+    ) -> list[Authority] | None:
+        country = self.get_country_from_geographical_locator(locator=locator)
+        if not country:
+            return None
+
+        if country not in licence.administrative_area.countries:
+            logger.info("%s not present in licence administrative area for licence: %s", country, licence.licence_code)
+            return None
+
+        authorities = self.get_authorities_for_licence(licence_code=licence.licence_code)
+
+        return [
+            authority
+            for authority in authorities
+            if self.check_authority_covers_location(authority=authority, locator=locator, country=country)
+        ]
+
+    @staticmethod
+    def get_country_from_geographical_locator(locator: str) -> str | None:
+        logger.info("Retrieving country for geographical locator: %s", locator)
+        for key, value in COUNTRY_TO_SNAC_CODE.items():
+            if locator in value:
+                return key.value
+
+        for key, value in COUNTRY_TO_GSS_CODE.items():
+            if re.match(value, locator):
+                return key.value
+
+        logger.info("No country found for locator: %s", locator)
         return None
 
-    if country not in licence.administrative_area.countries:
-        logger.info("%s not present in licence administrative area for licence: %s", country, licence.licence_code)
-        return None
+    @staticmethod
+    def check_authority_covers_location(authority: Authority, locator: str, country: str) -> bool:
+        is_locator_valid = locator in authority.snac_codes or not authority.snac_codes
+        is_country_present = country in authority.countries
 
-    authorities = get_authorities_for_licence(licence_code=licence.licence_code)
+        if not is_locator_valid or not is_country_present:
+            return False
 
-    return [
-        authority
-        for authority in authorities
-        if check_authority_covers_location(authority=authority, locator=locator, country=country)
-    ]
+        return True
 
-
-def get_country_from_geographical_locator(locator: str) -> str | None:
-    logger.info("Retrieving country for geographical locator: %s", locator)
-    for key, value in COUNTRY_TO_SNAC_CODE.items():
-        if locator in value:
-            return key.value
-
-    for key, value in COUNTRY_TO_GSS_CODE.items():
-        if re.match(value, locator):
-            return key.value
-
-    logger.info("No country found for locator: %s", locator)
-    return None
-
-
-def check_authority_covers_location(authority: Authority, locator: str, country: str) -> bool:
-    is_locator_valid = locator in authority.snac_codes or not authority.snac_codes
-    is_country_present = country in authority.countries
-
-    if not is_locator_valid or not is_country_present:
-        return False
-
-    return True
-
-
-def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetail | None:
-    matching_licence_details = [
-        details for details in authority.licence_details if details.licence_code == licence_code
-    ]
-    if len(matching_licence_details) > 1:
-        logger.error("Multiple licence details found for licence code: %s, %s", licence_code, authority.id)
-        raise DataIntegrityError(f"Multiple matching details for licence code: {licence_code} on {authority.id}")
-    return matching_licence_details[0] if matching_licence_details else None
+    @staticmethod
+    def find_licence_detail(authority: Authority, licence_code: str) -> LicenceDetail | None:
+        matching_licence_details = [
+            details for details in authority.licence_details if details.licence_code == licence_code
+        ]
+        if len(matching_licence_details) > 1:
+            logger.error("Multiple licence details found for licence code: %s, %s", licence_code, authority.id)
+            raise DataIntegrityError(f"Multiple matching details for licence code: {licence_code} on {authority.id}")
+        return matching_licence_details[0] if matching_licence_details else None

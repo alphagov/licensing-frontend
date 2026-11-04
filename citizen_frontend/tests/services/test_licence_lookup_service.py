@@ -8,7 +8,6 @@ from conftest import TEST_ISSUING_AUTHORITY
 from django.core.exceptions import ObjectDoesNotExist
 from pydantic import ValidationError
 
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactInformation,
     AuthorityInteraction,
@@ -17,7 +16,7 @@ from citizen_frontend.api.models.api_responses import (
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
 from citizen_frontend.exceptions import DocumentDBError, LicenceLookupError
-from citizen_frontend.services import authority_service
+from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.tests.conftest import (
     BASE_URL,
     TEST_AUTHORITY,
@@ -33,85 +32,43 @@ TEST_AUTHORITY_INTERACTIONS_FOR_APPLY = {LicenceInteractions.APPLY.value: [TEST_
 
 
 @pytest.fixture
-def mock_get_licence_by_licence_code(mocker):
-    yield mocker.patch.object(licence_lookup_service.licence_repository, "get_licence_by_licence_code")
+def lookup_service(mocker):
+    service = LicenceLookupService()
+    mocker.patch.object(service, "licence_service")
+    mocker.patch.object(service.authority_service, "repository")
+    mocker.patch.object(service.licence_repository, "get_licence_by_licence_code", return_value=TEST_LICENCE)
+    mocker.patch.object(service, "authority_repository")
+    mocker.patch.object(service, "interaction_customisation_repository")
+    yield service
 
 
-@pytest.fixture
-def mock_get_authorities_by_licence_code(mocker):
-    yield mocker.patch.object(
-        authority_service.authority_repository, "get_licence_offering_authorities_by_licence_code"
-    )
-
-
-@pytest.fixture
-def mock_get_authority_licence_interaction_details(mocker):
-    yield mocker.patch.object(licence_lookup_service, "get_authority_licence_interaction_details")
-
-
-@pytest.fixture
-def mock_check_if_location_specific(mocker):
-    yield mocker.patch.object(licence_lookup_service, "check_if_location_specific")
-
-
-@pytest.fixture
-def mock_get_authorities(mocker):
-    yield mocker.patch.object(licence_lookup_service, "get_authorities")
-
-
-@pytest.fixture
-def mock_licence_repository(mocker):
-    return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
-
-
-@pytest.fixture
-def mock_authority_repository(mocker):
-    return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
-
-
-@pytest.fixture
-def mock_find_licence_detail(mocker):
-    return mocker.patch.object(authority_service, "find_licence_detail", autospec=True)
-
-
-@pytest.fixture
-def mock_licence_service(mocker):
-    return mocker.patch.object(licence_lookup_service, "licence_service", autospec=True)
-
-
-def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_found(
-    mock_get_licence_by_licence_code,
-):
-    mock_get_licence_by_licence_code.return_value = None
+def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_found(lookup_service):
+    lookup_service.licence_repository.get_licence_by_licence_code.return_value = None
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
+        lookup_service.get_licence_authorities_and_interactions("unmatched-licence-code")
 
     assert e.value.args[0] == "Licence unmatched-licence-code doesn't exist"
 
 
 def test_get_licence_authorities_and_interactions_throws_error_when_no_authorities_found_for_licence_without_snac(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
+    lookup_service,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = None
+    lookup_service.authority_service.repository.get_licence_offering_authorities_by_licence_code.return_value = []
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     assert e.value.args[0] == f"No authorities found for the licence {TEST_LICENCE.licence_code}"
 
 
 def test_get_licence_authorities_and_interactions_throws_error_when_no_authorities_found_for_licence_with_snac(
-    mock_get_licence_by_licence_code, mock_get_authorities_by_licence_code
+    lookup_service,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-
-    mock_get_authorities_by_licence_code.return_value = None
+    lookup_service.authority_service.repository.get_licence_offering_authorities_by_licence_code.return_value = []
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
     assert e.value.args[0] == (
         f"No authorities found for the licence {TEST_LICENCE_CODE} and for the SNAC/GSS Code {TEST_SNAC_CODE}"
@@ -119,13 +76,14 @@ def test_get_licence_authorities_and_interactions_throws_error_when_no_authoriti
 
 
 def test_get_licence_authorities_and_interactions_returns_expected_licence_authorities_and_interactions_response(
-    mock_get_licence_by_licence_code,
-    mock_get_authorities_by_licence_code,
-    mock_get_authority_licence_interaction_details,
+    lookup_service, mocker
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
-    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    lookup_service.authority_service.repository.get_licence_offering_authorities_by_licence_code.return_value = [
+        TEST_AUTHORITY
+    ]
+    mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    ).return_value = TEST_ISSUING_AUTHORITY
 
     expected = LicenceAuthoritiesAndInteractionsResponse(
         is_location_specific=False,
@@ -134,16 +92,12 @@ def test_get_licence_authorities_and_interactions_returns_expected_licence_autho
         issuing_authorities=[TEST_ISSUING_AUTHORITY],
     )
 
-    actual = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+    actual = lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     assert actual == expected
 
 
-def test_get_licence_authorities_and_interactions_when_given_multiple_authorities(
-    mock_get_licence_by_licence_code,
-    mock_get_authorities_by_licence_code,
-    mock_get_authority_licence_interaction_details,
-):
+def test_get_licence_authorities_and_interactions_when_given_multiple_authorities(lookup_service, mocker):
     contact_details_2 = ContactInformation(
         line_one="2 test authority",
         line_two="2 test road",
@@ -157,7 +111,7 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
     test_authority_2.full_name = "Test authority 2"
     test_authority_2.url_slug = "test-authority-2"
     test_authority_2.contact_details = contact_details_2
-    test_authority_2_address_formatted = licence_lookup_service.format_postal_address(contact_details_2)
+    test_authority_2_address_formatted = lookup_service.format_postal_address(contact_details_2)
 
     test_issuing_authority_2 = deepcopy(TEST_ISSUING_AUTHORITY)
     test_issuing_authority_2.authority_name = test_authority_2.full_name
@@ -169,9 +123,14 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
         address=test_authority_2_address_formatted,
     )
 
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY, test_authority_2]
-    mock_get_authority_licence_interaction_details.side_effect = [TEST_ISSUING_AUTHORITY, test_issuing_authority_2]
+    lookup_service.authority_service.repository.get_licence_offering_authorities_by_licence_code.return_value = [
+        TEST_AUTHORITY,
+        test_authority_2,
+    ]
+    mocker.patch.object(lookup_service, "get_authority_licence_interaction_details").side_effect = [
+        TEST_ISSUING_AUTHORITY,
+        test_issuing_authority_2,
+    ]
 
     expected = LicenceAuthoritiesAndInteractionsResponse(
         is_location_specific=False,
@@ -180,40 +139,51 @@ def test_get_licence_authorities_and_interactions_when_given_multiple_authoritie
         issuing_authorities=[TEST_ISSUING_AUTHORITY, test_issuing_authority_2],
     )
 
-    actual = licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+    actual = lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     assert actual == expected
 
 
 def test_get_licence_authorities_and_interactions_when_location_specific_is_true_and_snac_code_not_present(
-    mock_get_licence_by_licence_code,
-    mock_get_authorities_by_licence_code,
-    mock_get_authority_licence_interaction_details,
-    mock_check_if_location_specific,
+    lookup_service,
+    mocker,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
-    mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+    lookup_service.authority_service.repository.get_licence_offering_authorities_by_licence_code.return_value = [
+        TEST_AUTHORITY
+    ]
+    mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    ).return_value = TEST_ISSUING_AUTHORITY
+
+    mock_check_if_location_specific = mocker.patch.object(lookup_service, "check_if_location_specific")
     mock_check_if_location_specific.return_value = True
 
-    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    )
+
+    lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_not_called()
 
 
 def test_get_licence_authorities_and_interactions_when_location_specific_is_false_and_snac_code_not_present(
-    mock_get_licence_by_licence_code,
-    mock_get_authorities_by_licence_code,
-    mock_get_authority_licence_interaction_details,
-    mock_check_if_location_specific,
+    lookup_service,
+    mocker,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities_by_licence_code.return_value = [TEST_AUTHORITY]
+    mocker.patch.object(
+        lookup_service.authority_service.repository, "get_licence_offering_authorities_by_licence_code"
+    ).return_value = [TEST_AUTHORITY]
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    )
     mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+
+    mock_check_if_location_specific = mocker.patch.object(lookup_service, "check_if_location_specific")
     mock_check_if_location_specific.return_value = False
 
-    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
+    lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
 
     mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
@@ -221,16 +191,19 @@ def test_get_licence_authorities_and_interactions_when_location_specific_is_fals
 
 def test_get_licence_authorities_and_interactions_when_location_specific_is_false_and_snac_code_present(
     mocker,
-    mock_get_authority_licence_interaction_details,
-    mock_check_if_location_specific,
-    mock_get_licence_by_licence_code,
+    lookup_service,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mocker.patch.object(licence_lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mocker.patch.object(lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    )
     mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+
+    mock_check_if_location_specific = mocker.patch.object(lookup_service, "check_if_location_specific")
     mock_check_if_location_specific.return_value = False
 
-    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+    lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
     mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
@@ -238,23 +211,26 @@ def test_get_licence_authorities_and_interactions_when_location_specific_is_fals
 
 def test_get_licence_authorities_and_interactions_when_location_specific_is_true_and_snac_code_present(
     mocker,
-    mock_get_authority_licence_interaction_details,
-    mock_check_if_location_specific,
-    mock_get_licence_by_licence_code,
+    lookup_service,
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mocker.patch.object(licence_lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mocker.patch.object(lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mock_get_authority_licence_interaction_details = mocker.patch.object(
+        lookup_service, "get_authority_licence_interaction_details"
+    )
+
     mock_get_authority_licence_interaction_details.return_value = TEST_ISSUING_AUTHORITY
+
+    mock_check_if_location_specific = mocker.patch.object(lookup_service, "check_if_location_specific")
     mock_check_if_location_specific.return_value = True
 
-    licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
+    lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE, TEST_SNAC_CODE)
 
     mock_check_if_location_specific.assert_called()
     mock_get_authority_licence_interaction_details.assert_called_with(authority=TEST_AUTHORITY, licence=TEST_LICENCE)
 
 
-def test_get_licence_url_when_authority_uses_gov_uk():
-    result = licence_lookup_service.get_licence_url(
+def test_get_licence_url_when_authority_uses_gov_uk(lookup_service):
+    result = lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
         licence=TEST_LICENCE,
         authority=TEST_AUTHORITY,
@@ -264,12 +240,12 @@ def test_get_licence_url_when_authority_uses_gov_uk():
     assert result == f"{BASE_URL}/apply-for-a-licence/test-licence/test-authority/apply-1"
 
 
-def test_get_licence_url_when_authority_does_not_use_gov_uk():
+def test_get_licence_url_when_authority_does_not_use_gov_uk(lookup_service):
     test_authority_not_using_gov_uk = deepcopy(TEST_AUTHORITY)
     test_authority_not_using_gov_uk.licence_details[0].using_gov_uk = False
     test_authority_not_using_gov_uk.licence_details[0].authority_url = "test-authority.gov.uk"
 
-    result = licence_lookup_service.get_licence_url(
+    result = lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
         licence=TEST_LICENCE,
         authority=test_authority_not_using_gov_uk,
@@ -279,13 +255,13 @@ def test_get_licence_url_when_authority_does_not_use_gov_uk():
     assert result == test_authority_not_using_gov_uk.licence_details[0].authority_url
 
 
-def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_found():
+def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_found(lookup_service):
     test_authority_with_non_matching_licence_details = deepcopy(TEST_AUTHORITY)
     test_authority_with_non_matching_licence_details.licence_details[0].using_gov_uk = False
     test_authority_with_non_matching_licence_details.licence_details[0].authority_url = "test-authority.gov.uk"
     test_authority_with_non_matching_licence_details.licence_details[0].licence_code = "345-6-7"
 
-    result = licence_lookup_service.get_licence_url(
+    result = lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
         licence=TEST_LICENCE,
         authority=test_authority_with_non_matching_licence_details,
@@ -295,12 +271,12 @@ def test_get_licence_url_returns_empty_string_when_no_matched_licence_details_fo
     assert result == ""
 
 
-def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
+def test_get_licence_url_returns_empty_string_when_authority_url_is_empty(lookup_service):
     test_authority_with_empty_authority_url = deepcopy(TEST_AUTHORITY)
     test_authority_with_empty_authority_url.licence_details[0].using_gov_uk = False
     test_authority_with_empty_authority_url.licence_details[0].authority_url = ""
 
-    result = licence_lookup_service.get_licence_url(
+    result = lookup_service.get_licence_url(
         licence_interaction=TEST_LICENCE.licence_interactions[0],
         licence=TEST_LICENCE,
         authority=test_authority_with_empty_authority_url,
@@ -310,110 +286,115 @@ def test_get_licence_url_returns_empty_string_when_authority_url_is_empty():
     assert result == ""
 
 
-def test_get_payment_info_from_customisation_returns_none_and_none_when_no_fee_required():
+def test_get_payment_info_from_customisation_returns_none_and_none_when_no_fee_required(lookup_service):
     customisation_no_fee_required = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
     customisation_no_fee_required.is_fee_required = False
 
-    actual = licence_lookup_service.get_payment_info_from_customisation(customisation_no_fee_required)
+    actual = lookup_service.get_payment_info_from_customisation(customisation_no_fee_required)
 
     assert actual == (PaymentType.NONE, None)
 
 
-def test_get_payment_info_from_customisation_returns_fixed_fee_and_amount_when_fixed_fee_required():
-    actual = licence_lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_FIXED_FEE)
+def test_get_payment_info_from_customisation_returns_fixed_fee_and_amount_when_fixed_fee_required(lookup_service):
+    actual = lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_FIXED_FEE)
 
     assert actual == (PaymentType.FIXED_FEE, TEST_CUSTOMISATION_FIXED_FEE.fixed_fee_amount.format_to_string_in_pounds)
 
 
-def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_but_no_fixed_fee():
-    actual = licence_lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_VARIABLE_FEE)
+def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_but_no_fixed_fee(
+    lookup_service,
+):
+    actual = lookup_service.get_payment_info_from_customisation(TEST_CUSTOMISATION_VARIABLE_FEE)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_and_fixed_fee_amount_0():
+def test_get_payment_info_from_customisation_returns_variable_fee_and_none_when_fee_required_and_fixed_fee_amount_0(
+    lookup_service,
+):
     customisation_fixed_fee_zero_pence = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
     customisation_fixed_fee_zero_pence.fixed_fee_amount = PaymentAmount(pence=0)
 
-    actual = licence_lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
+    actual = lookup_service.get_payment_info_from_customisation(customisation_fixed_fee_zero_pence)
 
     assert actual == (PaymentType.VARIABLE_FEE, None)
 
 
-def test_get_licence_interaction_context_returns_error_when_no_licence_found(
-    mock_licence_repository, mock_authority_repository
-):
-    mock_licence_repository.get_licence_by_url_slug.side_effect = ObjectDoesNotExist("Licence does not exist: url_slug")
+def test_get_licence_interaction_context_returns_error_when_no_licence_found(lookup_service, mocker):
+    mocker.patch.object(
+        lookup_service.licence_repository,
+        "get_licence_by_url_slug",
+        side_effect=ObjectDoesNotExist("Licence does not exist: url_slug"),
+    )
 
     with pytest.raises(ObjectDoesNotExist) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
+        lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Licence does not exist: url_slug"
 
 
-def test_get_licence_interaction_context_returns_error_when_no_authority_found(
-    mock_licence_repository, mock_authority_repository
-):
-    mock_authority_repository.find_authority_by_url_slug.return_value = None
+def test_get_licence_interaction_context_returns_error_when_no_authority_found(lookup_service, mocker):
+    mocker.patch.object(lookup_service.licence_repository, "get_licence_by_url_slug", return_value=TEST_LICENCE)
+    mocker.patch.object(lookup_service.authority_repository, "find_authority_by_url_slug", return_value=None)
+
     with pytest.raises(ObjectDoesNotExist) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
+        lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Authority not found"
 
 
-def test_get_licence_interaction_context_returns_error_when_no_licence_details_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail
-):
-    mock_find_licence_detail.return_value = None
+def test_get_licence_interaction_context_returns_error_when_no_licence_details_found(mocker, lookup_service):
+    mocker.patch.object(lookup_service.licence_repository, "get_licence_by_url_slug", return_value=TEST_LICENCE)
+    mocker.patch.object(lookup_service.licence_service, "find_licence_detail", return_value=None)
     with pytest.raises(ObjectDoesNotExist) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
+        lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Licence detail not found"
 
 
-def test_get_licence_interaction_context_returns_error_when_no_interaction_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
-):
-    mock_licence_service.find_interaction.return_value = None
+def test_get_licence_interaction_context_returns_error_when_no_interaction_found(mocker, lookup_service):
+    mocker.patch.object(lookup_service.licence_repository, "get_licence_by_url_slug", return_value=TEST_LICENCE)
+    mocker.patch.object(lookup_service.authority_service, "find_licence_detail")
+    lookup_service.licence_service.find_interaction.return_value = None
     with pytest.raises(ObjectDoesNotExist) as e:
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
+        lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Interaction not found"
 
 
-def test_get_licence_interaction_context_returns_all_data_when_all_data_found(
-    mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail, mock_licence_service
-):
-    mock_authority_repository.find_authority_by_url_slug.return_value.url_slug = "url_slug"
-    mock_licence_repository.get_licence_by_url_slug.return_value.licence_code = "licence_code"
+def test_get_licence_interaction_context_returns_all_data_when_all_data_found(mocker, lookup_service):
+    mocker.patch.object(lookup_service.authority_repository, "find_authority_by_url_slug", return_value=TEST_AUTHORITY)
+    mocker.patch.object(lookup_service.licence_repository, "get_licence_by_url_slug", return_value=TEST_LICENCE)
+    mocker.patch.object(lookup_service.authority_service, "find_licence_detail")
+
     actual_licence, actual_authority, actual_interaction, actual_licence_detail = (
-        licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
+        lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
     )
-    assert actual_authority.url_slug == "url_slug"
-    assert actual_licence.licence_code == "licence_code"
+    assert actual_authority.url_slug == TEST_AUTHORITY.url_slug
+    assert actual_licence.licence_code == TEST_LICENCE.licence_code
     assert actual_interaction is not None
     assert actual_licence_detail is not None
 
 
-def test_group_interactions():
+def test_group_interactions(lookup_service):
     expected_grouped_interactions = {
         LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0], TEST_LICENCE.licence_interactions[1]],
         LicenceInteractions.RENEW.value: [TEST_LICENCE.licence_interactions[2]],
     }
 
-    actual = licence_lookup_service.group_interactions(TEST_LICENCE)
+    actual = lookup_service.group_interactions(TEST_LICENCE)
 
     assert actual == expected_grouped_interactions
 
 
-def test_build_authority_interactions(mocker):
+def test_build_authority_interactions(mocker, lookup_service):
     test_customisation = mocker.patch.object(
-        licence_lookup_service.interaction_customisation_repository,
+        lookup_service.interaction_customisation_repository,
         "find_published_customisation",
         return_value=TEST_CUSTOMISATION_FIXED_FEE,
     )
     mock_group_interactions = mocker.patch.object(
-        licence_lookup_service,
+        lookup_service,
         "group_interactions",
         return_value={LicenceInteractions.APPLY.value: [TEST_LICENCE.licence_interactions[0]]},
     )
@@ -432,65 +413,61 @@ def test_build_authority_interactions(mocker):
         ]
     }
 
-    actual = licence_lookup_service.build_authority_interactions(TEST_AUTHORITY, TEST_LICENCE)
+    actual = lookup_service.build_authority_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert actual == expected
 
 
-def test_get_authority_licence_interaction_details_returns_expected_issuing_authority(mocker):
+def test_get_authority_licence_interaction_details_returns_expected_issuing_authority(mocker, lookup_service):
     mocker.patch.object(
-        licence_lookup_service, "build_authority_interactions", return_value=TEST_AUTHORITY_INTERACTIONS_FOR_APPLY
+        lookup_service, "build_authority_interactions", return_value=TEST_AUTHORITY_INTERACTIONS_FOR_APPLY
     )
 
     expected = TEST_ISSUING_AUTHORITY
 
-    actual = licence_lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
+    actual = lookup_service.get_authority_licence_interaction_details(TEST_AUTHORITY, TEST_LICENCE)
 
     assert actual == expected
 
 
 def test_get_licence_authorities_and_interactions_throws_error_licence_repository_error(
-    mock_get_licence_by_licence_code,
+    lookup_service,
 ):
-    mock_get_licence_by_licence_code.side_effect = DocumentDBError("error message")
+    lookup_service.licence_repository.get_licence_by_licence_code.side_effect = DocumentDBError("error message")
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert e.value.args[0] == "error message"
 
 
-def test_get_licence_authorities_and_interactions_throws_error_authority_repository_error(
-    mock_get_licence_by_licence_code, mock_get_authorities
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities.side_effect = DocumentDBError("error message")
+def test_get_licence_authorities_and_interactions_throws_error_authority_repository_error(lookup_service, mocker):
+    mocker.patch.object(lookup_service, "get_authorities", side_effect=DocumentDBError("error message"))
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert e.value.args[0] == "error message"
 
 
 def test_get_licence_authorities_and_interactions_throws_error_interaction_customisation_repository_error(
-    mock_get_licence_by_licence_code, mock_get_authorities, mock_find_interaction_customisation
+    lookup_service, mocker
 ):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities.return_value = [TEST_AUTHORITY]
-
-    mock_find_interaction_customisation.side_effect = DocumentDBError("error message")
+    mocker.patch.object(lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
+    mocker.patch.object(
+        lookup_service.interaction_customisation_repository,
+        "find_published_customisation",
+        side_effect=DocumentDBError("error message"),
+    )
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert e.value.args[0] == "error message"
 
 
-def test_get_licence_authorities_and_interactions_throws_error_on_response_validation_error(
-    mock_get_licence_by_licence_code, mock_get_authorities, mocker
-):
-    mock_get_licence_by_licence_code.return_value = TEST_LICENCE
-    mock_get_authorities.return_value = [TEST_AUTHORITY]
+def test_get_licence_authorities_and_interactions_throws_error_on_response_validation_error(lookup_service, mocker):
+    mocker.patch.object(lookup_service, "get_authorities", return_value=[TEST_AUTHORITY])
 
     mock_validation_error = ValidationError.from_exception_data(
         title="AuthorityInteraction",
@@ -504,9 +481,9 @@ def test_get_licence_authorities_and_interactions_throws_error_on_response_valid
         ],
     )
 
-    mocker.patch.object(licence_lookup_service, "build_authority_interactions", side_effect=mock_validation_error)
+    mocker.patch.object(lookup_service, "build_authority_interactions", side_effect=mock_validation_error)
 
     with pytest.raises(LicenceLookupError) as e:
-        licence_lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
+        lookup_service.get_licence_authorities_and_interactions(TEST_AUTHORITY, TEST_LICENCE)
 
     assert e.value.args[0] == "AuthorityInteraction validation error"

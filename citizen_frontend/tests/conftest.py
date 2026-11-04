@@ -11,7 +11,7 @@ from common.enums.interaction_id_codes import InteractionIdCodes
 from common.enums.payment_status import PaymentStatuses
 from common.enums.virus_check_status import VirusCheckStatus
 from common.models.authority import Authority, ContactInformation, LicenceDetail
-from common.models.interaction_customisation import Customisation, InteractionCustomisation
+from common.models.interaction_customisation import Customisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.licence_application import ApplicationStatus, LicenceApplication, SupportingDocument
 from common.models.payment import Payment, PaymentStatus
@@ -19,8 +19,6 @@ from common.models.shared_models import PaymentAmount, SupportingDocumentDefinit
 from django.utils import timezone
 from django.utils.timezone import now
 
-import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.api.models.api_responses import (
     AuthorityContactInformation,
     AuthorityInteraction,
@@ -89,26 +87,6 @@ def test_introduction_page_url(live_server):
 @pytest.fixture
 def test_submit_form_page_url(live_server):
     return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
-
-
-@pytest.fixture
-def mock_interaction_customisation_get(mocker):
-    mock_get = mocker.patch.object(InteractionCustomisation.objects, "get")
-    yield mock_get
-
-
-@pytest.fixture
-def mock_find_interaction_customisation(mocker):
-    mock_find_interaction_customisation = mocker.patch.object(
-        interaction_customisation_repository, "find_interaction_customisation"
-    )
-    yield mock_find_interaction_customisation
-
-
-@pytest.fixture
-def mock_get_licence(mocker):
-    mock_get = mocker.patch.object(Licence.objects, "get")
-    yield mock_get
 
 
 TEST_LICENCE_CODE = "1234-5-6"
@@ -286,7 +264,7 @@ TEST_ISSUING_AUTHORITY = IssuingAuthority(
         website=TEST_AUTHORITY.authority_url,
         email=TEST_AUTHORITY.contact_details.email,
         phone=TEST_AUTHORITY.contact_details.phone_number,
-        address="",
+        address="A building\nA street\nA line three\nLondon\na12 21a",
     ),
     authority_interactions={LicenceInteractions.APPLY: [TEST_AUTHORITY_INTERACTION]},
 )
@@ -363,73 +341,48 @@ TEST_PAYMENT = Payment(
 )
 
 
-@pytest.fixture
-def mock_lookup_service(mocker):
-    mock_look_up_service = mocker.patch("citizen_frontend.api.find_a_licence_integration.licence_lookup_service")
-    yield mock_look_up_service
+LICENCE_INTERACTION_CONTEXT = (
+    deepcopy(TEST_LICENCE),
+    deepcopy(TEST_AUTHORITY),
+    deepcopy(TEST_LICENCE_INTERACTION),
+    deepcopy(TEST_LICENCE_DETAIL),
+)
 
 
 @pytest.fixture
-def licence_interaction_context():
-    return (
-        deepcopy(TEST_LICENCE),
-        deepcopy(TEST_AUTHORITY),
-        deepcopy(TEST_LICENCE_INTERACTION),
-        deepcopy(TEST_LICENCE_DETAIL),
+def mock_get_licence_interaction_context(mocker):
+    service = mocker.MagicMock()
+    mocker.patch("citizen_frontend.controllers.begin_application.LicenceLookupService", return_value=service)
+    service.get_licence_interaction_context.return_value = deepcopy(LICENCE_INTERACTION_CONTEXT)
+    yield service
+
+
+@pytest.fixture
+def mock_customisation_repository(mocker):
+    repo = mocker.MagicMock()
+    mocker.patch("citizen_frontend.controllers.begin_application.CustomisationRepository", return_value=repo)
+    yield repo
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_fixed_fee(mock_customisation_repository):
+    mock_customisation_repository.find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
+    yield mock_customisation_repository.find_published_customisation.return_value
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_variable_fee(mock_customisation_repository):
+    mock_customisation_repository.find_published_customisation.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    yield mock_customisation_repository.find_published_customisation.return_value
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_no_fee(mock_customisation_repository):
+    mock_find_published_customisation_with_no_fee = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    mock_find_published_customisation_with_no_fee.is_fee_required = False
+    mock_find_published_customisation_with_no_fee.fixed_fee_amount = None
+
+    mock_customisation_repository.find_published_customisation.return_value = (
+        mock_find_published_customisation_with_no_fee
     )
-
-
-@pytest.fixture
-def mock_get_licence_interaction_context(mocker, licence_interaction_context):
-    mock_get_context = mocker.patch.object(
-        licence_lookup_service,
-        "get_licence_interaction_context",
-        autospec=True,
-    )
-    mock_get_context.return_value = licence_interaction_context
-    return mock_get_context
-
-
-@pytest.fixture
-def mock_find_published_customisation_with_fixed_fee(mocker):
-    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
-    return mock_find_published_customisation_with_fixed_fee
-
-
-@pytest.fixture
-def mock_find_published_customisation_with_variable_fee(mocker):
-    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    return mock_find_published_customisation_with_fixed_fee
-
-
-@pytest.fixture
-def mock_find_published_customisation_with_no_fee(mocker):
-    mock_find_published_customisation_with_no_fee = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
-    mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
-    return mock_find_published_customisation_with_no_fee
-
-
-@pytest.fixture
-def mock_find_published_customisation_returns_none(mocker):
-    mock_find_published_customisation = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation.return_value = None
+    yield mock_customisation_repository.find_published_customisation.return_value

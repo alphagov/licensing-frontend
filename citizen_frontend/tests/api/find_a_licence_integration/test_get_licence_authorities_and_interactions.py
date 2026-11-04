@@ -7,6 +7,13 @@ from citizen_frontend.exceptions import LicenceLookupError
 from citizen_frontend.tests.conftest import TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE
 
 
+@pytest.fixture
+def mock_lookup_service(mocker):
+    mock_service = mocker.MagicMock()
+    mocker.patch("citizen_frontend.api.find_a_licence_integration.LicenceLookupService", return_value=mock_service)
+    return mock_service
+
+
 @pytest.mark.parametrize(
     "view_name, kwargs",
     [

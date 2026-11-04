@@ -6,13 +6,12 @@ from pydantic import ValidationError
 
 from citizen_frontend.api.models.api_responses import LicenceResponse
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
-from citizen_frontend.repository import licence_repository
 from citizen_frontend.tests.conftest import TEST_LICENCE
 
 
 @pytest.fixture
 def mock_get_all_licences(mocker):
-    yield mocker.patch.object(licence_repository, "get_all_licences")
+    yield mocker.patch("citizen_frontend.api.find_a_licence_integration.LicenceRepository.get_all_licences")
 
 
 def test_get_all_licences_returns_expected_result(client, mock_get_all_licences):

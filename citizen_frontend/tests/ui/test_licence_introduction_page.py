@@ -89,7 +89,9 @@ def test_page_has_download_pdf_inset(
     live_server,
 ):
     dom = get_dom_parser(test_introduction_page_url)
-    licence, authority, interaction, detail = mock_get_licence_interaction_context.return_value
+    licence, authority, interaction, detail = (
+        mock_get_licence_interaction_context.get_licence_interaction_context.return_value
+    )
     expected_form_url = urlparse(
         f"{live_server}/{SERVICE_SLUG}/forms/"
         f"{authority.url_slug}/{licence.url_slug}/"
@@ -133,9 +135,9 @@ def test_page_has_additional_information_inset_when_general_info_url_available(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = "test_url"
-    mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
-    _, _, _, licence_details = mock_get_licence_interaction_context.return_value
+    mock_find_published_customisation_with_fixed_fee.guidance_url = "test_url"
+    mock_find_published_customisation_with_fixed_fee.information_url = None
+    _, _, _, licence_details = mock_get_licence_interaction_context.get_licence_interaction_context.return_value
     licence_details.authority_url = None
 
     dom = get_dom_parser(test_introduction_page_url)
@@ -151,8 +153,8 @@ def test_page_has_additional_information_inset_when_legislation_info_url_availab
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    mock_find_published_customisation_with_fixed_fee.return_value.information_url = "info_url"
-    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
+    mock_find_published_customisation_with_fixed_fee.information_url = "info_url"
+    mock_find_published_customisation_with_fixed_fee.guidance_url = None
 
     dom = get_dom_parser(test_introduction_page_url)
 
@@ -167,9 +169,9 @@ def test_page_does_not_have_additional_information_inset_when_no_general_info_no
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    mock_find_published_customisation_with_fixed_fee.return_value.information_url = None
-    mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
-    _, _, _, licence_details = mock_get_licence_interaction_context.return_value
+    mock_find_published_customisation_with_fixed_fee.information_url = None
+    mock_find_published_customisation_with_fixed_fee.guidance_url = None
+    _, _, _, licence_details = mock_get_licence_interaction_context.get_licence_interaction_context.return_value
     licence_details.authority_url = None
     dom = get_dom_parser(test_introduction_page_url)
 
@@ -228,7 +230,7 @@ def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = False
+    mock_find_published_customisation_with_fixed_fee.is_postal_allowed = False
 
     dom = get_dom_parser(test_introduction_page_url)
 
@@ -241,7 +243,7 @@ def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = True
+    mock_find_published_customisation_with_fixed_fee.is_postal_allowed = True
 
     dom = get_dom_parser(test_introduction_page_url)
 

@@ -10,57 +10,60 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-def find_published_customisation(
-    authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> Customisation | None:
-    logger.info(
-        "Finding published customisation for: %s, %s, %s, %s",
-        authority_url_slug,
-        licence_code,
-        interaction_id,
-        interaction_sub_id,
-    )
-    interaction_customisation = find_interaction_customisation(
-        authority_url_slug, licence_code, interaction_id, interaction_sub_id
-    )
-    if (
-        interaction_customisation
-        and interaction_customisation.published_customisation
-        and not interaction_customisation.published_customisation.suspended_at
-    ):
-        return interaction_customisation.published_customisation
+class CustomisationRepository:
+    def __init__(self):
+        self.model = InteractionCustomisation
 
-    logger.info("No published customisation found")
-    return None
-
-
-def find_interaction_customisation(
-    authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
-) -> InteractionCustomisation | None:
-    try:
-        customisation = InteractionCustomisation.objects.get(
-            authority_url_slug=authority_url_slug,
-            licence_code=licence_code,
-            interaction_id=interaction_id,
-            interaction_sub_id=interaction_sub_id,
+    def find_published_customisation(
+        self, authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
+    ) -> Customisation | None:
+        logger.info(
+            "Finding published customisation for: %s, %s, %s, %s",
+            authority_url_slug,
+            licence_code,
+            interaction_id,
+            interaction_sub_id,
         )
+        interaction_customisation = self.find_interaction_customisation(
+            authority_url_slug, licence_code, interaction_id, interaction_sub_id
+        )
+        if (
+            interaction_customisation
+            and interaction_customisation.published_customisation
+            and not interaction_customisation.published_customisation.suspended_at
+        ):
+            return interaction_customisation.published_customisation
 
-        if customisation:
-            customisation.clean_fields()
-            return customisation
-    except InteractionCustomisation.DoesNotExist:
+        logger.info("No published customisation found")
         return None
-    except ValidationError as e:
-        logger.error(e)
-        raise DataIntegrityError(f"InteractionCustomisation validation error: {e.messages}") from e
-    except InteractionCustomisation.MultipleObjectsReturned as e:
-        logger.error(e)
-        raise DataIntegrityError(
-            f"More than one InteractionCustomisations found for the following "
-            f"arguments:"
-            f"{authority_url_slug}, {licence_code}, {interaction_id}, "
-            f"{interaction_sub_id}"
-        ) from e
-    except DatabaseError as e:
-        logger.error(e)
-        raise DocumentDBError("There was a database error accessing InteractionCustomisations collection") from e
+
+    def find_interaction_customisation(
+        self, authority_url_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
+    ) -> InteractionCustomisation | None:
+        try:
+            customisation = self.model.objects.get(
+                authority_url_slug=authority_url_slug,
+                licence_code=licence_code,
+                interaction_id=interaction_id,
+                interaction_sub_id=interaction_sub_id,
+            )
+
+            if customisation:
+                customisation.clean_fields()
+                return customisation
+        except InteractionCustomisation.DoesNotExist:
+            return None
+        except ValidationError as e:
+            logger.error(e)
+            raise DataIntegrityError(f"InteractionCustomisation validation error: {e.messages}") from e
+        except InteractionCustomisation.MultipleObjectsReturned as e:
+            logger.error(e)
+            raise DataIntegrityError(
+                f"More than one InteractionCustomisations found for the following "
+                f"arguments:"
+                f"{authority_url_slug}, {licence_code}, {interaction_id}, "
+                f"{interaction_sub_id}"
+            ) from e
+        except DatabaseError as e:
+            logger.error(e)
+            raise DocumentDBError("There was a database error accessing InteractionCustomisations collection") from e

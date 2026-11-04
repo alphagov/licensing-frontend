@@ -7,8 +7,8 @@ from django.http import Http404
 from django.shortcuts import render
 
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
-from citizen_frontend.repository import interaction_customisation_repository
-from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.repository.interaction_customisation_repository import CustomisationRepository
+from citizen_frontend.services.licence_lookup_service import LicenceLookupService
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 
@@ -20,12 +20,15 @@ def begin_application_steps(
         if interaction_type is None:
             raise Http404("Invalid interaction ID") from None
 
+        licence_lookup_service = LicenceLookupService()
         licence, authority, interaction, licence_details = licence_lookup_service.get_licence_interaction_context(
             authority_slug, licence_slug, interaction_type, interaction_sub_id
         )
 
         if not licence_details.can_apply_via_licensify:
             return display_licence_must_be_applied_for_locally(request, licence_details.authority_url)
+
+        interaction_customisation_repository = CustomisationRepository()
 
         published_customisation = interaction_customisation_repository.find_published_customisation(
             authority_slug, licence.licence_code, interaction.interaction_id, interaction.interaction_sub_id
