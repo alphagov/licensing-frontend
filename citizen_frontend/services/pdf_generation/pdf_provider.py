@@ -34,15 +34,27 @@ class APTOPdfProvider(PdfProvider):
         customisation: Customisation,
         department: Department,
         return_url: str,
+        interaction: LicenceInteraction,
     ):
         pass
 
     def flatten_pdf(self):
         pass
 
-    def create_xml_request(self, licence: Licence, authority: Authority, customisation: Customisation, return_url: str):
+    def create_xml_request(
+        self,
+        licence: Licence,
+        authority: Authority,
+        customisation: Customisation,
+        department: Department,
+        interaction: LicenceInteraction,
+        return_url: str,
+    ):
         context = {
             "return_url": return_url,
+            "authority": authority,
+            "department": department,
+            "interaction": interaction,
         }
         return render_to_string("citizen_frontend/pdf_generation/apto_template.xml", context)
 
@@ -55,6 +67,7 @@ class MockAPTOPdfProvider(PdfProvider):
         customisation: Customisation,
         department: Department,
         return_url: str,
+        interaction: LicenceInteraction,
     ):
         if customisation.is_fee_required and customisation.fee_calculation_instructions:
             return self.create_buffer("citizen_frontend/services/resources/test_forms/fish_dealers_licence.pdf")
@@ -118,6 +131,7 @@ class PdfGenerator:
             department=department,
             customisation=published_customisation,
             return_url=return_url,
+            interaction=interaction,
         )
 
         return application_pdf_form, file_path

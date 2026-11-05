@@ -144,6 +144,7 @@ TEST_AUTHORITY = Authority(
         post_code="a12 21a",
         email="anauthorityemail@gov.uk",
     ),
+    encoded_image="this is a base64 encoded image",
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(

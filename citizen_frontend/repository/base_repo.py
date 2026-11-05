@@ -24,7 +24,7 @@ class DepartmentRepo:
     def __init__(self):
         self.model = Department
 
-    def get_by_id(self, department_id):
+    def get_by_id(self, department_id) -> Department:
         try:
             department = self.model.objects.get(_id=department_id)
             department.clean_fields()
