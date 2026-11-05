@@ -6,7 +6,7 @@ from django.http import FileResponse
 from django.urls import reverse
 
 from citizen_frontend.services import licence_lookup_service
-from citizen_frontend.services.pdf_provider import APTOPdfProvider
+from citizen_frontend.services.pdf_generation.pdf_provider import APTOPdfProvider
 
 
 @pytest.fixture

@@ -2,7 +2,7 @@ import pytest
 from conftest import TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE_INTERACTION
 from django.urls import reverse
 
-from citizen_frontend.services.pdf_provider import PdfGenerator
+from citizen_frontend.services.pdf_generation.pdf_provider import PdfGenerator
 
 
 @pytest.fixture

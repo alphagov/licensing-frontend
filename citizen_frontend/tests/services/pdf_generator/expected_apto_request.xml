@@ -1,0 +1,43 @@
+    <Root
+    xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+    xmlns:common="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CommonSections xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3">
+        <returnURL>http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1</returnURL>
+        <Branding>
+          <logoUri>this is the authority image</logoUri>
+          <altText>auth name</altText>
+          <colour>FFFFFF</colour>
+          <HelpContact>
+            <emailAddress>department email</emailAddress>
+            <telephone>department help phone</telephone>
+          </HelpContact>
+        </Branding>
+        <FormMetaData>
+          <transactionId>Not Currently In Use</transactionId>
+          <formId>form ref number</formId>
+          <formName>interaction.licenceInteractionName</formName>
+          <formalityId>licence.licenceCode</formalityId>
+          <formalityVersion>interaction.form.get.formVersion</formalityVersion>
+          <authorityShortName>authority.name</authorityShortName>
+          <authorityOrgName>authority.fullName</authorityOrgName>
+          <governingLegislation>customisation.legislation</governingLegislation>
+        </FormMetaData>
+        <PaymentDetails>
+        {fixedFeeAmount.map(amount=>
+          <isFixedFee>1</isFixedFee>
+          <Payment>{amount}</Payment>
+        ).toList}
+          <Calculation>customisation.feeCalculationInstructions.map(_.replaceAllLiterally("&pound;", "\u00A3")).mkString("\n")</Calculation>
+        </PaymentDetails>
+
+        <Declarations>
+          customisation.declarations.map(declaration =>
+          <Declaration>
+            <declarationText>declaration.replaceAllLiterally("&pound;","\u00A3")</declarationText>
+          </Declaration>
+        )
+        </Declarations>
+
+      </CommonSections>
+    </Root>

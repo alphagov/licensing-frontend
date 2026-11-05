@@ -2,7 +2,7 @@ from common.models.authority import Authority
 from django.http import FileResponse, HttpResponse
 from django.shortcuts import render
 
-from citizen_frontend.services.pdf_provider import PdfGenerator
+from citizen_frontend.services.pdf_generation.pdf_provider import PdfGenerator
 
 
 def display_licence_unavailable_online(request, authority: Authority):

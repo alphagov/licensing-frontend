@@ -1,0 +1,49 @@
+{% spaceless %}
+<Root
+xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+xmlns:common="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <CommonSections xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3">
+    {% if return_url  %}
+        <returnURL>{{return_url}}</returnURL>
+    {% endif %}
+<!--    <Branding>-->
+<!--      {if (authority.imageBase64encoded.isDefined)-->
+<!--      <logoUri>{authority.imageBase64encoded.get}</logoUri>-->
+<!--      }-->
+<!--      <altText>{authority.name}</altText>-->
+<!--      <colour>FFFFFF</colour>-->
+<!--      <HelpContact>-->
+<!--        <emailAddress>{department.helpEmail}</emailAddress>-->
+<!--        <telephone>{department.helpPhone}</telephone>-->
+<!--      </HelpContact>-->
+<!--    </Branding>-->
+<!--    <FormMetaData>-->
+<!--      <transactionId>Not Currently In Use</transactionId>-->
+<!--      <formId>{formRefNo}</formId>-->
+<!--      <formName>{interaction.licenceInteractionName}</formName>-->
+<!--      <formalityId>{licence.licenceCode}</formalityId>-->
+<!--      <formalityVersion>{interaction.form.get.formVersion}</formalityVersion>-->
+<!--      <authorityShortName>{authority.name}</authorityShortName>-->
+<!--      <authorityOrgName>{authority.fullName}</authorityOrgName>-->
+<!--      <governingLegislation>{customisation.legislation}</governingLegislation>-->
+<!--    </FormMetaData>-->
+<!--    <PaymentDetails>-->
+<!--    {fixedFeeAmount.map(amount=>-->
+<!--      <isFixedFee>1</isFixedFee>-->
+<!--      <Payment>{amount}</Payment>-->
+<!--    ).toList}-->
+<!--      <Calculation>{customisation.feeCalculationInstructions.map(_.replaceAllLiterally("&pound;", "\u00A3")).mkString("\n")}</Calculation>-->
+<!--    </PaymentDetails>-->
+<!--    {if (customisation.declarations.nonEmpty)-->
+<!--    <Declarations>-->
+<!--      {customisation.declarations.map(declaration =>-->
+<!--      <Declaration>-->
+<!--        <declarationText>{declaration.replaceAllLiterally("&pound;","\u00A3")}</declarationText>-->
+<!--      </Declaration>-->
+<!--    )}-->
+<!--    </Declarations>-->
+<!--    }-->
+    </CommonSections>
+</Root>
+{% endspaceless %}
