@@ -2,4 +2,10 @@
 
 {% block content %}
     {% include "citizen_frontend/partials/page_heading.html" %}
+    <h2 class="govuk-heading-m" data-testid="action-heading">
+        Application cancelled
+    </h2>
+    <p class="govuk-body" data-testid="cancelled-licence">
+        Your application for <strong>{{ licence.name }}</strong> has been cancelled.
+    </p>
 {% endblock %}

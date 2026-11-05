@@ -28,27 +28,50 @@ def test_page_has_correct_headings(
     assert heading_text == f"{TEST_LICENCE.name} from {TEST_AUTHORITY.full_name}"
 
 
-def test_page_has_4_steps(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+def test_page_has_4_steps(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
+    mock_payment_status.return_value = "cancelled"
+    mock_context.return_value = {
+        "step": "4",
+        "steps": "4",
+    }
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    steps_text = dom.get_by_test_id("steps").get_text()
+
+    assert "Step 4 of 4" in steps_text
+
+
+def test_page_has_licence_name(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
+    mock_payment_status.return_value = "cancelled"
+    mock_context.return_value = {"licence": TEST_LICENCE}
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    licence_text = dom.get_by_test_id("cancelled-licence").get_text()
+
+    assert TEST_LICENCE.name in licence_text
+
+
+def test_page_has_no_message_if_empty(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
     pass
 
 
-def test_page_has_licence_name(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+def test_page_has_message_if_not_empty(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
     pass
 
 
-def test_page_has_no_message_if_empty(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
-    pass
-
-
-def test_page_has_message_if_not_empty(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
-    pass
-
-
-def test_page_has_department_contact_details(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+def test_page_has_department_contact_details(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
     pass
 
 
 def test_page_displays_licence_finder_url_under_next_steps(
-    get_dom_parser, test_licence_application_cancelled_page_url, mock_context
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
 ):
     pass
