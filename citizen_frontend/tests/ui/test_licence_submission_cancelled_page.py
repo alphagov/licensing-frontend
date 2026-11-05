@@ -1,0 +1,54 @@
+import pytest
+from conftest import TEST_AUTHORITY, TEST_LICENCE
+
+
+@pytest.fixture
+def test_licence_application_cancelled_page_url(live_server):
+    return f"{live_server.url}/apply-for-a-licence/payment/licenceCallback?id=gds-test-1816200"
+
+
+@pytest.fixture
+def mock_context(mocker):
+    yield mocker.patch("citizen_frontend.controllers.payment_licence_callback.mock_payment_licence_callback_context")
+
+
+@pytest.fixture
+def mock_payment_status(mocker):
+    yield mocker.patch("citizen_frontend.controllers.payment_licence_callback.mock_payment_response_status")
+
+
+def test_page_has_correct_headings(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
+):
+    mock_payment_status.return_value = "cancelled"
+    mock_context.return_value = {"licence_name": TEST_LICENCE.name, "authority": TEST_AUTHORITY}
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    heading_text = dom.get_by_test_id("page-heading").get_text()
+
+    assert heading_text == f"{TEST_LICENCE.name} from {TEST_AUTHORITY.full_name}"
+
+
+def test_page_has_4_steps(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+    pass
+
+
+def test_page_has_licence_name(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+    pass
+
+
+def test_page_has_no_message_if_empty(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+    pass
+
+
+def test_page_has_message_if_not_empty(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+    pass
+
+
+def test_page_has_department_contact_details(get_dom_parser, test_licence_application_cancelled_page_url, mock_context):
+    pass
+
+
+def test_page_displays_licence_finder_url_under_next_steps(
+    get_dom_parser, test_licence_application_cancelled_page_url, mock_context
+):
+    pass
