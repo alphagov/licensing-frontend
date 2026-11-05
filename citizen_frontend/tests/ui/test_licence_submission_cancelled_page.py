@@ -56,13 +56,23 @@ def test_page_has_licence_name(
 def test_page_has_no_message_if_empty(
     get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
 ):
-    pass
+    mock_payment_status.return_value = "cancelled"
+    mock_context.return_value = {"message": ""}
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    licence_text = dom.get_by_test_id("cancelled-licence").get_text()
+
+    assert "Message:" not in licence_text
 
 
 def test_page_has_message_if_not_empty(
     get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
 ):
-    pass
+    mock_payment_status.return_value = "cancelled"
+    mock_context.return_value = {"message": "hello world"}
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    licence_text = dom.get_by_test_id("cancelled-licence").get_text()
+
+    assert "Message: hello world" in licence_text
 
 
 def test_page_has_department_contact_details(
