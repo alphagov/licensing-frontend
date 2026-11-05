@@ -1,6 +1,6 @@
 import pytest
 from common.models.department import Department
-from conftest import TEST_AUTHORITY, TEST_LICENCE
+from conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
 
 
 @pytest.fixture
@@ -106,4 +106,10 @@ def test_page_has_department_contact_details(
 def test_page_displays_licence_finder_url_under_next_steps(
     get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
 ):
-    pass
+    url = f"{BASE_URL}/apply-for-a-licence"
+    mock_context.return_value = {"licence_finder_url": url}
+    dom = get_dom_parser(test_licence_application_cancelled_page_url)
+    next_steps = dom.get_by_test_id("next-steps")
+    link = next_steps.find("a")
+
+    assert link["href"] == url
