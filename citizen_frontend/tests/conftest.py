@@ -11,6 +11,7 @@ from common.enums.interaction_id_codes import InteractionIdCodes
 from common.enums.payment_status import PaymentStatuses
 from common.enums.virus_check_status import VirusCheckStatus
 from common.models.authority import Authority, ContactInformation, LicenceDetail
+from common.models.department import Department
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.licence_application import ApplicationStatus, LicenceApplication, SupportingDocument
@@ -360,6 +361,20 @@ TEST_PAYMENT = Payment(
     transaction_id="test transaction id",
     callback_url="https://example.com",
     request_url="https://example.com",
+)
+
+TEST_DEPARTMENT = Department(
+    authority_slug=TEST_AUTHORITY.url_slug,
+    name="Test Department",
+    helpline_phone_number=TEST_AUTHORITY.contact_details.phone_number,
+    helpline_email_address=TEST_AUTHORITY.contact_details.email,
+    address_line_1=TEST_AUTHORITY.contact_details.line_one,
+    address_line_2=TEST_AUTHORITY.contact_details.line_two,
+    address_line_3=TEST_AUTHORITY.contact_details.line_three,
+    address_line_4=TEST_AUTHORITY.contact_details.city,
+    postcode=TEST_AUTHORITY.contact_details.post_code,
+    notification_email_address="notify@email.com",
+    default_privacy_notice_url="test-privacy-notice-url",
 )
 
 

@@ -1,6 +1,5 @@
 import pytest
-from common.models.department import Department
-from conftest import BASE_URL, TEST_AUTHORITY, TEST_LICENCE
+from conftest import BASE_URL, TEST_AUTHORITY, TEST_DEPARTMENT, TEST_LICENCE
 
 
 @pytest.fixture
@@ -79,20 +78,7 @@ def test_page_has_message_if_not_empty(
 def test_page_has_department_contact_details(
     get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
 ):
-    department = Department(
-        authority_slug=TEST_AUTHORITY.url_slug,
-        name="Test Department",
-        helpline_phone_number=TEST_AUTHORITY.contact_details.phone_number,
-        helpline_email_address=TEST_AUTHORITY.contact_details.email,
-        address_line_1=TEST_AUTHORITY.contact_details.line_one,
-        address_line_2=TEST_AUTHORITY.contact_details.line_two,
-        address_line_3=TEST_AUTHORITY.contact_details.line_three,
-        address_line_4=TEST_AUTHORITY.contact_details.city,
-        postcode=TEST_AUTHORITY.contact_details.post_code,
-        notification_email_address="notify@email.com",
-        default_privacy_notice_url="test-privacy-notice-url",
-    )
-    mock_context.return_value = {"department": department}
+    mock_context.return_value = {"department": TEST_DEPARTMENT}
     dom = get_dom_parser(test_licence_application_cancelled_page_url)
 
     department_contact = dom.get_by_test_id("department-contact").get_text()
