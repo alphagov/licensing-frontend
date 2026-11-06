@@ -402,7 +402,7 @@ def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
     mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
     mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
-    return mock_find_published_customisation_with_fixed_fee
+    return mock_find_published_customisation_with_no_fee
 
 
 @pytest.fixture

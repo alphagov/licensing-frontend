@@ -5,7 +5,7 @@ from conftest import TEST_AUTHORITY, TEST_LICENCE
 from django.http import FileResponse
 from django.urls import reverse
 
-from citizen_frontend.exceptions import PDFGenerationGeneralError
+from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
 
 
 @pytest.fixture
@@ -47,6 +47,14 @@ def test_generate_form_returns_file_response(client, generate_form_url, mock_pdf
 
 def test_generate_form_returns_500_response_general_pdf_generation_error(client, generate_form_url, mock_pdf_generator):
     mock_pdf_generator.handle_request.side_effect = PDFGenerationGeneralError("Error generating PDF")
+
+    response = client.get(generate_form_url())
+
+    assert response.status_code == 500
+
+
+def test_generate_form_returns_500_response_pdf_unavailable_error(client, generate_form_url, mock_pdf_generator):
+    mock_pdf_generator.handle_request.side_effect = PDFProviderUnavailableError("Error generating PDF, unavailable")
 
     response = client.get(generate_form_url())
 
