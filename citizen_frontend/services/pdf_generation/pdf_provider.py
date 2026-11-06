@@ -87,11 +87,11 @@ class MockAPTOPdfProvider(PdfProvider):
         return_url: str,
         interaction: LicenceInteraction,
     ):
-        if authority.name == "barnet":
+        if authority.name == "Barnet":
             raise PDFGenerationGeneralError("Mocking general error with Barnet")
 
-        if authority.name == "elmbridge":
-            raise PDFProviderUnavailableError("Mocking PDF Generation unavailable response with Elmbridge")
+        if authority.name == "York":
+            raise PDFProviderUnavailableError("Mocking PDF Generation unavailable response with York")
 
         if customisation.is_fee_required and customisation.fee_calculation_instructions:
             return self.create_buffer("citizen_frontend/services/resources/test_forms/temporary-event-notice.pdf")
