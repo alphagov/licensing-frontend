@@ -33,6 +33,7 @@ def mock_payment_licence_callback_context():
     )
     authority = Authority(
         name="Test Authority",
+        full_name="Test Authority Full Name",
     )
     licence = Licence(
         name="Test Licence",
