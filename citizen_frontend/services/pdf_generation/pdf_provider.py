@@ -50,11 +50,34 @@ class APTOPdfProvider(PdfProvider):
         interaction: LicenceInteraction,
         return_url: str,
     ):
+
+        modified_declarations = (
+            [declaration.replace("&pound;", "\u00a3") for declaration in customisation.declarations]
+            if customisation.declarations
+            else None
+        )
+        modified_calculations = (
+            [calculation.replace("&pound;", "\u00a3") for calculation in customisation.fee_calculation_instructions]
+            if customisation.fee_calculation_instructions
+            else None
+        )
+
+        fee_amount = (
+            customisation.fixed_fee_amount.format_to_string_in_pounds
+            if customisation.is_fee_required and customisation.fixed_fee_amount
+            else "0"
+        )
+
         context = {
             "return_url": return_url,
             "authority": authority,
             "department": department,
             "interaction": interaction,
+            "licence": licence,
+            "customisation": customisation,
+            "fixed_fee_amount": fee_amount,
+            "modified_declarations": modified_declarations,
+            "modified_calculations": modified_calculations,
         }
         return render_to_string("citizen_frontend/pdf_generation/apto_template.xml", context)
 

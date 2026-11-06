@@ -8,6 +8,7 @@ from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
 from common.models.authority import Authority, ContactInformation, LicenceDetail
+from common.models.department import Department
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
@@ -144,7 +145,6 @@ TEST_AUTHORITY = Authority(
         post_code="a12 21a",
         email="anauthorityemail@gov.uk",
     ),
-    encoded_image="this is a base64 encoded image",
 )
 
 TEST_LICENCE_INTERACTION = LicenceInteraction(
@@ -326,6 +326,20 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
             },
         )
     ],
+)
+
+TEST_DEPARTMENT = Department(
+    authority_slug=TEST_AUTHORITY.url_slug,
+    name="Test Department",
+    helpline_phone_number=TEST_AUTHORITY.contact_details.phone_number,
+    helpline_email_address=TEST_AUTHORITY.contact_details.email,
+    address_line_1=TEST_AUTHORITY.contact_details.line_one,
+    address_line_2=TEST_AUTHORITY.contact_details.line_two,
+    address_line_3=TEST_AUTHORITY.contact_details.line_three,
+    address_line_4=TEST_AUTHORITY.contact_details.city,
+    postcode=TEST_AUTHORITY.contact_details.post_code,
+    notification_email_address="notify@email.com",
+    default_privacy_notice_url="test-privacy-notice-url",
 )
 
 

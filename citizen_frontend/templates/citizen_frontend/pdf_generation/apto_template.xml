@@ -14,35 +14,36 @@ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <altText>{{ authority.name }}</altText>
         <colour>FFFFFF</colour>
         <HelpContact>
-            <emailAddress>{{ department.help_email }}</emailAddress>
-            <telephone>{{ department.help_phone }}</telephone>
+            <emailAddress>{{ department.helpline_email_address }}</emailAddress>
+            <telephone>{{ department.helpline_phone_number }}</telephone>
         </HelpContact>
         </Branding>
     <FormMetaData>
       <transactionId>Not Currently In Use</transactionId>
       <formId>{{ interaction.form.form_ref_number }}</formId>
-<!--      <formName>{interaction.licenceInteractionName}</formName>-->
-<!--      <formalityId>{licence.licenceCode}</formalityId>-->
-<!--      <formalityVersion>{interaction.form.get.formVersion}</formalityVersion>-->
-<!--      <authorityShortName>{authority.name}</authorityShortName>-->
-<!--      <authorityOrgName>{authority.fullName}</authorityOrgName>-->
-<!--      <governingLegislation>{customisation.legislation}</governingLegislation>-->
+      <formName>{{ interaction.licence_interaction_name }}</formName>
+      <formalityId>{{ licence.licence_code }}</formalityId>
+      <formalityVersion>{{ interaction.form.form_version }}</formalityVersion>
+      <authorityShortName>{{ authority.name }}</authorityShortName>
+      <authorityOrgName>{{ authority.full_name }}</authorityOrgName>
+      <governingLegislation>{{ customisation.legislation_name }}</governingLegislation>
     </FormMetaData>
-<!--    <PaymentDetails>-->
-<!--    {fixedFeeAmount.map(amount=>-->
-<!--      <isFixedFee>1</isFixedFee>-->
-<!--      <Payment>{amount}</Payment>-->
-<!--    ).toList}-->
-<!--      <Calculation>{customisation.feeCalculationInstructions.map(_.replaceAllLiterally("&pound;", "\u00A3")).mkString("\n")}</Calculation>-->
-<!--    </PaymentDetails>-->
-<!--    {if (customisation.declarations.nonEmpty)-->
-<!--    <Declarations>-->
-<!--      {customisation.declarations.map(declaration =>-->
-<!--      <Declaration>-->
-<!--        <declarationText>{declaration.replaceAllLiterally("&pound;","\u00A3")}</declarationText>-->
-<!--      </Declaration>-->
-<!--    )}-->
-<!--    </Declarations>-->
+    <PaymentDetails>
+        {% if fixed_fee_amount and not customisation.fee_calculation_instructions %}
+      <isFixedFee>1</isFixedFee>
+      <Payment>{{ fixed_fee_amount }}</Payment>
+        {% endif %}
+        {% for calculation in modified_calculations  %}
+      <Calculation>{{ calculation }}</Calculation>
+        {% endfor %}
+    </PaymentDetails>
+    <Declarations>
+    {% for declarations in modified_declarations %})
+      <Declaration>
+        <declarationText>{{ declaration }}</declarationText>
+      </Declaration>
+    {% endfor %}
+    </Declarations>
 <!--    }-->
     </CommonSections>
 </Root>
