@@ -8,3 +8,11 @@ class DocumentDBError(Exception):
 
 class LicenceLookupError(Exception):
     pass
+
+
+class PDFGenerationGeneralError(Exception):
+    pass
+
+
+class PDFProviderUnavailableError(Exception):
+    pass
