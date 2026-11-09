@@ -1,0 +1,21 @@
+{% extends "citizen_frontend/base.html" %}
+
+{% block content %}
+    {% include "citizen_frontend/partials/page_heading.html" %}
+    <h2 class="govuk-heading-m" data-testid="action-heading">
+        Application cancelled
+    </h2>
+    <section data-testid="cancelled-licence">
+        <p class="govuk-body">
+            Your application for <strong>{{ licence.name }}</strong> has been cancelled.
+        </p>
+        {% if message %}
+            <p class="govuk-body" data-testid="message">Message: {{ message }}</p>
+        {% endif %}
+    </section>
+    <p class="govuk-body">If you have any other questions about the licence, please contact the authority.</p>
+    {% include "citizen_frontend/partials/department_contact.html" %}
+    <h1 class="govuk-heading-s">Next steps</h1>
+    <p class="govuk-body" data-testid="next-steps"><a href="{{ "https://www.gov.uk/licence-finder" }}" class="govuk-link">Search for other licences</a>
+    </p>
+{% endblock %}
