@@ -1,5 +1,6 @@
 import os
 from copy import deepcopy
+from datetime import timedelta
 
 import bson
 import pytest
@@ -7,12 +8,17 @@ from bs4 import BeautifulSoup
 from bson import ObjectId
 from common.enums.countries import Countries
 from common.enums.interaction_id_codes import InteractionIdCodes
+from common.enums.payment_status import PaymentStatuses
+from common.enums.virus_check_status import VirusCheckStatus
 from common.models.authority import Authority, ContactInformation, LicenceDetail
 from common.models.department import Department
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
+from common.models.licence_application import ApplicationStatus, LicenceApplication, SupportingDocument
+from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
+from django.utils.timezone import now
 
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
@@ -340,6 +346,45 @@ TEST_DEPARTMENT = Department(
     postcode=TEST_AUTHORITY.contact_details.post_code,
     notification_email_address="notify@email.com",
     default_privacy_notice_url="test-privacy-notice-url",
+)
+
+TEST_LICENCE_APPLICATION = LicenceApplication(
+    applicant_email="test@email.com",
+    authority=TEST_AUTHORITY.full_name,
+    licence=TEST_LICENCE.id,
+    has_supporting_documents_online=True,
+    application_pdf=SupportingDocument(
+        definition=SupportingDocumentDefinition(), _id=ObjectId(), virus_check_status=VirusCheckStatus.CLEAN.value
+    ),
+    licence_code=TEST_LICENCE.licence_code,
+    interaction_id=InteractionIdCodes.APPLY.value,
+    interaction_sub_id=0,
+    application_date=now(),
+    application_status=ApplicationStatus(
+        is_data_available=False, is_being_processed=False, collected_by_authority=False
+    ),
+    extracted_application_data="test data",
+    application_reference_number="test application reference number",
+    authority_application_reference="test application reference",
+    expected_processing_date=now() + timedelta(days=7),
+    has_tacit_consent=True,
+    required_payment_amount=PaymentAmount(),
+    is_fee_required=False,
+    has_variable_fee=False,
+    payment_reference_id="test payment reference id",
+    application_form_metadata="test form metadata",
+    collected_by="test@authority.com",
+    under_process_by="test@authority.com",
+)
+
+TEST_PAYMENT = Payment(
+    payment_account_id="test account id",
+    payment_provider="WorldPay",
+    application_reference="test application reference",
+    payment_status=PaymentStatus(status=PaymentStatuses.COMPLETED),
+    transaction_id="test transaction id",
+    callback_url="https://example.com",
+    request_url="https://example.com",
 )
 
 
