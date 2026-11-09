@@ -2,7 +2,7 @@ import pytest
 from conftest import TEST_AUTHORITY, TEST_LICENCE, TEST_LICENCE_INTERACTION
 from django.urls import reverse
 
-from citizen_frontend.services.pdf_generation.pdf_provider import PdfGenerator
+from citizen_frontend.services.pdf_generation.pdf_generator import PdfGenerator
 
 
 @pytest.fixture
@@ -83,6 +83,7 @@ def test_pdf_generator_calls_correct_services_with_args(mock_service, mocker):
             interaction_id=TEST_LICENCE.licence_interactions[0].interaction_id,
             interaction_sub_id=TEST_LICENCE.licence_interactions[0].interaction_sub_id,
         ),
+        interaction=TEST_LICENCE_INTERACTION,
     )
 
     mock_create_file_path.assert_called_with(authority=TEST_AUTHORITY, interaction=TEST_LICENCE_INTERACTION)
