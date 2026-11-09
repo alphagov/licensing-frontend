@@ -14,7 +14,7 @@ from common.models.authority import Authority, ContactInformation, LicenceDetail
 from common.models.department import Department
 from common.models.interaction_customisation import Customisation, InteractionCustomisation
 from common.models.licence import AdministrativeArea, Licence, LicenceForm, LicenceInteraction
-from common.models.licence_application import ApplicationStatus, LicenceApplication, SupportingDocument
+from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
@@ -332,9 +332,11 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     application_pdf=SupportingDocument(
         definition=SupportingDocumentDefinition(), _id=ObjectId(), virus_check_status=VirusCheckStatus.CLEAN.value
     ),
-    licence_code=TEST_LICENCE.licence_code,
-    interaction_id=InteractionIdCodes.APPLY.value,
-    interaction_sub_id=0,
+    service=Service(
+        licence_code=TEST_LICENCE.licence_code,
+        interaction_id=InteractionIdCodes.APPLY.value,
+        interaction_sub_id=0,
+    ),
     application_date=now(),
     application_status=ApplicationStatus(
         is_data_available=False, is_being_processed=False, collected_by_authority=False

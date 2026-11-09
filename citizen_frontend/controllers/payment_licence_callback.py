@@ -43,7 +43,6 @@ def mock_payment_licence_callback_context():
         "licence": licence,
         "authority": authority,
         "step": "4",
-        "steps": "4",
         # "fee_required": True,
         # "is_paid": True,
         # "applicant_email": "test@email.com",
