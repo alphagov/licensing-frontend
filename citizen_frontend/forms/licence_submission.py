@@ -66,9 +66,9 @@ class ApplicationSubmissionForm(forms.Form):
                 )
             )
 
-        if published_customisation.default_declarations:
+        if published_customisation.declarations:
             layout_items.append(
-                self.build_declarations_fieldset({"default_declarations": published_customisation.default_declarations})
+                self.build_declarations_fieldset({"default_declarations": published_customisation.declarations})
             )
 
         layout_items.append(HTML(render_to_string("citizen_frontend/partials/submission_statement.html")))

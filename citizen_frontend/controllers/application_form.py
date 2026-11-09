@@ -60,9 +60,7 @@ def generate_application_form(
 
         else:
             form = ApplicationSubmissionForm(
-                fee=context.get("fee_amount"),
-                supporting_documents=context.get("supporting_documents"),
-                default_declarations=context.get("default_declarations"),
+                published_customisation=context.get("published_customisation"),
             )
 
         context.update({"form": form})

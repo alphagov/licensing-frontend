@@ -23,7 +23,7 @@ def mock_context(mocker):
 
 
 def test_page_has_correct_headings(get_dom_parser, test_licence_submission_success_page_url, mock_context):
-    mock_context.return_value = {"licence": TEST_LICENCE, "authority": TEST_AUTHORITY}
+    mock_context.return_value = {"licence_name": TEST_LICENCE.name, "authority": TEST_AUTHORITY}
     dom = get_dom_parser(test_licence_submission_success_page_url)
     heading_text = dom.get_by_test_id("page-heading").get_text()
 
