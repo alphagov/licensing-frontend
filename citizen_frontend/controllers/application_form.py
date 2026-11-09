@@ -35,29 +35,16 @@ def generate_application_form(
         if not published_customisation:
             return display_licence_unavailable_online(request, authority)
 
-        is_fee_required = published_customisation.is_fee_required
-
-        supporting_documents = published_customisation.supporting_document_definitions
-
         licence_name = (
             interaction.licence_interaction_name if len(interaction.display_title) < 1 else interaction.display_title
         )
-
-        steps = 4 if is_fee_required else 3
-
-        declarations = published_customisation.declarations
 
         context = {
             "authority": authority,
             "licence_name": licence_name,
             "interaction_sub_id": interaction_sub_id,
             "interaction": interaction_id,
-            "is_fee_required": is_fee_required,
-            "steps": steps,
-            "authority_slug": authority.url_slug,
-            "licence_slug": licence.url_slug,
-            "supporting_documents": supporting_documents,
-            "default_declarations": declarations,
+            "published_customisation": published_customisation,
         }
 
         context.update({"step": 2})
@@ -65,9 +52,7 @@ def generate_application_form(
         if request.method == "POST":
             form = ApplicationSubmissionForm(
                 request.POST,
-                fee=context.get("fee_amount"),
-                supporting_documents=context.get("supporting_documents"),
-                default_declarations=context.get("default_declarations"),
+                published_customisation=context.get("published_customisation"),
             )
 
             if form.is_valid():
@@ -75,9 +60,7 @@ def generate_application_form(
 
         else:
             form = ApplicationSubmissionForm(
-                fee=context.get("fee_amount"),
-                supporting_documents=context.get("supporting_documents"),
-                default_declarations=context.get("default_declarations"),
+                published_customisation=context.get("published_customisation"),
             )
 
         context.update({"form": form})

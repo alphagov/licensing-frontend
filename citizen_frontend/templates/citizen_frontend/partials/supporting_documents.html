@@ -1,7 +1,7 @@
 
 <p class="govuk-body">You'll need to provide copies of the following:</p>
 <ul class="govuk-list govuk-list--bullet" data-testid="supporting-documents">
-{% for document in supporting_documents %}
+{% for document in published_customisation.supporting_document_definitions %}
     <li data-testid="support-document-{{ forloop.counter }}">{{ document.name }} {% if not document.is_mandatory %}(optional){% endif %}</li>
 {% endfor %}
 </ul>
@@ -11,7 +11,7 @@
     </summary>
     <div class="govuk-details__text" data-testid="electronic-copies-detail-text">
         <p class="govuk-body">Photos or scans of documents are acceptable, providing the relevant information is clear.</p>
-        {% if is_postal_allowed %}
+        {% if published_customisation.is_postal_allowed %}
             <p class="govuk-body"> If you can't provide electronic versions you can still apply online, but you'll need to send in copies by post.
             We'll give you the address and reference number once you've completed the application.</p>
         {% else %}

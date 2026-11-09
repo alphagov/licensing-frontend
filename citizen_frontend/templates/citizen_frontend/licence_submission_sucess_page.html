@@ -4,27 +4,27 @@
     {% include "citizen_frontend/partials/page_heading.html" %}
     <h2 class="govuk-heading-m" data-testid="action-heading">Thank you</h2>
     <p class="govuk-body" data-testid="application-confirmation">We have received your application
-        {% if fee_required and is_paid %} and have been notified that the fee has been paid{% endif %}.
+        {% if published_customisation.is_fee_required and is_paid %} and have been notified that the fee has been paid{% endif %}.
     </p>
     <p class="govuk-body" data-testid="email-confirmation">We will send a confirmation email to:
-        <br>{{ applicant_email }}
+        <br>{{ application.applicant_email }}
     </p>
     <p class="govuk-body" data-testid="payment-reference">
-        {% if transaction_id_exists and payment_provider_exists %}
-            Your {{ payment_provider }} reference is:
-            <br>{{ transaction_id }}
+        {% if payment.transaction_id and payment.payment_provider %}
+            Your {{ payment.payment_provider }} reference is:
+            <br>{{ payment.transaction_id }}
         {% endif %}
     </p>
     <div class="govuk-inset-text" data-testid="application-reference">
-        <p class="govuk-body">Your application reference is: <strong> {{ application_reference_number }}</strong></p>
+        <p class="govuk-body">Your application reference is: <strong> {{ application.application_reference_number }}</strong></p>
         <p class="govuk-body">Keep this safe as you'll need it in any correspondence with the licencing authority or if you want to change
             or renew the licence.</p>
     </div>
 
     <h2 class="govuk-heading-s">What happens next?</h2>
     <p class="govuk-body" data-testid="what-next">
-        {{ authority_full_name }} has been notified of your application.
-        {% if application_has_supporting_documents_online %}
+        {{ application.authority }} has been notified of your application.
+        {% if application.has_supporting_documents_online %}
             Assuming the form
             {% if has_supporting_documents %}
                 {% if all_supporting_documents_required %}
@@ -37,9 +37,9 @@
                 is
             {% endif %}
             valid they'll contact you with a decision
-            {% if has_expected_processing_date %}
+            {% if application.expected_processing_date %}
                 by {{ expected_processing_date }}.
-                {% if application_has_tacit_consent %}
+                {% if application.has_tacit_consent %}
                     If you haven't had a decision by this date you can assume it's been approved as tacit consent applies.
                 {% endif %}
             {% else %}
@@ -58,5 +58,5 @@
     {% include "citizen_frontend/partials/department_contact.html" %}
 
     <h1 class="govuk-heading-s">Next steps</h1>
-    <p class="govuk-body" data-testid="next-steps"><a href="{{ licence_finder_url }}" class="govuk-link">Search for other licences</a></p>
+    <p class="govuk-body" data-testid="next-steps"><a href="{{ "https://www.gov.uk/licence-finder" }}" class="govuk-link">Search for other licences</a></p>
 {% endblock %}
