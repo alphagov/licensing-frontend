@@ -269,6 +269,27 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
 )
 
 
+TEST_CUSTOMISATION_NO_FEE = Customisation(
+    is_postal_allowed=False,
+    number_of_days_to_process=30,
+    is_processing_days_working_days=True,
+    has_tacit_consent=False,
+    created_at=timezone.now(),
+    is_fee_required=False,
+    legislation_name="test-legislation",
+    introduction_text="test-introduction",
+    declarations=["test-declaration1", "test-declaration2"],
+    department=bson.ObjectId(),
+    information_url="https://test-information.com",
+    guidance_url="https://test-guidance.com",
+    supporting_document_definitions=[
+        SupportingDocumentDefinition(name="test", is_mandatory=True),
+        SupportingDocumentDefinition(name="test2", is_mandatory=False),
+        SupportingDocumentDefinition(name="test3", is_mandatory=False),
+    ],
+)
+
+
 TEST_AUTHORITY_INTERACTION = AuthorityInteraction(
     url="http://127.0.0.1:8000/apply-for-a-licence/test-licence/test-authority/apply-1",
     uses_licensify=TEST_AUTHORITY.licence_details[0].using_gov_uk,
@@ -436,9 +457,7 @@ def mock_find_published_customisation_with_no_fee(mocker):
         "find_published_customisation",
         autospec=True,
     )
-    mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    mock_find_published_customisation_with_no_fee.return_value.is_fee_required = False
-    mock_find_published_customisation_with_no_fee.return_value.fixed_fee_amount = None
+    mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_NO_FEE)
     return mock_find_published_customisation_with_no_fee
 
 

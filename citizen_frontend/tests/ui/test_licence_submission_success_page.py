@@ -5,6 +5,7 @@ from conftest import (
     BASE_URL,
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_FIXED_FEE,
+    TEST_CUSTOMISATION_NO_FEE,
     TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_DEPARTMENT,
     TEST_LICENCE,
@@ -78,10 +79,8 @@ def test_page_application_confirmation_when_licence_fee_defined(
 def test_page_application_confirmation_when_no_licence_fee_defined(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    customisation_no_fee = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    customisation_no_fee.is_fee_required = False
     mock_context.return_value = {
-        "customisation": customisation_no_fee,
+        "customisation": TEST_CUSTOMISATION_NO_FEE,
         "is_paid": False,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
@@ -119,10 +118,8 @@ def test_page_has_payment_reference_for_provider_when_licence_has_a_paid_fee(
 def test_page_has_no_payment_reference_when_licence_has_no_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
-    customisation_no_fee = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    customisation_no_fee.is_fee_required = False
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
+        "customisation": TEST_CUSTOMISATION_NO_FEE,
         "is_paid": False,
         "payment": None,
     }
