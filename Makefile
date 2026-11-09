@@ -38,7 +38,7 @@ test-common:
 
 test-unit:
 	uv sync
-	uv run pytest citizen_frontend/tests --ignore citizen_frontend/tests/ui/ --ignore citizen_frontend/tests/api/end_to_end --ignore licensing_common
+	pytest citizen_frontend/tests --ignore citizen_frontend/tests/ui/ --ignore citizen_frontend/tests/api/end_to_end --ignore licensing_common
 
 test-api:
 	uv sync

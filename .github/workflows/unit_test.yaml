@@ -32,7 +32,7 @@ jobs:
           activate-environment: 'true'
 
       - name: Run Unit tests
-        run: pytest citizen_frontend/tests --ignore citizen_frontend/tests/api/end_to_end citizen_frontend/tests/ui/e2e -vv
+        run: make test-unit
 
       - name: Minimize uv cache
         run: uv cache prune --ci
