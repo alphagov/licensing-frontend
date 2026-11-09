@@ -23,14 +23,11 @@ jobs:
           repository: '${{ github.repository }}'
           ref: ${{ github.event.inputs.build_branch }}
 
+      - name: Setup Mise
+        uses: jdx/mise-action@v4.2.5
 
       - name: Install UV
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-
-      - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version-file: ".python-version"
 
       - name: Lint (fix)
         run: uv run ruff check --fix --output-format=github
@@ -50,14 +47,11 @@ jobs:
           repository: '${{ github.repository }}'
           ref: ${{ github.event.inputs.build_branch }}
 
+      - name: Setup Mise
+        uses: jdx/mise-action@v4.2.5
 
       - name: Install UV
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-
-      - name: Set up Python
-        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
-        with:
-          python-version-file: ".python-version"
 
       - name: Run Format
         run: uv run ruff format --check

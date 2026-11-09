@@ -23,9 +23,6 @@ jobs:
           ref: ${{ github.event.inputs.build_branch }}
           fetch-depth: 0
 
-      - name: Setup Mise
-        uses: jdx/mise-action@v4.2.5
-
       - name: Install UV
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
