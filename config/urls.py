@@ -24,7 +24,7 @@ from django.urls import include, path
 from django.views.generic import RedirectView
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path("admin/", admin.site.urls),  # TODO don't think this needs including
     path("apply-for-a-licence/", include("citizen_frontend.urls")),
     path("assets/<path:path>", RedirectView.as_view(url="/static/assets/%(path)s", permanent=False)),
     path("api/", include("citizen_frontend.api.urls")),

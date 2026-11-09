@@ -356,9 +356,6 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     application_pdf=SupportingDocument(
         definition=SupportingDocumentDefinition(), _id=ObjectId(), virus_check_status=VirusCheckStatus.CLEAN.value
     ),
-    licence_code=TEST_LICENCE.licence_code,
-    interaction_id=InteractionIdCodes.APPLY.value,
-    interaction_sub_id=0,
     application_date=now(),
     application_status=ApplicationStatus(
         is_data_available=False, is_being_processed=False, collected_by_authority=False
