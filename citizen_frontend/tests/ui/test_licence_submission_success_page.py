@@ -34,7 +34,7 @@ def test_page_has_4_steps_when_licence_has_a_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "fee_required": True,
+        "customisation": TEST_CUSTOMISATION_VARIABLE_FEE,
         "is_paid": True,
         "step": "4",
         "steps": "4",
@@ -48,8 +48,11 @@ def test_page_has_4_steps_when_licence_has_a_fee(
 def test_page_has_3_steps_when_licence_has_no_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
+    customisation_no_fee = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    customisation_no_fee.is_fee_required = False
+
     mock_context.return_value = {
-        "fee_required": False,
+        "customisation": customisation_no_fee,
         "is_paid": False,
         "step": "3",
         "steps": "3",
