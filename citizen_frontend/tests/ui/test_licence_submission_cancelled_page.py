@@ -1,5 +1,5 @@
 import pytest
-from conftest import TEST_AUTHORITY, TEST_DEPARTMENT, TEST_LICENCE
+from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_FIXED_FEE, TEST_DEPARTMENT, TEST_LICENCE
 
 
 @pytest.fixture
@@ -33,8 +33,8 @@ def test_page_has_4_steps(
 ):
     mock_payment_status.return_value = "cancelled"
     mock_context.return_value = {
+        "published_customisation": TEST_CUSTOMISATION_FIXED_FEE,
         "step": "4",
-        "steps": "4",
     }
     dom = get_dom_parser(test_licence_application_cancelled_page_url)
     steps_text = dom.get_by_test_id("steps").get_text()

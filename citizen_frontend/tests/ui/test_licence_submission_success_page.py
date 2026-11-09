@@ -5,7 +5,6 @@ from conftest import (
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_FIXED_FEE,
     TEST_CUSTOMISATION_NO_FEE,
-    TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_DEPARTMENT,
     TEST_LICENCE,
     TEST_LICENCE_APPLICATION,
@@ -35,10 +34,9 @@ def test_page_has_4_steps_when_licence_has_a_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
+        "published_customisation": TEST_CUSTOMISATION_FIXED_FEE,
         "is_paid": True,
         "step": "4",
-        "steps": "4",
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
     steps_text = dom.get_by_test_id("steps").get_text()
@@ -50,10 +48,9 @@ def test_page_has_3_steps_when_licence_has_no_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_VARIABLE_FEE,
+        "published_customisation": TEST_CUSTOMISATION_NO_FEE,
         "is_paid": False,
         "step": "3",
-        "steps": "3",
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
     steps_text = dom.get_by_test_id("steps").get_text()
@@ -65,7 +62,7 @@ def test_page_application_confirmation_when_licence_fee_defined(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
+        "published_customisation": TEST_CUSTOMISATION_FIXED_FEE,
         "is_paid": True,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
@@ -79,7 +76,7 @@ def test_page_application_confirmation_when_no_licence_fee_defined(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_NO_FEE,
+        "published_customisation": TEST_CUSTOMISATION_NO_FEE,
         "is_paid": False,
     }
     dom = get_dom_parser(test_licence_submission_success_page_url)
@@ -118,7 +115,7 @@ def test_page_has_no_payment_reference_when_licence_has_no_fee(
     get_dom_parser, test_licence_submission_success_page_url, mock_context
 ):
     mock_context.return_value = {
-        "customisation": TEST_CUSTOMISATION_NO_FEE,
+        "published_customisation": TEST_CUSTOMISATION_NO_FEE,
         "is_paid": False,
         "payment": None,
     }

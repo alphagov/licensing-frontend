@@ -69,24 +69,17 @@ def build_context(
         interaction.licence_interaction_name if len(interaction.display_title) < 1 else interaction.display_title
     )
     legislation_info_url = _get_correct_url_for_legislation(licence_details, published_customisation)
-    general_info_url = published_customisation.guidance_url
 
     context = {
         "licence": licence,
         "authority": authority,
         "licence_name": licence_name,
+        "published_customisation": published_customisation,
         "interaction": interaction,
         "interaction_id": interaction_id,
-        "is_fee_required": published_customisation.is_fee_required,
         "fee_amount": fee_amount,
-        "steps": 4 if published_customisation.is_fee_required else 3,
-        "supporting_documents": published_customisation.supporting_document_definitions,
-        "general_info_url": published_customisation.guidance_url,
         "legislation_info_url": legislation_info_url,
-        "is_postal_allowed": published_customisation.is_postal_allowed,
-        "additional_info_exists": legislation_info_url or general_info_url,
-        "before_you_apply_required": published_customisation.is_fee_required
-        or published_customisation.supporting_document_definitions,
+        "additional_info_exists": legislation_info_url or published_customisation.guidance_url,
     }
     context.update({"step": 1})
 
