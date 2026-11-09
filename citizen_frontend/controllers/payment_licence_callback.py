@@ -60,5 +60,4 @@ def mock_payment_licence_callback_context():
         # "authority_full_name": "Test Authority",
         # "processing_days": "30 working days",
         "department": department,
-        "licence_finder_url": "localhost:8000/apply-for-a-licence",
     }

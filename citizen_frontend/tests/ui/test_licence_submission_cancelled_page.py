@@ -1,5 +1,5 @@
 import pytest
-from conftest import BASE_URL, TEST_AUTHORITY, TEST_DEPARTMENT, TEST_LICENCE
+from conftest import TEST_AUTHORITY, TEST_DEPARTMENT, TEST_LICENCE
 
 
 @pytest.fixture
@@ -89,11 +89,8 @@ def test_page_has_department_contact_details(
     assert TEST_AUTHORITY.contact_details.city in department_contact
 
 
-def test_page_displays_licence_finder_url_under_next_steps(
-    get_dom_parser, test_licence_application_cancelled_page_url, mock_context, mock_payment_status
-):
-    url = f"{BASE_URL}/apply-for-a-licence"
-    mock_context.return_value = {"licence_finder_url": url}
+def test_page_displays_licence_finder_url_under_next_steps(get_dom_parser, test_licence_application_cancelled_page_url):
+    url = "https://www.gov.uk/licence-finder"
     dom = get_dom_parser(test_licence_application_cancelled_page_url)
     next_steps = dom.get_by_test_id("next-steps")
     link = next_steps.find("a")
