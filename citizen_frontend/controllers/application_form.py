@@ -43,8 +43,8 @@ def generate_application_form(
             "authority": authority,
             "licence_name": licence_name,
             "interaction_sub_id": interaction_sub_id,
-            "published_customisation": published_customisation,
             "interaction": interaction_id,
+            "published_customisation": published_customisation,
         }
 
         context.update({"step": 2})
