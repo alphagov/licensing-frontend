@@ -9,6 +9,8 @@ from common.models.department import Department
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
 from django.template.loader import render_to_string
+from requests import HTTPError
+from requests.adapters import HTTPAdapter
 
 from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
 from citizen_frontend.repository.base_repo import SettingsRepo
@@ -43,29 +45,46 @@ class APTOPdfProvider(PdfProvider):
         return_url: str,
         interaction: LicenceInteraction,
     ):
-        if not self.get_apto_pdf_status_setting():
-            # TODO check what message is currently being used in the codebase
-            raise PDFProviderUnavailableError("APTO PDF is unavailable for download")
+        try:
+            if not self.get_apto_pdf_status_setting():
+                # TODO check what message is currently being used in the codebase
+                raise PDFProviderUnavailableError("APTO PDF is unavailable for download")
 
-        xml_bytes = self.create_xml_request(
-            licence, authority, customisation, department, interaction, return_url
-        ).encode("utf-8")
+            session = requests.Session()
 
-        byte_stream = BytesIO(xml_bytes)
+            adapter = HTTPAdapter(
+                pool_connections=int(os.getenv("APTO_MAX_HTTP_CONNECTIONS", 126)),
+                pool_maxsize=int(os.getenv("APTO_MAX_CONNECTIONS_PER_ROUTE", 16)),
+                pool_block=True,
+            )
+            # TODO double check timeout and pool connections correspond correctly.
 
-        response = requests.post(
-            url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{interaction.form.form_ref_number}",
-            files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
-        )
+            session.mount("https://", adapter)
 
-        response.raise_for_status()
+            xml_bytes = self.create_xml_request(
+                licence, authority, customisation, department, interaction, return_url
+            ).encode("utf-8")
+
+            byte_stream = BytesIO(xml_bytes)
+
+            response = session.post(
+                url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{interaction.form.form_ref_number}",
+                files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
+                timeout=(int(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
+            )
+
+            response.raise_for_status()
+
+        #     TODO extract content from response as steam?
+        except HTTPError as e:
+            raise PDFGenerationGeneralError(f"Received error from APTO: {e}") from e
 
     def get_apto_pdf_status_setting(self) -> bool:
         status = self.settings_repo.get_setting(key="aptoStatus")
         return status == AptoStatuses.AVAILABLE or status == AptoStatuses.DOWNLOAD_ONLY
 
+    @staticmethod
     def create_xml_request(
-        self,
         licence: Licence,
         authority: Authority,
         customisation: Customisation,

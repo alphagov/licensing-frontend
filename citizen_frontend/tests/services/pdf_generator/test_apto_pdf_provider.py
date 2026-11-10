@@ -11,9 +11,17 @@ from conftest import (
     TEST_DEPARTMENT,
     TEST_LICENCE,
 )
+from requests import HTTPError
 
-from citizen_frontend.exceptions import PDFProviderUnavailableError
+from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
 from citizen_frontend.services.pdf_generation.pdf_provider import APTOPdfProvider, AptoStatuses
+
+
+@pytest.fixture
+def mock_session(mocker):
+    mocked_class = mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.requests.Session")
+    session = mocked_class.return_value
+    yield session
 
 
 @pytest.fixture
@@ -207,9 +215,9 @@ def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mo
         )
 
 
-def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf_provider, mocker):
+def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf_provider, mocker, mock_session):
     mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
-    mock_post = mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.requests.post")
+    mock_post = mock_session.post
 
     expected_xml_body = apto_pdf_provider.create_xml_request(
         authority=TEST_AUTHORITY,
@@ -221,7 +229,6 @@ def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf
     ).encode("utf-8")
 
     stream = BytesIO(expected_xml_body)
-
     mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.BytesIO", return_value=stream)
 
     apto_pdf_provider.request_pdf_form(
@@ -238,11 +245,43 @@ def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf
         files={
             "AttachedData": ("customisationFile.xml", stream, "text/xml"),
         },
+        timeout=(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05), os.getenv("APTO_SOCKET_TIMEOUT", 3)),
     )
 
 
-def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request():
-    pass
+def test_apto_pdf_provider_uses_correct_session(apto_pdf_provider, mocker, mock_session):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+
+    apto_pdf_provider.request_pdf_form(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        department=TEST_DEPARTMENT,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+    )
+
+    adapter = mock_session.get_adapter()
+
+    assert adapter.pool_connections == 126
+
+
+# TODO TESTING FOR THIS MAY REQUIRE PULLING THE SESSION CREATION INTO ITS OWN FACTORY
+
+
+def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(mocker, apto_pdf_provider, mock_session):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+    mock_session.post.side_effect = HTTPError
+
+    with pytest.raises(PDFGenerationGeneralError):
+        apto_pdf_provider.request_pdf_form(
+            authority=TEST_AUTHORITY,
+            licence=TEST_LICENCE,
+            department=TEST_DEPARTMENT,
+            customisation=TEST_CUSTOMISATION_FIXED_FEE,
+            interaction=TEST_LICENCE.licence_interactions[0],
+            return_url="",
+        )
 
 
 def test_apto_not_found():
