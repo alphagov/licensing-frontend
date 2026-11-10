@@ -72,10 +72,11 @@ class APTOPdfProvider(PdfProvider):
                 files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
                 timeout=(int(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
             )
+            # TODO does this need stream=true?
 
             response.raise_for_status()
 
-        #     TODO extract content from response as steam?
+            return BytesIO(response.content)
         except HTTPError as e:
             raise PDFGenerationGeneralError(f"Received error from APTO: {e}") from e
 
