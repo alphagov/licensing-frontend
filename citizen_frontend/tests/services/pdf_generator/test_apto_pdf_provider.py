@@ -188,7 +188,7 @@ def test_apto_pdf_provider_creates_apto_request_xml_with_correct_structure(apto_
     )
 
 
-def test_apto_pdf_provider_checks_apto_availability_on_pdf_generation(apto_pdf_provider, mocker):
+def test_apto_pdf_provider_checks_apto_availability_on_pdf_generation(apto_pdf_provider, mocker, mock_session):
     status_check = mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting")
     apto_pdf_provider.request_pdf_form(
         authority=TEST_AUTHORITY,
@@ -245,7 +245,7 @@ def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf
         files={
             "AttachedData": ("customisationFile.xml", stream, "text/xml"),
         },
-        timeout=(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05), os.getenv("APTO_SOCKET_TIMEOUT", 3)),
+        timeout=(float(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
     )
 
 
@@ -282,13 +282,6 @@ def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(mo
             interaction=TEST_LICENCE.licence_interactions[0],
             return_url="",
         )
-
-
-def test_apto_not_found():
-    # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
-    #  Render not found page, should happen in the controller layer but currently the form proxy does this
-    #  and the PDF generator throws this, custom errors?
-    pass
 
 
 def test_apto_not_published():

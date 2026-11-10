@@ -1,3 +1,4 @@
+import logging
 import os
 from abc import ABC, abstractmethod
 from enum import StrEnum
@@ -14,6 +15,9 @@ from requests.adapters import HTTPAdapter
 
 from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
 from citizen_frontend.repository.base_repo import SettingsRepo
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class AptoStatuses(StrEnum):
@@ -47,9 +51,9 @@ class APTOPdfProvider(PdfProvider):
     ):
         try:
             if not self.get_apto_pdf_status_setting():
-                # TODO check what message is currently being used in the codebase
-                raise PDFProviderUnavailableError("APTO PDF is unavailable for download")
+                raise PDFProviderUnavailableError("PDF Generation not available")
 
+            logger.info("Configuring request session for APTO request")
             session = requests.Session()
 
             adapter = HTTPAdapter(
@@ -70,7 +74,7 @@ class APTOPdfProvider(PdfProvider):
             response = session.post(
                 url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{interaction.form.form_ref_number}",
                 files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
-                timeout=(int(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
+                timeout=(float(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
             )
             # TODO does this need stream=true?
 
@@ -78,9 +82,11 @@ class APTOPdfProvider(PdfProvider):
 
             return BytesIO(response.content)
         except HTTPError as e:
+            logger.error(e)
             raise PDFGenerationGeneralError(f"Received error from APTO: {e}") from e
 
     def get_apto_pdf_status_setting(self) -> bool:
+        logger.info("Checking APTO status")
         status = self.settings_repo.get_setting(key="aptoStatus")
         return status == AptoStatuses.AVAILABLE or status == AptoStatuses.DOWNLOAD_ONLY
 
@@ -93,6 +99,7 @@ class APTOPdfProvider(PdfProvider):
         interaction: LicenceInteraction,
         return_url: str,
     ):
+        logger.info("Creating XML string for APTO request")
 
         modified_declarations = (
             [declaration.replace("&pound;", "\u00a3") for declaration in customisation.declarations]

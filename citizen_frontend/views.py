@@ -1,5 +1,5 @@
 from common.models.authority import Authority
-from django.http import FileResponse, HttpResponse
+from django.http import FileResponse
 from django.shortcuts import render
 
 from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
@@ -41,9 +41,19 @@ def generate_form(
         )
 
         return FileResponse(file, content_type="application/pdf", filename=file_name, as_attachment=True)
-    except PDFGenerationGeneralError as e:
-        # TODO create and render internal error page with correct message
-        return HttpResponse(f"General error: {e}", status=500)
-    except PDFProviderUnavailableError as e:
-        # TODO create and render PDF service unavailable page with correct message
-        return HttpResponse(f"General error: {e}", status=500)
+    except PDFGenerationGeneralError:
+        return render(
+            request=request,
+            template_name="citizen_frontend/error.html",
+            context={"title": "An error has occurred"},
+            status=500,
+        )
+    except PDFProviderUnavailableError:
+        return render(
+            request=request,
+            template_name="citizen_frontend/error.html",
+            context={"title": "An error has occurred", "message": "The PDF form is unavailable at the moment."},
+            status=503,
+        )
+
+    # TODO current template passes an exception ID in
