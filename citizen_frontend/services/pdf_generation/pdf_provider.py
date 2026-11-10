@@ -1,5 +1,6 @@
 import os
 from abc import ABC, abstractmethod
+from enum import StrEnum
 from io import BytesIO
 
 from common.models.authority import Authority
@@ -9,6 +10,13 @@ from common.models.licence import Licence, LicenceInteraction
 from django.template.loader import render_to_string
 
 from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
+from citizen_frontend.repository.base_repo import SettingsRepo
+
+
+class AptoStatuses(StrEnum):
+    AVAILABLE = "available"
+    DOWNLOAD_ONLY = "onlyForDownload"
+    NOT_AVAILABLE = "notAvailable"
 
 
 class PdfProvider(ABC):
@@ -22,6 +30,9 @@ class PdfProvider(ABC):
 
 
 class APTOPdfProvider(PdfProvider):
+    def __init__(self):
+        self.settings_repo = SettingsRepo()
+
     def generate_pdf(
         self,
         authority: Authority,
@@ -31,7 +42,13 @@ class APTOPdfProvider(PdfProvider):
         return_url: str,
         interaction: LicenceInteraction,
     ):
-        pass
+        if not self.get_apto_pdf_status_setting():
+            # TODO check what message is currently being used in the codebase
+            raise PDFProviderUnavailableError("APTO PDF is unavailable for download")
+
+    def get_apto_pdf_status_setting(self) -> bool:
+        status = self.settings_repo.get_setting(key="aptoStatus")
+        return status == AptoStatuses.AVAILABLE or status == AptoStatuses.DOWNLOAD_ONLY
 
     def flatten_pdf(self):
         pass

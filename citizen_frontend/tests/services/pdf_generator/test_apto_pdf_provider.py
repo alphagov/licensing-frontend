@@ -10,7 +10,8 @@ from conftest import (
     TEST_LICENCE,
 )
 
-from citizen_frontend.services.pdf_generation.pdf_provider import APTOPdfProvider
+from citizen_frontend.exceptions import PDFProviderUnavailableError
+from citizen_frontend.services.pdf_generation.pdf_provider import APTOPdfProvider, AptoStatuses
 
 
 @pytest.fixture
@@ -173,8 +174,31 @@ def test_apto_pdf_provider_creates_apto_request_xml_with_correct_structure(apto_
     )
 
 
-def test_apto_pdf_provider_checks_apto_availability():
-    pass
+def test_apto_pdf_provider_checks_apto_availability_on_pdf_generation(apto_pdf_provider, mocker):
+    status_check = mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting")
+    apto_pdf_provider.generate_pdf(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        department=TEST_DEPARTMENT,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+    )
+    status_check.assert_called()
+
+
+def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mocker):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=False)
+
+    with pytest.raises(PDFProviderUnavailableError):
+        apto_pdf_provider.generate_pdf(
+            authority=TEST_AUTHORITY,
+            licence=TEST_LICENCE,
+            department=TEST_DEPARTMENT,
+            customisation=TEST_CUSTOMISATION_FIXED_FEE,
+            interaction=TEST_LICENCE.licence_interactions[0],
+            return_url="",
+        )
 
 
 def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body():
@@ -187,17 +211,29 @@ def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request():
 
 def test_apto_not_found():
     # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
-    #  Render not found page, should happen in the controller layer but currently to the form proxy does this
-    #  and the pdf generator throws this, custom errors?
+    #  Render not found page, should happen in the controller layer but currently the form proxy does this
+    #  and the PDF generator throws this, custom errors?
     pass
 
 
 def test_apto_not_published():
     # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
-    # Render contact page, should happen in the view controller layer,
-    # PDF generator throws thsi too
+    #   Render contact page, should happen in the view controller layer,
+    #   PDF generator throws this too
     pass
 
 
-def test_apto_not_available():
-    pass
+def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_pdf_provider, mocker):
+    settings_repo = mocker.patch.object(apto_pdf_provider, "settings_repo")
+
+    apto_pdf_provider.get_apto_pdf_status_setting()
+
+    settings_repo.get_setting.assert_called_with(key="aptoStatus")
+
+
+def test_get_apto_pdf_status_setting_returns_false_apto_unavailable(apto_pdf_provider, mocker):
+    mocker.patch.object(apto_pdf_provider, "settings_repo", return_value=AptoStatuses.NOT_AVAILABLE)
+
+    actual = apto_pdf_provider.get_apto_pdf_status_setting()
+
+    assert not actual
