@@ -41,7 +41,7 @@ class PdfGenerator:
 
         file_path = self.create_download_file_path(authority=authority, interaction=interaction)
 
-        application_pdf_form = self.pdf_provider.generate_pdf(
+        application_pdf_form = self.pdf_provider.request_pdf_form(
             authority=authority,
             licence=licence,
             department=department,

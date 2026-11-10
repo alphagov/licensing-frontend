@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from enum import StrEnum
 from io import BytesIO
 
+import requests
 from common.models.authority import Authority
 from common.models.department import Department
 from common.models.interaction_customisation import Customisation
@@ -21,7 +22,7 @@ class AptoStatuses(StrEnum):
 
 class PdfProvider(ABC):
     @abstractmethod
-    def generate_pdf(self, *args, **kwargs):
+    def request_pdf_form(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -33,7 +34,7 @@ class APTOPdfProvider(PdfProvider):
     def __init__(self):
         self.settings_repo = SettingsRepo()
 
-    def generate_pdf(
+    def request_pdf_form(
         self,
         authority: Authority,
         licence: Licence,
@@ -46,12 +47,22 @@ class APTOPdfProvider(PdfProvider):
             # TODO check what message is currently being used in the codebase
             raise PDFProviderUnavailableError("APTO PDF is unavailable for download")
 
+        xml_bytes = self.create_xml_request(
+            licence, authority, customisation, department, interaction, return_url
+        ).encode("utf-8")
+
+        byte_stream = BytesIO(xml_bytes)
+
+        response = requests.post(
+            url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{interaction.form.form_ref_number}",
+            files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
+        )
+
+        response.raise_for_status()
+
     def get_apto_pdf_status_setting(self) -> bool:
         status = self.settings_repo.get_setting(key="aptoStatus")
         return status == AptoStatuses.AVAILABLE or status == AptoStatuses.DOWNLOAD_ONLY
-
-    def flatten_pdf(self):
-        pass
 
     def create_xml_request(
         self,
@@ -93,9 +104,12 @@ class APTOPdfProvider(PdfProvider):
         }
         return render_to_string("citizen_frontend/pdf_generation/apto_template.xml", context)
 
+    def flatten_pdf(self):
+        pass
+
 
 class MockAPTOPdfProvider(PdfProvider):
-    def generate_pdf(
+    def request_pdf_form(
         self,
         authority: Authority,
         licence: Licence,

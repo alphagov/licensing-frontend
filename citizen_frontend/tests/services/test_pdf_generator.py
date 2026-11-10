@@ -30,7 +30,7 @@ def test_pdf_generator_calls_correct_services_with_args(mock_service, mocker):
     )
 
     pdf_response = ""
-    mock_service.pdf_provider.generate_pdf.return_value = pdf_response
+    mock_service.pdf_provider.request_pdf_form.return_value = pdf_response
 
     expected = (
         pdf_response,
@@ -70,7 +70,7 @@ def test_pdf_generator_calls_correct_services_with_args(mock_service, mocker):
         )
     )
 
-    mock_service.pdf_provider.generate_pdf.assert_called_with(
+    mock_service.pdf_provider.request_pdf_form.assert_called_with(
         authority=mock_service.licence_lookup_service.get_licence_interaction_context.return_value[1],
         licence=mock_service.licence_lookup_service.get_licence_interaction_context.return_value[0],
         department=mock_service.department_repository.get_by_id.return_value,

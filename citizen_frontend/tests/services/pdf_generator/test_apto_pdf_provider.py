@@ -1,5 +1,7 @@
+import os
 import xml.etree.ElementTree as ET
 from copy import deepcopy
+from io import BytesIO
 
 import pytest
 from conftest import (
@@ -24,6 +26,10 @@ namespaces = {
     "common": "http://www.aptosolutions.co.uk/businesslink/psc/common/2.3",
     "xsi": "http://www.w3.org/2001/XMLSchema-instance",
 }
+
+
+def test_request_pdf_happy_path(apto_pdf_provider):
+    pass
 
 
 def test_xml_request_should_contain_calculation_instructions_and_no_payment_element_for_a_licence_with_variable_fee(
@@ -176,7 +182,7 @@ def test_apto_pdf_provider_creates_apto_request_xml_with_correct_structure(apto_
 
 def test_apto_pdf_provider_checks_apto_availability_on_pdf_generation(apto_pdf_provider, mocker):
     status_check = mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting")
-    apto_pdf_provider.generate_pdf(
+    apto_pdf_provider.request_pdf_form(
         authority=TEST_AUTHORITY,
         licence=TEST_LICENCE,
         department=TEST_DEPARTMENT,
@@ -191,7 +197,7 @@ def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mo
     mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=False)
 
     with pytest.raises(PDFProviderUnavailableError):
-        apto_pdf_provider.generate_pdf(
+        apto_pdf_provider.request_pdf_form(
             authority=TEST_AUTHORITY,
             licence=TEST_LICENCE,
             department=TEST_DEPARTMENT,
@@ -201,8 +207,38 @@ def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mo
         )
 
 
-def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body():
-    pass
+def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf_provider, mocker):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+    mock_post = mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.requests.post")
+
+    expected_xml_body = apto_pdf_provider.create_xml_request(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+        department=TEST_DEPARTMENT,
+    ).encode("utf-8")
+
+    stream = BytesIO(expected_xml_body)
+
+    mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.BytesIO", return_value=stream)
+
+    apto_pdf_provider.request_pdf_form(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        department=TEST_DEPARTMENT,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+    )
+
+    mock_post.assert_called_with(
+        url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{TEST_LICENCE.licence_interactions[0].form.form_ref_number}",
+        files={
+            "AttachedData": ("customisationFile.xml", stream, "text/xml"),
+        },
+    )
 
 
 def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request():
