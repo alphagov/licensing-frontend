@@ -6,10 +6,10 @@
     <h2 class="govuk-heading-m" data-testid="action-heading">Pay the licence fee</h2>
     <div class="govuk-inset-text">
         <p class="govuk-body" data-testid="fee-info">A fee of <strong>£{{ payment.amount.format_to_string_in_pounds }}</strong> applies for this licence.
-            When you click the button below, you will be forwarded to payment provider, {{ payment.payment_provider.capitalise }}, in order to pay the fees due.</p>
+            When you click the button below, you will be forwarded to payment provider, {{ payment.payment_provider }}, in order to pay the fees due.</p>
     </div>
 
-    <a class="govuk-button" id="pay-btn" data-module="govuk-button" href="{{ payment.request_url }}">
-      Continue to {{ payment.payment_provider.capitalise }} website
+    <a class="govuk-button" id="pay-btn" data-module="govuk-button" href="{{ payment.request_url }}" data-testid="pay-button">
+      Continue to {{ payment.payment_provider }} website
     </a>
 {% endblock %}
