@@ -28,7 +28,7 @@ def generate_form_url():
 
 @pytest.fixture
 def mock_pdf_generator(mocker):
-    mocked_class = mocker.patch("citizen_frontend.views.PdfGenerator")
+    mocked_class = mocker.patch("citizen_frontend.controllers.pdf_form.PdfGenerator")
     service = mocked_class.return_value
     yield service
 

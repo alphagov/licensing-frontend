@@ -4,6 +4,7 @@ from copy import deepcopy
 from io import BytesIO
 
 import pytest
+import requests
 from conftest import (
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_FIXED_FEE,
@@ -25,8 +26,10 @@ def mock_session(mocker):
 
 
 @pytest.fixture
-def apto_pdf_provider():
-    yield APTOPdfProvider()
+def apto_pdf_provider(mocker):
+    pdf_provider = APTOPdfProvider()
+
+    yield pdf_provider
 
 
 namespaces = {
@@ -36,8 +39,114 @@ namespaces = {
 }
 
 
-def test_request_pdf_happy_path(apto_pdf_provider):
+def test_apto_pdf_provider_happy_path(apto_pdf_provider, mocker, mock_session):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+
+    session = requests.Session()
+    mocker.patch.object(apto_pdf_provider, "configure_apto_session", return_value=session)
+    mock_post = mock_session.post
+
+    with open("citizen_frontend/services/resources/test_forms/temporary-event-notice.pdf", "rb") as f:
+        buffer = BytesIO(f.read())
+        buffer.seek(0)
+
+    mock_post.return_value.status_code = 200
+    mock_post.return_value.content = buffer
+
+    expected_xml_request_body = apto_pdf_provider.create_xml_request(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+        department=TEST_DEPARTMENT,
+    ).encode("utf-8")
+
+    xml_stream = BytesIO(expected_xml_request_body)
+    mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.BytesIO", return_value=xml_stream)
+
+    actual = apto_pdf_provider.request_pdf_form(
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        department=TEST_DEPARTMENT,
+        customisation=TEST_CUSTOMISATION_FIXED_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        return_url="",
+    )
+
+    apto_pdf_provider.get_apto_pdf_status_setting.assert_called()
+    apto_pdf_provider.configure_apto_session.assert_called()
+    mock_post.assert_called_with(
+        url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{TEST_LICENCE.licence_interactions[0].form.form_ref_number}",
+        files={
+            "AttachedData": ("customisationFile.xml", xml_stream, "text/xml"),
+        },
+        timeout=(float(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
+    )
+
+    assert actual == buffer
+
+
+def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mocker):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=False)
+
+    with pytest.raises(PDFProviderUnavailableError):
+        apto_pdf_provider.request_pdf_form(
+            authority=TEST_AUTHORITY,
+            licence=TEST_LICENCE,
+            department=TEST_DEPARTMENT,
+            customisation=TEST_CUSTOMISATION_FIXED_FEE,
+            interaction=TEST_LICENCE.licence_interactions[0],
+            return_url="",
+        )
+
+
+def test_apto_pdf_provider_uses_correct_session(apto_pdf_provider):
+
+    session = apto_pdf_provider.configure_apto_session()
+    adapter = session.get_adapter("https://example.com")
+
+    assert adapter._pool_connections == 1
+    assert adapter._pool_maxsize == 16
+    assert adapter._pool_block
+
+
+def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(apto_pdf_provider, mock_session, mocker):
+    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+    mock_session.post.side_effect = HTTPError
+
+    with pytest.raises(PDFGenerationGeneralError):
+        apto_pdf_provider.request_pdf_form(
+            authority=TEST_AUTHORITY,
+            licence=TEST_LICENCE,
+            department=TEST_DEPARTMENT,
+            customisation=TEST_CUSTOMISATION_FIXED_FEE,
+            interaction=TEST_LICENCE.licence_interactions[0],
+            return_url="",
+        )
+
+
+def test_apto_not_published():
+    # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
+    #   Render contact page, should happen in the view controller layer,
+    #   PDF generator throws this too
     pass
+
+
+def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_pdf_provider, mocker):
+    settings_repo = mocker.patch.object(apto_pdf_provider, "settings_repo")
+
+    apto_pdf_provider.get_apto_pdf_status_setting()
+
+    settings_repo.get_setting.assert_called_with(key="aptoStatus")
+
+
+def test_get_apto_pdf_status_setting_returns_false_apto_unavailable(apto_pdf_provider, mocker):
+    mocker.patch.object(apto_pdf_provider, "settings_repo", return_value=AptoStatuses.NOT_AVAILABLE)
+
+    actual = apto_pdf_provider.get_apto_pdf_status_setting()
+
+    assert not actual
 
 
 def test_xml_request_should_contain_calculation_instructions_and_no_payment_element_for_a_licence_with_variable_fee(
@@ -186,122 +295,3 @@ def test_apto_pdf_provider_creates_apto_request_xml_with_correct_structure(apto_
     assert len(root.findall("ns:CommonSections/ns:Declarations/ns:Declaration", namespaces)) == len(
         TEST_CUSTOMISATION_FIXED_FEE.declarations
     )
-
-
-def test_apto_pdf_provider_checks_apto_availability_on_pdf_generation(apto_pdf_provider, mocker, mock_session):
-    status_check = mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting")
-    apto_pdf_provider.request_pdf_form(
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        department=TEST_DEPARTMENT,
-        customisation=TEST_CUSTOMISATION_FIXED_FEE,
-        interaction=TEST_LICENCE.licence_interactions[0],
-        return_url="",
-    )
-    status_check.assert_called()
-
-
-def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mocker):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=False)
-
-    with pytest.raises(PDFProviderUnavailableError):
-        apto_pdf_provider.request_pdf_form(
-            authority=TEST_AUTHORITY,
-            licence=TEST_LICENCE,
-            department=TEST_DEPARTMENT,
-            customisation=TEST_CUSTOMISATION_FIXED_FEE,
-            interaction=TEST_LICENCE.licence_interactions[0],
-            return_url="",
-        )
-
-
-def test_apto_pdf_provider_sends_post_request_to_apto_with_correct_body(apto_pdf_provider, mocker, mock_session):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
-    mock_post = mock_session.post
-
-    expected_xml_body = apto_pdf_provider.create_xml_request(
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        customisation=TEST_CUSTOMISATION_FIXED_FEE,
-        interaction=TEST_LICENCE.licence_interactions[0],
-        return_url="",
-        department=TEST_DEPARTMENT,
-    ).encode("utf-8")
-
-    stream = BytesIO(expected_xml_body)
-    mocker.patch("citizen_frontend.services.pdf_generation.pdf_provider.BytesIO", return_value=stream)
-
-    apto_pdf_provider.request_pdf_form(
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        department=TEST_DEPARTMENT,
-        customisation=TEST_CUSTOMISATION_FIXED_FEE,
-        interaction=TEST_LICENCE.licence_interactions[0],
-        return_url="",
-    )
-
-    mock_post.assert_called_with(
-        url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{TEST_LICENCE.licence_interactions[0].form.form_ref_number}",
-        files={
-            "AttachedData": ("customisationFile.xml", stream, "text/xml"),
-        },
-        timeout=(float(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
-    )
-
-
-def test_apto_pdf_provider_uses_correct_session(apto_pdf_provider, mocker, mock_session):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
-
-    apto_pdf_provider.request_pdf_form(
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        department=TEST_DEPARTMENT,
-        customisation=TEST_CUSTOMISATION_FIXED_FEE,
-        interaction=TEST_LICENCE.licence_interactions[0],
-        return_url="",
-    )
-
-    adapter = mock_session.get_adapter()
-
-    assert adapter.pool_connections == 126
-
-
-# TODO TESTING FOR THIS MAY REQUIRE PULLING THE SESSION CREATION INTO ITS OWN FACTORY
-
-
-def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(mocker, apto_pdf_provider, mock_session):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
-    mock_session.post.side_effect = HTTPError
-
-    with pytest.raises(PDFGenerationGeneralError):
-        apto_pdf_provider.request_pdf_form(
-            authority=TEST_AUTHORITY,
-            licence=TEST_LICENCE,
-            department=TEST_DEPARTMENT,
-            customisation=TEST_CUSTOMISATION_FIXED_FEE,
-            interaction=TEST_LICENCE.licence_interactions[0],
-            return_url="",
-        )
-
-
-def test_apto_not_published():
-    # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
-    #   Render contact page, should happen in the view controller layer,
-    #   PDF generator throws this too
-    pass
-
-
-def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_pdf_provider, mocker):
-    settings_repo = mocker.patch.object(apto_pdf_provider, "settings_repo")
-
-    apto_pdf_provider.get_apto_pdf_status_setting()
-
-    settings_repo.get_setting.assert_called_with(key="aptoStatus")
-
-
-def test_get_apto_pdf_status_setting_returns_false_apto_unavailable(apto_pdf_provider, mocker):
-    mocker.patch.object(apto_pdf_provider, "settings_repo", return_value=AptoStatuses.NOT_AVAILABLE)
-
-    actual = apto_pdf_provider.get_apto_pdf_status_setting()
-
-    assert not actual

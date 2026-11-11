@@ -1,3 +1,6 @@
+import uuid
+
+
 class DataIntegrityError(Exception):
     pass
 
@@ -11,8 +14,12 @@ class LicenceLookupError(Exception):
 
 
 class PDFGenerationGeneralError(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(message)
+        self.id = uuid.uuid4()
 
 
 class PDFProviderUnavailableError(Exception):
-    pass
+    def __init__(self, message):
+        super().__init__(message)
+        self.id = uuid.uuid4()

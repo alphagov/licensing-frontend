@@ -53,37 +53,44 @@ class APTOPdfProvider(PdfProvider):
             if not self.get_apto_pdf_status_setting():
                 raise PDFProviderUnavailableError("PDF Generation not available")
 
-            logger.info("Configuring request session for APTO request")
-            session = requests.Session()
-
-            adapter = HTTPAdapter(
-                pool_connections=int(os.getenv("APTO_MAX_HTTP_CONNECTIONS", 126)),
-                pool_maxsize=int(os.getenv("APTO_MAX_CONNECTIONS_PER_ROUTE", 16)),
-                pool_block=True,
-            )
-            # TODO double check timeout and pool connections correspond correctly.
-
-            session.mount("https://", adapter)
-
             xml_bytes = self.create_xml_request(
                 licence, authority, customisation, department, interaction, return_url
             ).encode("utf-8")
 
             byte_stream = BytesIO(xml_bytes)
 
+            session = self.configure_apto_session()
+
             response = session.post(
                 url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{interaction.form.form_ref_number}",
                 files={"AttachedData": ("customisationFile.xml", byte_stream, "text/xml")},
                 timeout=(float(os.getenv("APTO_CONNECTION_TIMEOUT", 3.05)), int(os.getenv("APTO_SOCKET_TIMEOUT", 3))),
             )
-            # TODO does this need stream=true?
 
             response.raise_for_status()
 
-            return BytesIO(response.content)
+            return response.content
         except HTTPError as e:
             logger.error(e)
             raise PDFGenerationGeneralError(f"Received error from APTO: {e}") from e
+
+    @staticmethod
+    def configure_apto_session():
+        logger.info("Configuring request session for APTO request")
+        session = requests.Session()
+
+        adapter = HTTPAdapter(
+            pool_connections=1,
+            pool_maxsize=int(os.getenv("APTO_MAX_CONNECTIONS_PER_ROUTE", 16)),
+            pool_block=True,
+        )
+        #   pool_block=True limits concurrency, but it waits forever.
+        #   Scala would give up after 2 seconds. If that matters,
+        #   wrap the call in a threading.BoundedSemaphore(16) and use acquire(timeout=2.0).
+        #   Return Error if it times out.
+
+        session.mount("https://", adapter)
+        return session
 
     def get_apto_pdf_status_setting(self) -> bool:
         logger.info("Checking APTO status")

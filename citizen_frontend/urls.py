@@ -4,7 +4,7 @@ from citizen_frontend.controllers.application_form import generate_application_f
 from citizen_frontend.controllers.begin_application import begin_application_steps
 from citizen_frontend.controllers.payment_licence_callback import payment_licence_callback
 
-from . import views
+from .controllers import pdf_form
 
 urlpatterns = [
     path(
@@ -19,7 +19,7 @@ urlpatterns = [
     ),
     path(
         "forms/<str:authority_slug>/<str:licence_slug>/<str:licence_code>,<int:interaction_id>-<int:interaction_sub_id>",
-        views.generate_form,
+        pdf_form.generate_pdf_form,
         name="generate_form",
     ),
     path(

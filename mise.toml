@@ -25,4 +25,4 @@ APTO_MAX_CONNECTIONS_PER_ROUTE = "16"
 # Pytho sessions and adapters use timeouts in seconds not miliseconds
 APTO_CONNECTION_TIMEOUT = "3.05"
 APTO_SOCKET_TIMEOUT = "3"
-APTO_CONNECT_REQUEST_TIMEOUT = "2000"
+#APTO_CONNECT_REQUEST_TIMEOUT = "2"
