@@ -47,6 +47,7 @@ def generate_pdf_form(
             authority=authority,
             licence=licence,
             interaction=interaction,
+            customisation=published_customisation,
         )
 
         return FileResponse(file, content_type="application/pdf", filename=file_name, as_attachment=True)
@@ -72,7 +73,7 @@ def generate_pdf_form(
     except LicenceLookupError as e:
         logger.error(e.args)
         logger.error(
-            "No form found for %s, $s, $s, %s, %s",
+            "No form found for %s, %s, %s, %s, %s",
             authority_slug,
             licence_slug,
             licence_code,
