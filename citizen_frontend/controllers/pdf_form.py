@@ -56,7 +56,7 @@ def generate_pdf_form(
         return render(
             request=request,
             template_name="citizen_frontend/error.html",
-            context={"title": "An error has occurred"},
+            context={"title": "An error has occurred", "error_id": e.id},
             status=500,
         )
     except PDFProviderUnavailableError as e:
@@ -64,7 +64,11 @@ def generate_pdf_form(
         return render(
             request=request,
             template_name="citizen_frontend/error.html",
-            context={"title": "An error has occurred", "message": "The PDF form is unavailable at the moment."},
+            context={
+                "title": "An error has occurred",
+                "message": "The PDF form is unavailable at the moment.",
+                "error_id": e.id,
+            },
             status=503,
         )
     except FormNotFoundException as e:
