@@ -8,7 +8,7 @@ from pytest_django.asserts import assertTemplateUsed
 
 from citizen_frontend.exceptions import (
     FormNotFoundException,
-    FormNotPublishedException,
+    LicenceLookupError,
     PDFGenerationGeneralError,
     PDFProviderUnavailableError,
 )
@@ -38,7 +38,13 @@ def mock_pdf_generator(mocker):
     yield service
 
 
-def test_generate_form_returns_file_response(client, generate_form_url, mock_pdf_generator):
+def test_generate_form_returns_file_response(
+    client,
+    generate_form_url,
+    mock_pdf_generator,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+):
     with open("citizen_frontend/services/resources/test_forms/fish_dealers_licence.pdf", "rb") as file:
         buffer = BytesIO(file.read())
         buffer.seek(0)
@@ -51,7 +57,13 @@ def test_generate_form_returns_file_response(client, generate_form_url, mock_pdf
     assert response.status_code == 200
 
 
-def test_generate_form_returns_500_response_general_pdf_generation_error(client, generate_form_url, mock_pdf_generator):
+def test_generate_form_returns_500_response_general_pdf_generation_error(
+    client,
+    generate_form_url,
+    mock_pdf_generator,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+):
     mock_pdf_generator.handle_request.side_effect = PDFGenerationGeneralError("Error generating PDF")
 
     response = client.get(generate_form_url())
@@ -60,7 +72,13 @@ def test_generate_form_returns_500_response_general_pdf_generation_error(client,
     assertTemplateUsed(response, "citizen_frontend/error.html")
 
 
-def test_generate_form_returns_503_response_pdf_unavailable_error(client, generate_form_url, mock_pdf_generator):
+def test_generate_form_returns_503_response_pdf_unavailable_error(
+    client,
+    generate_form_url,
+    mock_pdf_generator,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+):
     mock_pdf_generator.handle_request.side_effect = PDFProviderUnavailableError("Error generating PDF, unavailable")
 
     response = client.get(generate_form_url())
@@ -69,7 +87,13 @@ def test_generate_form_returns_503_response_pdf_unavailable_error(client, genera
     assertTemplateUsed(response, "citizen_frontend/error.html")
 
 
-def test_generate_form_renders_contact_details_form_not_published(client, generate_form_url, mock_pdf_generator):
+def test_generate_form_renders_contact_details_form_not_published(
+    client,
+    generate_form_url,
+    mock_pdf_generator,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
+):
     mock_pdf_generator.handle_request.side_effect = FormNotFoundException("Form not found")
 
     response = client.get(generate_form_url())
@@ -78,8 +102,9 @@ def test_generate_form_renders_contact_details_form_not_published(client, genera
     assertTemplateUsed(response, "404.html")
 
 
-def test_generate_form_render_not_found_when_form_not_found_exception(client, generate_form_url, mock_pdf_generator):
-    mock_pdf_generator.handle_request.side_effect = FormNotPublishedException("Form not published")
+def test_generate_form_render_not_found_when_form_not_found_exception(client, generate_form_url, mocker):
+    mock_lookup = mocker.patch("citizen_frontend.controllers.pdf_form.licence_lookup_service")
+    mock_lookup.get_licence_interaction_context.side_effect = LicenceLookupError("No licence found")
 
     response = client.get(generate_form_url())
 

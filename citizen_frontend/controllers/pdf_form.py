@@ -3,9 +3,11 @@ import logging
 from django.http import FileResponse, Http404
 from django.shortcuts import render
 
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.exceptions import (
     FormNotFoundException,
     FormNotPublishedException,
+    LicenceLookupError,
     PDFGenerationGeneralError,
     PDFProviderUnavailableError,
 )
@@ -19,14 +21,32 @@ def generate_pdf_form(
     request, authority_slug: str, licence_slug: str, licence_code: str, interaction_id: int, interaction_sub_id: int
 ):
     try:
+        licence, authority, interaction, _ = licence_lookup_service.get_licence_interaction_context(
+            authority_url_slug=authority_slug,
+            licence_url_slug=licence_slug,
+            interaction=interaction_id,
+            interaction_sub_id=interaction_sub_id,
+        )
+
+        published_customisation = (
+            licence_lookup_service.interaction_customisation_repository.find_published_customisation(
+                authority_url_slug=authority_slug,
+                licence_code=licence_code,
+                interaction_id=interaction_id,
+                interaction_sub_id=interaction_sub_id,
+            )
+        )
+        if not published_customisation:
+            #  instead of raise exception, do the render here
+            # TODO creat page to render authority contact details
+            raise FormNotPublishedException(f"No form published for {authority.name}")
+
         pdf_generator = PdfGenerator()
 
         file, file_name = pdf_generator.handle_request(
-            authority_slug=authority_slug,
-            licence_slug=licence_slug,
-            licence_code=licence_code,
-            interaction_id=interaction_id,
-            interaction_sub_id=interaction_sub_id,
+            authority=authority,
+            licence=licence,
+            interaction=interaction,
         )
 
         return FileResponse(file, content_type="application/pdf", filename=file_name, as_attachment=True)
@@ -49,8 +69,14 @@ def generate_pdf_form(
     except FormNotFoundException as e:
         logger.error(e.args)
         raise Http404 from e
-    except FormNotPublishedException:
-        # The current app handled this by having lookup happen in this controller layer
-        # then in case of this error using the authority details to render authority contact details.
-        # Do we replicate or change, replication means refactor, change means redirect and another db call.
-        pass
+    except LicenceLookupError as e:
+        logger.error(e.args)
+        logger.error(
+            "No form found for %s, $s, $s, %s, %s",
+            authority_slug,
+            licence_slug,
+            licence_code,
+            interaction_id,
+            interaction_sub_id,
+        )
+        raise Http404 from e
