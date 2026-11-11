@@ -6,7 +6,12 @@ from django.http import FileResponse
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
-from citizen_frontend.exceptions import PDFGenerationGeneralError, PDFProviderUnavailableError
+from citizen_frontend.exceptions import (
+    FormNotFoundException,
+    FormNotPublishedException,
+    PDFGenerationGeneralError,
+    PDFProviderUnavailableError,
+)
 
 
 @pytest.fixture
@@ -62,3 +67,21 @@ def test_generate_form_returns_503_response_pdf_unavailable_error(client, genera
 
     assert response.status_code == 503
     assertTemplateUsed(response, "citizen_frontend/error.html")
+
+
+def test_generate_form_renders_contact_details_form_not_published(client, generate_form_url, mock_pdf_generator):
+    mock_pdf_generator.handle_request.side_effect = FormNotFoundException("Form not found")
+
+    response = client.get(generate_form_url())
+
+    assert response.status_code == 404
+    assertTemplateUsed(response, "404.html")
+
+
+def test_generate_form_render_not_found_when_form_not_found_exception(client, generate_form_url, mock_pdf_generator):
+    mock_pdf_generator.handle_request.side_effect = FormNotPublishedException("Form not published")
+
+    response = client.get(generate_form_url())
+
+    assert response.status_code == 404
+    assertTemplateUsed(response, "404.html")

@@ -340,7 +340,7 @@ def test_get_licence_interaction_context_returns_error_when_no_authority_found(
     mock_licence_repository, mock_authority_repository
 ):
     mock_authority_repository.find_authority_by_url_slug.return_value = None
-    with pytest.raises(ObjectDoesNotExist) as e:
+    with pytest.raises(LicenceLookupError) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Authority not found"
@@ -350,7 +350,7 @@ def test_get_licence_interaction_context_returns_error_when_no_licence_details_f
     mock_licence_repository, mock_authority_repository, mocker, mock_find_licence_detail
 ):
     mock_find_licence_detail.return_value = None
-    with pytest.raises(ObjectDoesNotExist) as e:
+    with pytest.raises(LicenceLookupError) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Licence detail not found"
@@ -360,7 +360,7 @@ def test_get_licence_interaction_context_returns_error_when_no_interaction_found
     mock_licence_repository, mock_authority_repository, mock_find_licence_detail, mock_licence_service
 ):
     mock_licence_service.find_interaction.return_value = None
-    with pytest.raises(ObjectDoesNotExist) as e:
+    with pytest.raises(LicenceLookupError) as e:
         licence_lookup_service.get_licence_interaction_context("authority", "url_slug", InteractionIdCodes.RENEW, 5)
 
     assert e.value.args[0] == "Interaction not found"

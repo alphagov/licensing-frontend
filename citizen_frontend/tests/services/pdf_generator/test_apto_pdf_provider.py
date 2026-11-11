@@ -126,13 +126,6 @@ def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(ap
         )
 
 
-def test_apto_not_published():
-    # TODO frontend/app/uk/gov/gds/licensing/frontend/controllers/FormProxyController.scala
-    #   Render contact page, should happen in the view controller layer,
-    #   PDF generator throws this too
-    pass
-
-
 def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_pdf_provider, mocker):
     settings_repo = mocker.patch.object(apto_pdf_provider, "settings_repo")
 
