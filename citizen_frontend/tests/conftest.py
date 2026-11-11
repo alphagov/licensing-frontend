@@ -380,6 +380,7 @@ TEST_PAYMENT = Payment(
     payment_account_id="test account id",
     payment_provider="WorldPay",
     application_reference="test application reference",
+    amount=PaymentAmount(pence=500),
     payment_status=PaymentStatus(status=PaymentStatuses.COMPLETED),
     transaction_id="test transaction id",
     callback_url="https://example.com",

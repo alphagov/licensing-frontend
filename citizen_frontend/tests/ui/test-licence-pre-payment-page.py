@@ -1,5 +1,5 @@
 import pytest
-from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_FIXED_FEE, TEST_LICENCE
+from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_FIXED_FEE, TEST_LICENCE, TEST_PAYMENT
 
 
 @pytest.fixture
@@ -29,7 +29,11 @@ def test_page_is_step_3_of_4(get_dom_parser, test_licence_application_prepayment
 
 
 def test_page_has_correct_fee_amount(get_dom_parser, test_licence_application_prepayment_page_url, mock_context):
-    pass
+    mock_context.return_value = {"payment": TEST_PAYMENT}
+    dom = get_dom_parser(test_licence_application_prepayment_page_url)
+    fee_text = dom.get_by_test_id("fee-info").get_text()
+
+    assert "£5.00" in fee_text
 
 
 def test_page_references_correct_payment_provider(
