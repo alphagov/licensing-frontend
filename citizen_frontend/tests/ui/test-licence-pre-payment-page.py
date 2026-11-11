@@ -37,7 +37,7 @@ def test_page_has_correct_fee_amount(get_dom_parser, test_licence_application_pr
 
 
 def test_page_references_correct_payment_provider(
-        get_dom_parser, test_licence_application_prepayment_page_url, mock_context
+    get_dom_parser, test_licence_application_prepayment_page_url, mock_context
 ):
     mock_context.return_value = {"payment": TEST_PAYMENT}
     dom = get_dom_parser(test_licence_application_prepayment_page_url)
@@ -47,7 +47,7 @@ def test_page_references_correct_payment_provider(
 
 
 def test_page_has_button_to_continue_to_provider(
-        get_dom_parser, test_licence_application_prepayment_page_url, mock_context
+    get_dom_parser, test_licence_application_prepayment_page_url, mock_context
 ):
     mock_context.return_value = {"payment": TEST_PAYMENT}
     dom = get_dom_parser(test_licence_application_prepayment_page_url)

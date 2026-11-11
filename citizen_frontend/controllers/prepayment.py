@@ -1,6 +1,6 @@
 from common.models.authority import Authority
-from common.models.payment import Payment
 from common.models.interaction_customisation import Customisation
+from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.shortcuts import render
 
@@ -17,7 +17,8 @@ def mock_prepayment_context():
 
     return {
         "licence_name": "Test Licence",
-        "authority": authority, "payment": payment,
+        "authority": authority,
+        "payment": payment,
         "published_customisation": published_customisation,
-        "step": "3"
+        "step": "3",
     }
