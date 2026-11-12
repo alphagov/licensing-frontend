@@ -113,7 +113,7 @@ def test_find_published_customisation_throws_error_clean_fields_failure(mock_int
             TEST_AUTH_SLUG, TEST_LICENCE_CODE, TEST_INTERACTION_ID, TEST_INTERACTION_SUB_ID_INT
         )
 
-    assert e.value.args[0] == "InteractionCustomisation validation error: field error"
+    assert e.value.args[0] == "InteractionCustomisation validation error: ['field error']"
 
 
 def test_find_published_customisation_throws_error_more_than_one_interaction_customisation_found(

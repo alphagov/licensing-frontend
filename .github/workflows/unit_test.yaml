@@ -11,8 +11,8 @@ permissions:
   contents: read
 
 jobs:
-  api:
-    name: API testing
+  unit_test:
+    name: Unit testing
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -31,8 +31,8 @@ jobs:
         with:
           activate-environment: 'true'
 
-      - name: Run API tests
-        run: make test-api
+      - name: Run Unit tests
+        run: make test-unit
 
       - name: Minimize uv cache
         run: uv cache prune --ci

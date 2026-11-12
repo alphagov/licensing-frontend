@@ -221,3 +221,5 @@ nohup.out
 
 # Django static files output
 staticfiles/
+
+.DS_Store
