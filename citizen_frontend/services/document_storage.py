@@ -23,3 +23,6 @@ class S3Service(DocumentStorage):
 
     def store_file(self, path: str, file: io.BytesIO):
         self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path)
+
+    def load(self):
+        pass
