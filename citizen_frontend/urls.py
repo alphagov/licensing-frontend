@@ -1,6 +1,7 @@
 from django.urls import path
 
 from citizen_frontend.controllers.application_form import generate_application_form
+from citizen_frontend.controllers.application_uploaded import application_uploaded
 from citizen_frontend.controllers.begin_application import begin_application_steps
 from citizen_frontend.controllers.payment_licence_callback import payment_licence_callback
 
@@ -26,5 +27,10 @@ urlpatterns = [
         "payment/licenceCallback",
         payment_licence_callback,
         name="payment_licence_callback",
+    ),
+    path(
+        "uploaded",
+        application_uploaded,
+        name="application_uploaded",
     ),
 ]
