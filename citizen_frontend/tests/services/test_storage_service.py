@@ -20,15 +20,14 @@ def mock_s3(mock_s3_client):
 
 
 @pytest.fixture
-def mock_service(mocker):
+def mock_service(mock_s3_client):
     service = S3Service()
-    mocker.patch.object(service, "client")
     yield service
 
 
-def test_s3_service_stores_file(mock_s3, mock_s3_client, mock_service):
-    with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as file:
-        buffer = BytesIO(file.read())
+def test_s3_service_stores_file(mock_s3, mock_service, mock_s3_client):
+    with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as form:
+        buffer = BytesIO(form.read())
         buffer.seek(0)
 
     mock_service.store_file(
@@ -36,4 +35,10 @@ def test_s3_service_stores_file(mock_s3, mock_s3_client, mock_service):
         file=buffer,
     )
 
-    mock_service.client.upload_fileobj.assert_called()
+    file = mock_s3_client.get_object(
+        Bucket="test-bucket",
+        Key="test/file/path",
+    )
+
+    with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as form:
+        assert file["Body"].read() == form.read()
