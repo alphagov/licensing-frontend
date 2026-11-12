@@ -17,3 +17,10 @@ DOCUMENTDB_PASSWORD = "MX78weVPvR7a7wyJ"
 DOCUMENTDB_PORT = "10260" # The port to bind to the documentDB endpoint to on your local machine
 DOCUMENTDB_IMAGE = "ghcr.io/documentdb/documentdb/documentdb-local@sha256:8c8a716e27f398b03c397424c4ddd901bddbc22b9f910b17096b0b246c7c9011" # pg17-0.114.0
 DOCUMENTDB_ALLOW_INVALID_CERTS = "true"
+
+AWS_ACCESS_KEY_ID='testing'
+AWS_SECRET_ACCESS_KEY='testing'
+AWS_SECURITY_TOKEN='testing'
+AWS_SESSION_TOKEN='testing'
+AWS_DEFAULT_REGION='us-east-1'
+S3_BUCKET="test-bucket"
