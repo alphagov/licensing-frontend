@@ -1,5 +1,5 @@
 import pytest
-from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_FIXED_FEE, TEST_LICENCE, TEST_PAYMENT
+from conftest import TEST_AUTHORITY, TEST_LICENCE
 
 
 @pytest.fixture
@@ -28,18 +28,14 @@ def test_page_has_correct_fee_amount(get_dom_parser, test_licence_application_pr
     assert "£5.00" in fee_text
 
 
-def test_page_references_correct_payment_provider(
-    get_dom_parser, test_licence_application_prepayment_page_url
-):
+def test_page_references_correct_payment_provider(get_dom_parser, test_licence_application_prepayment_page_url):
     dom = get_dom_parser(test_licence_application_prepayment_page_url)
     fee_text = dom.get_by_test_id("fee-info").get_text()
 
     assert "WorldPay" in fee_text
 
 
-def test_page_has_button_to_continue_to_provider(
-    get_dom_parser, test_licence_application_prepayment_page_url
-):
+def test_page_has_button_to_continue_to_provider(get_dom_parser, test_licence_application_prepayment_page_url):
     dom = get_dom_parser(test_licence_application_prepayment_page_url)
     button_text = dom.get_by_test_id("pay-button").get_text()
 
