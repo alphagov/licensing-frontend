@@ -32,7 +32,7 @@ def generate_form_url():
 
 @pytest.fixture
 def mock_pdf_generator(mocker):
-    mocked_class = mocker.patch("citizen_frontend.controllers.pdf_form.PdfGenerator")
+    mocked_class = mocker.patch("citizen_frontend.controllers.pdf_form_controller.PdfGenerator")
     service = mocked_class.return_value
     yield service
 
@@ -108,15 +108,18 @@ def test_generate_pdf_form_returns_503_response_pdf_unavailable_error(
 def test_generate_pdf_form_renders_contact_details_form_not_published(
     client,
     generate_form_url,
-    mock_pdf_generator,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_fixed_fee,
 ):
-    pass
+    mock_find_published_customisation_with_fixed_fee.return_value = None
+    response = client.get(generate_form_url())
+
+    assert response.status_code == 200
+    assertTemplateUsed(response, "citizen_frontend/licence_not_available_online_page.html")
 
 
 def test_generate_pdf_form_renders_not_found_when_form_not_found_exception(client, generate_form_url, mocker):
-    mock_lookup = mocker.patch("citizen_frontend.controllers.pdf_form.licence_lookup_service")
+    mock_lookup = mocker.patch("citizen_frontend.controllers.pdf_form_controller.licence_lookup_service")
     mock_lookup.get_licence_interaction_context.side_effect = LicenceLookupError("No licence found")
 
     response = client.get(generate_form_url())

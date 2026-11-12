@@ -6,12 +6,12 @@ from django.shortcuts import render
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.exceptions import (
     FormNotFoundException,
-    FormNotPublishedException,
     LicenceLookupError,
     PDFGenerationGeneralError,
     PDFProviderUnavailableError,
 )
 from citizen_frontend.services.pdf_generation.pdf_generator import PdfGenerator
+from citizen_frontend.views import display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -37,9 +37,7 @@ def generate_pdf_form(
             )
         )
         if not published_customisation:
-            #  instead of raise exception, do the render here
-            # TODO creat page to render authority contact details
-            raise FormNotPublishedException(f"No form published for {authority.name}")
+            return display_licence_unavailable_online(request, authority)
 
         pdf_generator = PdfGenerator()
 
