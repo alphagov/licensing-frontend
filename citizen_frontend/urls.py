@@ -3,7 +3,7 @@ from django.urls import path
 from citizen_frontend.controllers.application_form import generate_application_form
 from citizen_frontend.controllers.begin_application import begin_application_steps
 from citizen_frontend.controllers.payment_licence_callback import payment_licence_callback
-from citizen_frontend.controllers.prepayment import prepayment
+from citizen_frontend.controllers.application_uploaded import application_uploaded
 
 from . import views
 
@@ -30,7 +30,7 @@ urlpatterns = [
     ),
     path(
         "uploaded",
-        prepayment,
-        name="prepayment",
+        application_uploaded,
+        name="application_uploaded",
     ),
 ]

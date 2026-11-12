@@ -5,7 +5,7 @@ from common.models.shared_models import PaymentAmount
 from django.shortcuts import render
 
 
-def prepayment(request):
+def application_uploaded(request):
     context = mock_prepayment_context()
     return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
 

@@ -9,7 +9,7 @@ def test_licence_application_prepayment_page_url(live_server):
 
 @pytest.fixture
 def mock_context(mocker):
-    yield mocker.patch("citizen_frontend.controllers.prepayment.mock_prepayment_context")
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.mock_prepayment_context")
 
 
 def test_page_has_correct_headings(get_dom_parser, test_licence_application_prepayment_page_url, mock_context):
