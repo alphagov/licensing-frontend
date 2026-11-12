@@ -40,7 +40,7 @@ def test_get_licence_offering_authorities_by_licence_code_throws_error_validatio
 
     mocker.patch.object(instance, "clean_fields", side_effect=[ValidationError("field error")])
 
-    expected_error_message = "Authority validation error: field error"
+    expected_error_message = "Authority validation error: ['field error']"
 
     with pytest.raises(DataIntegrityError) as e:
         get_licence_offering_authorities_by_licence_code(licence_code=TEST_LICENCE_CODE)
@@ -77,7 +77,7 @@ def test_find_authority_by_url_slug_throws_error_on_clean_fields_failure(mock_au
 
     mocker.patch.object(instance, "clean_fields", side_effect=[ValidationError("field error")])
 
-    expected_error_message = "Authority validation error: field error"
+    expected_error_message = "Authority validation error: ['field error']"
 
     with pytest.raises(DataIntegrityError) as e:
         find_authority_by_url_slug(url_slug=TEST_AUTHORITY.url_slug)

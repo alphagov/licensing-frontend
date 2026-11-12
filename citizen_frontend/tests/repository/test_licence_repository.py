@@ -44,7 +44,7 @@ def test_get_licence_by_licence_code_throws_exception_clean_fields_error(mock_ge
 
     mocker.patch.object(instance, "clean_fields", side_effect=ValidationError("field error message"))
 
-    expected_error_message = "Licence validation error: field error message"
+    expected_error_message = "Licence validation error: ['field error message']"
 
     with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_licence_by_licence_code(TEST_LICENCE.licence_code)
@@ -79,7 +79,7 @@ def test_get_all_licences_from_database_throws_exception_validation_error(mocker
 
     mocker.patch.object(TEST_LICENCE, "clean_fields", side_effect=ValidationError("field error message"))
 
-    expected_error_message = "Licence validation error: field error message"
+    expected_error_message = "Licence validation error: ['field error message']"
 
     with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_all_licences()
@@ -114,7 +114,7 @@ def test_get_licence_by_url_slug_throws_error_on_clean_fields_failure(mock_get_l
 
     mocker.patch.object(TEST_LICENCE, "clean_fields", side_effect=ValidationError("field error message"))
 
-    expected_error_message = "Licence validation error: field error message"
+    expected_error_message = "Licence validation error: ['field error message']"
 
     with pytest.raises(DataIntegrityError) as e:
         licence_repository.get_licence_by_url_slug(TEST_LICENCE.url_slug)
