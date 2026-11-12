@@ -11,7 +11,7 @@ def application_uploaded(request):
 
 
 def mock_prepayment_context():
-    authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
+    authority = Authority(name="Test Authority", full_name="Test Authority for testing with")
     payment = Payment(amount=PaymentAmount(pence=500), payment_provider="WorldPay")
     published_customisation = Customisation(is_fee_required=True)
 
