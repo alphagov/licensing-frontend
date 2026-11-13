@@ -20,8 +20,8 @@ jobs:
     with:
       build_branch: ${{ github.event.pull_request.head.ref }}
 
-  test_api:
-    name: Unit Tests
+  test_unit:
+    name: Unit Test
     uses: ./.github/workflows/unit_test.yaml
     with:
       build_branch: ${{ github.event.pull_request.head.ref }}

@@ -52,3 +52,7 @@ test-repo: prepare
 
 test-payment: prepare
 	pytest citizen_frontend/tests/payment_providers
+
+test-unit:
+	uv sync
+	pytest citizen_frontend/tests --ignore citizen_frontend/tests/ui/ --ignore citizen_frontend/tests/api/end_to_end --ignore licensing_common
