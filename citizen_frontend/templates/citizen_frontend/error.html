@@ -1,0 +1,7 @@
+{% extends "citizen_frontend/base.html" %}
+{% block content %}
+
+<p class="govuk-body">{% if message %}{{message}}{%else%}Apologies, an error has occurred.{% endif %}</p>
+<p class="govuk-body">Please retry, or if the error persists, contact <a href="https://www.gov.uk/contact/govuk" class="govuk-link">GOV.UK Support</a> with the error ID: {{ error_id }}</p>
+
+{% endblock %}

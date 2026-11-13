@@ -1,7 +1,3 @@
-# TODO scenarios to cover:
-#   cancel, goback,, generic failure => cancel and go back go to a call backurl set in the paymount account
-#   build out mock request, and response, probably best to stick them straight in their own file/dir
-#   forms again?
 from urllib.parse import urlencode
 
 import pytest

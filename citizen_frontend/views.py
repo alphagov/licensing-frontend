@@ -20,7 +20,3 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
         "citizen_frontend/licence_must_be_applied_for_locally_page.html",
         {"title": "This licence must be applied for locally", "authority_url": authority_url},
     )
-
-
-def generate_form():
-    return None

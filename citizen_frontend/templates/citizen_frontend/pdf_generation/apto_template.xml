@@ -1,0 +1,50 @@
+{% spaceless %}
+<Root
+xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+xmlns:common="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <CommonSections xmlns="http://www.aptosolutions.co.uk/businesslink/psc/common/2.3">
+        {% if return_url  %}
+        <returnURL>{{return_url}}</returnURL>
+        {% endif %}
+        <Branding>
+        {% if authority.encoded_image %}
+        <logoUri>{{ authority.encoded_image }}</logoUri>
+        {% endif %}
+        <altText>{{ authority.name }}</altText>
+        <colour>FFFFFF</colour>
+        <HelpContact>
+            <emailAddress>{{ department.helpline_email_address }}</emailAddress>
+            <telephone>{{ department.helpline_phone_number }}</telephone>
+        </HelpContact>
+        </Branding>
+    <FormMetaData>
+      <transactionId>Not Currently In Use</transactionId>
+      <formId>{{ interaction.form.form_ref_number }}</formId>
+      <formName>{{ interaction.licence_interaction_name }}</formName>
+      <formalityId>{{ licence.licence_code }}</formalityId>
+      <formalityVersion>{{ interaction.form.form_version }}</formalityVersion>
+      <authorityShortName>{{ authority.name }}</authorityShortName>
+      <authorityOrgName>{{ authority.full_name }}</authorityOrgName>
+      <governingLegislation>{{ customisation.legislation_name }}</governingLegislation>
+    </FormMetaData>
+    <PaymentDetails>
+        {% if fixed_fee_amount and not customisation.fee_calculation_instructions %}
+      <isFixedFee>1</isFixedFee>
+      <Payment>{{ fixed_fee_amount }}</Payment>
+        {% endif %}
+        {% for calculation in modified_calculations  %}
+      <Calculation>{{ calculation }}</Calculation>
+        {% endfor %}
+    </PaymentDetails>
+    <Declarations>
+    {% for declarations in modified_declarations %})
+      <Declaration>
+        <declarationText>{{ declaration }}</declarationText>
+      </Declaration>
+    {% endfor %}
+    </Declarations>
+<!--    }-->
+    </CommonSections>
+</Root>
+{% endspaceless %}
