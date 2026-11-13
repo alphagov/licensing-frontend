@@ -7,6 +7,7 @@ from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.services.application_upload_service import ApplicationUploadService
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)
@@ -52,11 +53,13 @@ def generate_application_form(
         if request.method == "POST":
             form = ApplicationSubmissionForm(
                 request.POST,
+                request.FILES,
                 published_customisation=context.get("published_customisation"),
             )
 
             if form.is_valid():
-                pass
+                upload_service = ApplicationUploadService()
+                upload_service.upload_application(request.FILES["application_upload"])
 
         else:
             form = ApplicationSubmissionForm(
