@@ -152,7 +152,7 @@ class ApplicationSubmissionForm(forms.Form):
                 document for document in self.customisation.supporting_document_definitions if document.is_mandatory
             ]
 
-            if self.data.get("will_submit_by_post") in ["off", "false", "False"]:
+            if self.data.get("will_submit_by_post") not in ["off", "false", "False"]:
                 for index, _document in enumerate(mandatory_supporting_documents):
                     del self._errors[f"supporting_document_{index}"]
                     logger.info("Mandatory documents are being posted")
