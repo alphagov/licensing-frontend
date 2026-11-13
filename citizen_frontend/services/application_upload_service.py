@@ -9,7 +9,11 @@ class ApplicationUploadService:
     def __init__(self):
         self.document_store = S3Service()
 
-    def upload_application(self, application: SimpleUploadedFile):
-        path = f"{str(uuid.uuid4())}/{application.name}"
+    def handle_supporting_documents(self, documents):
+        for document in documents:
+            self.upload_document(document=document)
 
-        self.document_store.store_file(path=path, file=application, content_type=application.content_type)
+    def upload_document(self, document: SimpleUploadedFile):
+        path = f"{str(uuid.uuid4())}/{document.name}"
+
+        self.document_store.store_file(path=path, file=document, content_type=document.content_type)

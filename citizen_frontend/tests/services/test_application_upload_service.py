@@ -19,13 +19,29 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
         name="application.pdf", content_type="application/pdf", content=expected_content
     )
 
-    mock_application_upload_service.upload_application(mock_application)
+    mock_application_upload_service.upload_document(mock_application)
 
     file = mock_s3_client.get_object(
         Bucket="test-bucket",
         Key=f"{TEST_UUID}/{mock_application.name}",
     )
     assert file["Body"].read() == expected_content
+
+
+def test_application_handles_supported_documents(mock_application_upload_service, mocker):
+    mocker.patch.object(mock_application_upload_service, "upload_document")
+    expected_content = b"%PDF-1.4 fake pdf content"
+
+    supporting_documents = [
+        SimpleUploadedFile(name="supporting_0.pdf", content_type="application/pdf", content=expected_content),
+        SimpleUploadedFile(name="supporting_1.pdf", content_type="application/pdf", content=expected_content),
+    ]
+
+    mock_application_upload_service.handle_supporting_documents(supporting_documents)
+
+    mock_application_upload_service.upload_document.assert_has_calls(
+        [mocker.call(document=supporting_document) for supporting_document in supporting_documents]
+    )
 
 
 def test_application_upload_service_verifies_postal_supported_documents():
