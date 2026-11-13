@@ -50,7 +50,7 @@ class APTOPdfProvider(PdfProvider):
         interaction: LicenceInteraction,
     ):
         try:
-            if not self.get_apto_pdf_status_setting():
+            if not self.is_apto_available():
                 raise PDFProviderUnavailableError("PDF Generation not available")
 
             xml_bytes = self.create_xml_request(
@@ -92,7 +92,7 @@ class APTOPdfProvider(PdfProvider):
         session.mount("https://", adapter)
         return session
 
-    def get_apto_pdf_status_setting(self) -> bool:
+    def is_apto_available(self) -> bool:
         logger.info("Checking APTO status")
         status = self.settings_repo.get_setting(key="aptoStatus")
         return status == AptoStatuses.AVAILABLE or status == AptoStatuses.DOWNLOAD_ONLY

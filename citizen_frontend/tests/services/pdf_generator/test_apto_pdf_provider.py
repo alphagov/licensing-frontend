@@ -8,6 +8,7 @@ import requests
 from conftest import (
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_FIXED_FEE,
+    TEST_CUSTOMISATION_NO_FEE,
     TEST_CUSTOMISATION_VARIABLE_FEE,
     TEST_DEPARTMENT,
     TEST_LICENCE,
@@ -40,7 +41,7 @@ namespaces = {
 
 
 def test_apto_pdf_provider_happy_path(apto_pdf_provider, mocker, mock_session):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+    mocker.patch.object(apto_pdf_provider, "is_apto_available", return_value=True)
 
     session = requests.Session()
     mocker.patch.object(apto_pdf_provider, "configure_apto_session", return_value=session)
@@ -74,7 +75,7 @@ def test_apto_pdf_provider_happy_path(apto_pdf_provider, mocker, mock_session):
         return_url="",
     )
 
-    apto_pdf_provider.get_apto_pdf_status_setting.assert_called()
+    apto_pdf_provider.is_apto_available.assert_called()
     apto_pdf_provider.configure_apto_session.assert_called()
     mock_post.assert_called_with(
         url=f"{os.getenv('APTO_REQUEST_BASE_URL')}/Licence/{TEST_LICENCE.licence_interactions[0].form.form_ref_number}",
@@ -88,7 +89,7 @@ def test_apto_pdf_provider_happy_path(apto_pdf_provider, mocker, mock_session):
 
 
 def test_apto_pdf_provider_throws_error_apto_not_available(apto_pdf_provider, mocker):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=False)
+    mocker.patch.object(apto_pdf_provider, "is_apto_available", return_value=False)
 
     with pytest.raises(PDFProviderUnavailableError):
         apto_pdf_provider.request_pdf_form(
@@ -112,7 +113,7 @@ def test_apto_pdf_provider_uses_correct_session(apto_pdf_provider):
 
 
 def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(apto_pdf_provider, mock_session, mocker):
-    mocker.patch.object(apto_pdf_provider, "get_apto_pdf_status_setting", return_value=True)
+    mocker.patch.object(apto_pdf_provider, "is_apto_available", return_value=True)
     mock_session.post.side_effect = HTTPError
 
     with pytest.raises(PDFGenerationGeneralError):
@@ -129,7 +130,7 @@ def test_apto_pdf_provider_throws_error_on_non_200_response_from_apto_request(ap
 def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_pdf_provider, mocker):
     settings_repo = mocker.patch.object(apto_pdf_provider, "settings_repo")
 
-    apto_pdf_provider.get_apto_pdf_status_setting()
+    apto_pdf_provider.is_apto_available()
 
     settings_repo.get_setting.assert_called_with(key="aptoStatus")
 
@@ -137,7 +138,7 @@ def test_get_apto_pdf_status_setting_calls_settings_repo_with_correct_args(apto_
 def test_get_apto_pdf_status_setting_returns_false_apto_unavailable(apto_pdf_provider, mocker):
     mocker.patch.object(apto_pdf_provider, "settings_repo", return_value=AptoStatuses.NOT_AVAILABLE)
 
-    actual = apto_pdf_provider.get_apto_pdf_status_setting()
+    actual = apto_pdf_provider.is_apto_available()
 
     assert not actual
 
@@ -194,13 +195,10 @@ def test_xml_request_should_not_contain_logo_section_if_no_logo_has_been_provide
 
 
 def test_xml_request_should_contain_fixed_fee_section_with_0_as_amount_for_free_licence(apto_pdf_provider):
-    free_customisation = deepcopy(TEST_CUSTOMISATION_FIXED_FEE)
-    free_customisation.is_fee_required = False
-
     xml_request = apto_pdf_provider.create_xml_request(
         licence=TEST_LICENCE,
         authority=TEST_AUTHORITY,
-        customisation=free_customisation,
+        customisation=TEST_CUSTOMISATION_NO_FEE,
         return_url="",
         department=TEST_DEPARTMENT,
         interaction=TEST_LICENCE.licence_interactions[0],

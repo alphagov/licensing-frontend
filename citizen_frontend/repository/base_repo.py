@@ -34,7 +34,6 @@ class DepartmentRepo:
             raise ObjectDoesNotExist("Department not found") from e
 
 
-# TODO what does this actually look like? => key, value pair..
 class Settings(models.Model):
     key = models.CharField(max_length=255, unique=True)
     value = models.CharField(max_length=255)

@@ -75,7 +75,7 @@ def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_f
     assert e.value.args[0] == "Licence unmatched-licence-code doesn't exist"
 
 
-def skip_test_get_licence_authorities_and_interactions_throws_error_when_no_authorities_found_for_licence_without_snac(
+def test_get_licence_authorities_and_interactions_throws_error_when_no_authorities_found_for_licence_without_snac(
     mock_licence_repository, mock_authority_repository
 ):
     mock_licence_repository.get_licence_by_licence_code.return_value = TEST_LICENCE
