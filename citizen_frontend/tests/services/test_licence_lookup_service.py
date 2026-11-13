@@ -76,11 +76,11 @@ def test_get_licence_authorities_and_interactions_throws_error_when_no_licence_f
 
 
 def test_get_licence_authorities_and_interactions_throws_error_when_no_authorities_found_for_licence_without_snac(
-    mock_licence_repository, mock_authority_repository
+    mock_licence_repository, mock_get_authorities_by_licence_code
 ):
     mock_licence_repository.get_licence_by_licence_code.return_value = TEST_LICENCE
 
-    mock_authority_repository.get_licence_offering_authorities_by_licence_code.return_value = None
+    mock_get_authorities_by_licence_code.return_value = None
 
     with pytest.raises(LicenceLookupError) as e:
         licence_lookup_service.get_licence_authorities_and_interactions(TEST_LICENCE_CODE)
