@@ -98,7 +98,7 @@ def mock_s3(mock_s3_client):
 
 
 @pytest.fixture
-def mock_service(mock_s3_client):
+def mock_s3_service(mock_s3_client):
     service = S3Service()
     yield service
 

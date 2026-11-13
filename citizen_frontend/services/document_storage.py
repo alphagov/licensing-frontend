@@ -7,7 +7,7 @@ import boto3
 
 class DocumentStorage(ABC):
     @abstractmethod
-    def store_file(self):
+    def store_file(self, *args, **kwargs):
         pass
 
     @abstractmethod
@@ -21,8 +21,8 @@ class S3Service(DocumentStorage):
         self.client = boto3.client("s3")
         self.bucket_name = os.getenv("S3_BUCKET")
 
-    def store_file(self, path: str, file: io.BytesIO):
-        self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path)
+    def store_file(self, path: str, file: io.BytesIO, content_type: str):
+        self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path, ExtraArgs={"ContentType": content_type})
 
     def load(self):
         pass
