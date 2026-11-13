@@ -2,6 +2,7 @@ import os
 from copy import deepcopy
 from datetime import timedelta
 
+import boto3
 import bson
 import pytest
 from bs4 import BeautifulSoup
@@ -19,6 +20,7 @@ from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
 from django.utils import timezone
 from django.utils.timezone import now
+from moto import mock_aws
 
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
@@ -30,6 +32,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.services.document_storage import S3Service
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -80,6 +83,24 @@ def get_dom_parser(client):
         return soup
 
     return _get
+
+
+@pytest.fixture
+def mock_s3_client():
+    with mock_aws():
+        yield boto3.client("s3", region_name="us-east-1")
+
+
+@pytest.fixture
+def mock_s3(mock_s3_client):
+    test_bucket = mock_s3_client.create_bucket(Bucket="test-bucket")
+    yield test_bucket
+
+
+@pytest.fixture
+def mock_service(mock_s3_client):
+    service = S3Service()
+    yield service
 
 
 @pytest.fixture
