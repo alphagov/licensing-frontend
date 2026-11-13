@@ -8,3 +8,7 @@ class DocumentDBError(Exception):
 
 class LicenceLookupError(Exception):
     pass
+
+
+class DocumentStorageError(Exception):
+    pass
