@@ -59,7 +59,7 @@ def generate_application_form(
 
             if form.is_valid():
                 upload_service = ApplicationUploadService()
-                upload_service.upload_document(request.FILES["application_upload"])
+                upload_service.handle_form_submission(request.FILES)
 
         else:
             form = ApplicationSubmissionForm(
