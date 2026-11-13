@@ -1,6 +1,6 @@
-import io
 import os
 from abc import ABC, abstractmethod
+from typing import BinaryIO
 
 import boto3
 
@@ -21,8 +21,10 @@ class S3Service(DocumentStorage):
         self.client = boto3.client("s3")
         self.bucket_name = os.getenv("S3_BUCKET")
 
-    def store_file(self, path: str, file: io.BytesIO, content_type: str):
-        self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path, ExtraArgs={"ContentType": content_type})
+    def store_file(self, path: str, file: BinaryIO, content_type: str | None):
+        extra_args = {"ContentType": content_type} if content_type else {}
+
+        self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path, ExtraArgs=extra_args)
 
     def load(self):
         pass

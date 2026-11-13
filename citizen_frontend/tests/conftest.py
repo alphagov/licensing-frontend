@@ -1,6 +1,7 @@
 import os
 from copy import deepcopy
 from datetime import timedelta
+from uuid import UUID
 
 import boto3
 import bson
@@ -60,6 +61,14 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
     f"/{SERVICE_SLUG}/{FOOD_PREMISES_APPLICATION_SLUG}/"
     f"{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}/form"
 )
+
+TEST_UUID = UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+
+
+@pytest.fixture
+def mock_uuid(mocker):
+    mocker.patch("uuid.uuid4", return_value=TEST_UUID)
+    yield TEST_UUID
 
 
 @pytest.fixture(scope="session", autouse=True)
