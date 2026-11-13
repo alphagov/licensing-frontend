@@ -14,6 +14,7 @@ class ApplicationUploadService:
         self.document_store = S3Service()
 
     def handle_form_submission(self, request_files):
+        logger.info("Uploading application form")
         self.upload_document(request_files["application_upload"])
 
         supporting_documents = [file for key, file in request_files.items() if key.startswith("supporting_document_")]
