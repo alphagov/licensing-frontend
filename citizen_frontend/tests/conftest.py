@@ -113,11 +113,6 @@ def mock_s3_service(mock_s3_client):
     yield service
 
 
-# @pytest.fixture
-# def introduction_page_url(live_server):
-#     return f"{live_server.url}/{SERVICE_SLUG}/test-licence/test-authority/apply-1"
-
-
 @pytest.fixture
 def test_introduction_page_url():
     def _url(**overrides) -> str:
