@@ -1,3 +1,5 @@
+from django.shortcuts import render
+
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
@@ -17,14 +19,8 @@ def application_uploaded(request):
         if application_ref not in application_refs:
             raise Http404("No application references found") from None
 
-        return HttpResponse("Hello world")
-
-    #     application_refs = request.session.get("applicationReferenceNos", [])
-    #     if application_ref not in application_refs:
-    #         raise Http404("No application references found") from None
-    #
-    #     context = mock_no_fee_context()
-    #     return render(request, "citizen_frontend/licence_submission_success_page.html", context)
+        context = mock_no_fee_context()
+        return render(request, "citizen_frontend/licence_submission_success_page.html", context)
     except Http404:
         raise
 
