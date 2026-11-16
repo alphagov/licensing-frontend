@@ -446,6 +446,7 @@ name = "licensing-frontend"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "boto3" },
     { name = "crispy-forms-gds" },
     { name = "gunicorn" },
     { name = "licensing-common" },
@@ -467,6 +468,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "boto3", specifier = ">=1.44.1" },
     { name = "crispy-forms-gds", specifier = ">=2.0.1" },
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "licensing-common", virtual = "licensing_common" },

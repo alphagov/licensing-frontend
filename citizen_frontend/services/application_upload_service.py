@@ -28,5 +28,6 @@ class ApplicationUploadService:
 
     def upload_document(self, document: SimpleUploadedFile, upload_id: str):
         path = f"{upload_id}/{document.name}"
+        document.seek(0)
 
-        self.document_store.store_file(path=path, file=document, content_type=document.content_type)
+        self.document_store.store_file(path=path, file=document.file, content_type=document.content_type)
