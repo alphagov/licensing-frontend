@@ -1,10 +1,9 @@
-from django.http.response import HttpResponse
-
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
+from django.http.response import HttpResponse
 
 
 def application_uploaded(request):
@@ -14,7 +13,11 @@ def application_uploaded(request):
         if application_ref is None:
             raise Http404("No application in session") from None
 
-        return HttpResponse("Hello World")
+        application_refs = request.session.get("applicationReferenceNumbers", [])
+        if application_ref not in application_refs:
+            raise Http404("No application references found") from None
+
+        return HttpResponse("Hello world")
 
     #     application_refs = request.session.get("applicationReferenceNos", [])
     #     if application_ref not in application_refs:
