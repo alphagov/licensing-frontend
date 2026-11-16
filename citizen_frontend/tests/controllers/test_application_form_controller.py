@@ -133,3 +133,7 @@ def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_p
 
     assert application_form["Body"].read() == expected_content
     assert supporting_document["Body"].read() == expected_content
+
+
+def test_submit_handles_s3_failures_throws_500_question():
+    pass

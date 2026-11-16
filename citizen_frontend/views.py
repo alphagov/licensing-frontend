@@ -1,4 +1,5 @@
 from common.models.authority import Authority
+from django.http import HttpResponse
 from django.shortcuts import render
 
 
@@ -22,5 +23,5 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
     )
 
 
-def generate_form():
-    return None
+def generate_form(request, authority_slug, licence_slug, licence_code, interaction_id, interaction_sub_id):
+    return HttpResponse("Hello world")

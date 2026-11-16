@@ -1,7 +1,7 @@
 import os
 from urllib.parse import urlparse
 
-from conftest import SERVICE_SLUG
+from django.urls import reverse
 
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
@@ -12,7 +12,7 @@ def test_page_has_correct_headings(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
     heading_text = dom.get_by_test_id("page-heading").get_text()
     assert "Test Licence" in heading_text
     assert "Test Authority" in heading_text
@@ -29,7 +29,7 @@ def test_page_has_4_steps_when_licence_has_fee(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert "1 of 4" in dom.get_by_test_id("steps").get_text()
 
@@ -40,7 +40,7 @@ def test_page_has_3_steps_when_licence_has_no_fee(
     mock_find_published_customisation_with_no_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert "1 of 3" in dom.get_by_test_id("steps").get_text()
 
@@ -51,7 +51,7 @@ def test_page_has_fee_amount_when_licence_has_fixed_fee_required(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("fee-amount").get_text() == "£5.00"
 
@@ -62,7 +62,7 @@ def test_page_has_no_fee_amount_when_licence_has_no_fee_required(
     mock_find_published_customisation_with_no_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("fee-amount") is None
 
@@ -74,7 +74,7 @@ def test_page_has_no_fee_amount_when_licence_fee_is_required(
     test_introduction_page_url,
 ):
 
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("fee-amount") is None
     assert dom.get_by_test_id("fee") is not None
@@ -86,15 +86,19 @@ def test_page_has_download_pdf_inset(
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
-    live_server,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
     licence, authority, interaction, detail = mock_get_licence_interaction_context.return_value
-    expected_form_url = urlparse(
-        f"{live_server}/{SERVICE_SLUG}/forms/"
-        f"{authority.url_slug}/{licence.url_slug}/"
-        f"{licence.licence_code},{interaction.interaction_id}-{interaction.interaction_sub_id}"
-    ).path
+    url = reverse(
+        "generate_form",
+        kwargs={
+            "authority_slug": authority.url_slug,
+            "licence_slug": licence.url_slug,
+            "licence_code": licence.licence_code,
+            "interaction_id": interaction.interaction_id,
+            "interaction_sub_id": interaction.interaction_sub_id,
+        },
+    )
 
     adobe_download_link = dom.get_by_test_id("adobe-download")
     pdf_download_link = dom.get_by_test_id("pdf-download")
@@ -103,7 +107,7 @@ def test_page_has_download_pdf_inset(
     assert adobe_download_link.name == "a"
     assert adobe_download_link["href"] == "https://get.adobe.com/uk/reader/"
     assert pdf_download_link.name == "a"
-    assert pdf_download_link["href"] == expected_form_url
+    assert pdf_download_link["href"] == url
 
 
 def test_page_has_additional_information_inset_when_both_legislation_and_general_info_urls_available(
@@ -112,7 +116,7 @@ def test_page_has_additional_information_inset_when_both_legislation_and_general
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     general_info_link = dom.get_by_test_id("general-information")
     legislation_info_link = dom.get_by_test_id("legislation-information")
@@ -138,7 +142,7 @@ def test_page_has_additional_information_inset_when_general_info_url_available(
     _, _, _, licence_details = mock_get_licence_interaction_context.return_value
     licence_details.authority_url = None
 
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("additional-information") is not None
     assert dom.get_by_test_id("general-information") is not None
@@ -154,7 +158,7 @@ def test_page_has_additional_information_inset_when_legislation_info_url_availab
     mock_find_published_customisation_with_fixed_fee.return_value.information_url = "info_url"
     mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
 
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("additional-information") is not None
     assert dom.get_by_test_id("general-information") is None
@@ -171,7 +175,7 @@ def test_page_does_not_have_additional_information_inset_when_no_general_info_no
     mock_find_published_customisation_with_fixed_fee.return_value.guidance_url = None
     _, _, _, licence_details = mock_get_licence_interaction_context.return_value
     licence_details.authority_url = None
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert dom.get_by_test_id("additional-information") is None
     assert dom.get_by_test_id("general-information") is None
@@ -184,8 +188,8 @@ def test_page_has_submit_button(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
-    expected_url = f"{urlparse(test_introduction_page_url).path}/form"
+    dom = get_dom_parser(test_introduction_page_url())
+    expected_url = f"{urlparse(test_introduction_page_url()).path}/form"
     submit_button = dom.get_by_test_id("submit-button")
     assert submit_button is not None
     assert submit_button["href"] == expected_url
@@ -197,7 +201,7 @@ def test_page_has_supporting_documents_list_when_licence_requires_supporting_doc
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     details = dom.get_by_test_id("electronic-copies-detail")
     details_text = dom.get_by_test_id("electronic-copies-detail-text")
@@ -213,7 +217,7 @@ def test_page_marks_non_mandatory_supporting_documents_optional(
     mock_find_published_customisation_with_fixed_fee,
     test_introduction_page_url,
 ):
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     mandatory_document = dom.get_by_test_id("support-document-1")
     optional_document = dom.get_by_test_id("support-document-3")
@@ -230,7 +234,7 @@ def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_
 ):
     mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = False
 
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert "you cannot make an online application" in dom.get_by_test_id("electronic-copies-detail-text").get_text()
 
@@ -243,6 +247,6 @@ def test_page_handles_conditional_rendering_of_supporting_documents_when_postal_
 ):
     mock_find_published_customisation_with_fixed_fee.return_value.is_postal_allowed = True
 
-    dom = get_dom_parser(test_introduction_page_url)
+    dom = get_dom_parser(test_introduction_page_url())
 
     assert "you can still apply online" in dom.get_by_test_id("electronic-copies-detail-text").get_text()

@@ -19,6 +19,7 @@ from common.models.licence import AdministrativeArea, Licence, LicenceForm, Lice
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import now
 from moto import mock_aws
@@ -112,14 +113,25 @@ def mock_s3_service(mock_s3_client):
     yield service
 
 
-@pytest.fixture
-def test_introduction_page_url(live_server):
-    return f"{live_server.url}/{SERVICE_SLUG}/test-licence/test-authority/apply-1"
+# @pytest.fixture
+# def introduction_page_url(live_server):
+#     return f"{live_server.url}/{SERVICE_SLUG}/test-licence/test-authority/apply-1"
 
 
 @pytest.fixture
-def test_submit_form_page_url(live_server):
-    return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
+def test_introduction_page_url():
+    def _url(**overrides) -> str:
+        defaults = {
+            "licence_slug": TEST_LICENCE.url_slug,
+            "authority_slug": TEST_AUTHORITY.url_slug,
+            "interaction_id": "apply",
+            "interaction_sub_id": TEST_LICENCE.licence_interactions[0].interaction_sub_id,
+        }
+
+        merged_kwargs = {**defaults, **overrides}
+        return reverse("begin_application_steps", kwargs=merged_kwargs)
+
+    return _url
 
 
 @pytest.fixture

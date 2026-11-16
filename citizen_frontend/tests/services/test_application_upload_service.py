@@ -44,10 +44,6 @@ def test_application_handles_supported_documents(mock_application_upload_service
     )
 
 
-def test_application_upload_service_verifies_postal_supported_documents():
-    pass
-
-
 def test_application_upload_service_virus_scans_files_before_uploading():
     pass
 
