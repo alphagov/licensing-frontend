@@ -18,7 +18,7 @@ class DocumentStorage(ABC):
         pass
 
     @abstractmethod
-    def load(self):
+    def get_file(self, *args, **kwargs):
         pass
 
 
@@ -37,5 +37,11 @@ class S3Service(DocumentStorage):
             logger.error(e)
             raise DocumentStorageError("Failed to upload file to S3.") from e
 
-    def load(self):
-        pass
+    def get_file(self, key: str):
+        try:
+            response = self.client.get_object(Bucket=self.bucket_name, Key=key)
+            return response["Body"]
+
+        except ClientError as e:
+            logger.error(e)
+            raise DocumentStorageError("Failed to get file from S3.") from e

@@ -96,13 +96,6 @@ class ApplicationSubmissionForm(forms.Form):
         customisation = context["customisation"]
         supporting_documents = customisation.supporting_document_definitions
 
-        if customisation.is_postal_allowed:
-            self.fields["will_submit_by_post"] = forms.BooleanField(
-                label="OK, I'll submit all the documents by post instead",
-                required=False,
-                widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "will-post-checkbox"}),
-            )
-
         for index, document in enumerate(supporting_documents):
             label = document.name if document.is_mandatory else f"{document.name}(optional)"
             self.fields[f"supporting_document_{index}"] = forms.FileField(
@@ -118,7 +111,15 @@ class ApplicationSubmissionForm(forms.Form):
 
             fieldset_additions.append(f"supporting_document_{index}")
 
-        fieldset_additions.append("will_submit_by_post")
+        if customisation.is_postal_allowed:
+            logger.info("Adding is postal")
+            self.fields["will_submit_by_post"] = forms.BooleanField(
+                label="OK, I'll submit all the documents by post instead",
+                required=False,
+                widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "will-post-checkbox"}),
+            )
+
+            fieldset_additions.append("will_submit_by_post")
 
         return Fieldset(*fieldset_additions, legend="Supporting Documents", legend_tag="h2", legend_size="s")
 

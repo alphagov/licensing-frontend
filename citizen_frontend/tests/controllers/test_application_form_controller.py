@@ -1,10 +1,12 @@
 from copy import deepcopy
 
 import pytest
-from botocore.exceptions import ClientError
 from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_UUID
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+
+from citizen_frontend.exceptions import DocumentStorageError
+from citizen_frontend.services.application_upload_service import ApplicationUploadService
 
 
 @pytest.fixture
@@ -23,9 +25,14 @@ def submit_url_path():
     return _url
 
 
+@pytest.fixture
+def store_service(mock_s3, mock_s3_client):
+    service = ApplicationUploadService()
+    yield service
+
+
 def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
-    mock_s3,
-    mock_s3_client,
+    store_service,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
@@ -48,17 +55,15 @@ def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
         },
     )
 
-    application_form = mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/application_upload.pdf")
+    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
 
-    supporting_document = mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/supporting_document_0.pdf")
-
-    assert application_form["Body"].read() == expected_content
-    assert supporting_document["Body"].read() == expected_content
+    assert application_form.read() == expected_content
+    assert supporting_document.read() == expected_content
 
 
 def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowed_will_post_checked_mandatory_document(
-    mock_s3,
-    mock_s3_client,
+    store_service,
     mock_uuid,
     client,
     mock_get_licence_interaction_context,
@@ -84,13 +89,13 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
         },
     )
 
-    application_form = mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/application_upload.pdf")
+    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
 
-    assert application_form["Body"].read() == expected_content
+    assert application_form.read() == expected_content
 
     # Raise error because object does not exist.
-    with pytest.raises(ClientError):
-        mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/supporting_document_0.pdf")
+    with pytest.raises(DocumentStorageError):
+        store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
 
     # TODO, research what happens when is_postal allowed, and will submit via post is checked
     #   Does the application still creat an entry for them, or does it just exit user journey?...
@@ -100,8 +105,7 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
 
 
 def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_post_not_checked_mandatory_document(
-    mock_s3,
-    mock_s3_client,
+    store_service,
     mock_uuid,
     client,
     mock_get_licence_interaction_context,
@@ -128,12 +132,39 @@ def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_p
         },
     )
 
-    application_form = mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/application_upload.pdf")
-    supporting_document = mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/supporting_document_0.pdf")
+    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
 
-    assert application_form["Body"].read() == expected_content
-    assert supporting_document["Body"].read() == expected_content
+    assert application_form.read() == expected_content
+    assert supporting_document.read() == expected_content
 
 
-def test_submit_handles_s3_failures_throws_500_question():
-    pass
+def test_submit_handles_document_storage_failures_throws_500_question(
+    client,
+    mocker,
+    submit_url_path,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_no_fee,
+):
+    mock_call = mocker.patch(
+        "citizen_frontend.controllers.application_form.ApplicationUploadService.handle_form_submission"
+    )
+    mock_call.side_effect = DocumentStorageError("Failed to upload document")
+
+    expected_content = b"%PDF-1.4 fake pdf content"
+    response = client.post(
+        submit_url_path(),
+        data={
+            "email": "anemail@example.com",
+            "confirmation_email": "anemail@example.com",
+            "application_upload": SimpleUploadedFile(
+                name="application_upload.pdf", content_type="application/pdf", content=expected_content
+            ),
+            "supporting_document_0": SimpleUploadedFile(
+                name="supporting_document_0.pdf", content_type="application/pdf", content=expected_content
+            ),
+            "declaration": "on",
+        },
+    )
+
+    assert response.status_code == 500
