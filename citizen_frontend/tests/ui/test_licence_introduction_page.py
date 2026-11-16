@@ -1,9 +1,25 @@
 import os
+from copy import deepcopy
 from urllib.parse import urlparse
 
+import pytest
+from conftest import TEST_CUSTOMISATION_VARIABLE_FEE
 from django.urls import reverse
 
+from citizen_frontend.repository import interaction_customisation_repository
+
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
+
+
+@pytest.fixture
+def mock_find_published_customisation_with_variable_fee(mocker):
+    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
+        interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
+    return mock_find_published_customisation_with_fixed_fee
 
 
 def test_page_has_correct_headings(

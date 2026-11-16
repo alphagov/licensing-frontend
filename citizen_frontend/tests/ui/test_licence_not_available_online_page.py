@@ -1,3 +1,18 @@
+import pytest
+
+from citizen_frontend.repository import interaction_customisation_repository
+
+
+@pytest.fixture
+def mock_find_published_customisation_returns_none(mocker):
+    mock_find_published_customisation = mocker.patch.object(
+        interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation.return_value = None
+
+
 def test_email_visible_when_authority_has_email(
     get_dom_parser,
     test_introduction_page_url,

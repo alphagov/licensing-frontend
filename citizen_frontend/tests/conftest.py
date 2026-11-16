@@ -446,23 +446,18 @@ def mock_lookup_service(mocker):
 
 
 @pytest.fixture
-def licence_interaction_context():
-    return (
-        deepcopy(TEST_LICENCE),
-        deepcopy(TEST_AUTHORITY),
-        deepcopy(TEST_LICENCE_INTERACTION),
-        deepcopy(TEST_LICENCE_DETAIL),
-    )
-
-
-@pytest.fixture
-def mock_get_licence_interaction_context(mocker, licence_interaction_context):
+def mock_get_licence_interaction_context(mocker):
     mock_get_context = mocker.patch.object(
         licence_lookup_service,
         "get_licence_interaction_context",
         autospec=True,
     )
-    mock_get_context.return_value = licence_interaction_context
+    mock_get_context.return_value = (
+        deepcopy(TEST_LICENCE),
+        deepcopy(TEST_AUTHORITY),
+        deepcopy(TEST_LICENCE_INTERACTION),
+        deepcopy(TEST_LICENCE_DETAIL),
+    )
     return mock_get_context
 
 
@@ -478,17 +473,6 @@ def mock_find_published_customisation_with_fixed_fee(mocker):
 
 
 @pytest.fixture
-def mock_find_published_customisation_with_variable_fee(mocker):
-    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    return mock_find_published_customisation_with_fixed_fee
-
-
-@pytest.fixture
 def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee = mocker.patch.object(
         interaction_customisation_repository,
@@ -497,13 +481,3 @@ def mock_find_published_customisation_with_no_fee(mocker):
     )
     mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_NO_FEE)
     return mock_find_published_customisation_with_no_fee
-
-
-@pytest.fixture
-def mock_find_published_customisation_returns_none(mocker):
-    mock_find_published_customisation = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation.return_value = None
