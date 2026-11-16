@@ -88,6 +88,7 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
 
     assert application_form["Body"].read() == expected_content
 
+    # Raise error because object does not exist.
     with pytest.raises(ClientError):
         mock_s3_client.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/supporting_document_0.pdf")
 

@@ -6,6 +6,10 @@ services:
       - PASSWORD=${DOCUMENTDB_PASSWORD:-password}
     ports:
       - ${DOCUMENTDB_PORT:-10260}:10260
+  ministack:
+    image: ministackorg/ministack:latest
+    ports:
+      - "4566:4566"
   citizen_frontend:
     depends_on:
       - document_db

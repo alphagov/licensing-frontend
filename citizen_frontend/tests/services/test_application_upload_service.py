@@ -19,7 +19,7 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
         name="application.pdf", content_type="application/pdf", content=expected_content
     )
 
-    mock_application_upload_service.upload_document(mock_application)
+    mock_application_upload_service.upload_document(mock_application, TEST_UUID)
 
     file = mock_s3_client.get_object(
         Bucket="test-bucket",
@@ -28,7 +28,7 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
     assert file["Body"].read() == expected_content
 
 
-def test_application_handles_supported_documents(mock_application_upload_service, mocker):
+def test_application_handles_supported_documents(mock_application_upload_service, mocker, mock_uuid):
     mocker.patch.object(mock_application_upload_service, "upload_document")
     expected_content = b"%PDF-1.4 fake pdf content"
 
@@ -37,10 +37,10 @@ def test_application_handles_supported_documents(mock_application_upload_service
         SimpleUploadedFile(name="supporting_1.pdf", content_type="application/pdf", content=expected_content),
     ]
 
-    mock_application_upload_service.handle_supporting_documents(supporting_documents)
+    mock_application_upload_service.handle_supporting_documents(supporting_documents, TEST_UUID)
 
     mock_application_upload_service.upload_document.assert_has_calls(
-        [mocker.call(document=supporting_document) for supporting_document in supporting_documents]
+        [mocker.call(document=supporting_document, upload_id=TEST_UUID) for supporting_document in supporting_documents]
     )
 
 
