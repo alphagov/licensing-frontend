@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.decorators.cache import never_cache
 
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
@@ -7,6 +8,7 @@ from common.models.shared_models import PaymentAmount
 from django.http import Http404
 
 
+@never_cache
 def application_uploaded(request):
 
     application_ref = request.GET.get("id")
