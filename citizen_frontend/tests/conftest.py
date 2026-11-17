@@ -112,6 +112,16 @@ def mock_get_licence(mocker):
     yield mock_get
 
 
+@pytest.fixture
+def mock_authority_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "authority_repository", autospec=True)
+
+
+@pytest.fixture
+def mock_licence_repository(mocker):
+    return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
+
+
 TEST_LICENCE_CODE = "1234-5-6"
 TEST_SNAC_CODE = "SNAC"
 
@@ -194,7 +204,7 @@ TEST_LICENCE = Licence(
         ),
         LicenceInteraction(
             interaction_id=InteractionIdCodes.APPLY.value,
-            interaction_sub_id=1,
+            interaction_sub_id=2,
             licence_interaction_name="Application for a Test Licence",
             form=LicenceForm(
                 name="Test Licence Form 2",
@@ -258,7 +268,7 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
     legislation_name="test-legislation",
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
-    department=bson.ObjectId(),
+    department=bson.ObjectId("50c8520393867870cb0d775f"),
     information_url="https://test-information.com",
     guidance_url="https://test-guidance.com",
     supporting_document_definitions=[
@@ -345,6 +355,20 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
     ],
 )
 
+TEST_DEPARTMENT = Department(
+    authority_slug=TEST_AUTHORITY.url_slug,
+    name="Test Department",
+    helpline_phone_number=TEST_AUTHORITY.contact_details.phone_number,
+    helpline_email_address=TEST_AUTHORITY.contact_details.email,
+    address_line_1=TEST_AUTHORITY.contact_details.line_one,
+    address_line_2=TEST_AUTHORITY.contact_details.line_two,
+    address_line_3=TEST_AUTHORITY.contact_details.line_three,
+    address_line_4=TEST_AUTHORITY.contact_details.city,
+    postcode=TEST_AUTHORITY.contact_details.post_code,
+    notification_email_address="notify@email.com",
+    default_privacy_notice_url="test-privacy-notice-url",
+)
+
 TEST_LICENCE_APPLICATION = LicenceApplication(
     applicant_email="test@email.com",
     authority=TEST_AUTHORITY.full_name,
@@ -387,20 +411,6 @@ TEST_PAYMENT = Payment(
     request_url="https://example.com",
 )
 
-TEST_DEPARTMENT = Department(
-    authority_slug=TEST_AUTHORITY.url_slug,
-    name="Test Department",
-    helpline_phone_number=TEST_AUTHORITY.contact_details.phone_number,
-    helpline_email_address=TEST_AUTHORITY.contact_details.email,
-    address_line_1=TEST_AUTHORITY.contact_details.line_one,
-    address_line_2=TEST_AUTHORITY.contact_details.line_two,
-    address_line_3=TEST_AUTHORITY.contact_details.line_three,
-    address_line_4=TEST_AUTHORITY.contact_details.city,
-    postcode=TEST_AUTHORITY.contact_details.post_code,
-    notification_email_address="notify@email.com",
-    default_privacy_notice_url="test-privacy-notice-url",
-)
-
 
 @pytest.fixture
 def mock_lookup_service(mocker):
@@ -410,7 +420,7 @@ def mock_lookup_service(mocker):
 
 @pytest.fixture
 def licence_interaction_context():
-    return (
+    yield (
         deepcopy(TEST_LICENCE),
         deepcopy(TEST_AUTHORITY),
         deepcopy(TEST_LICENCE_INTERACTION),

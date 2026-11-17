@@ -18,6 +18,15 @@ DOCUMENTDB_PORT = "10260" # The port to bind to the documentDB endpoint to on yo
 DOCUMENTDB_IMAGE = "ghcr.io/documentdb/documentdb/documentdb-local@sha256:8c8a716e27f398b03c397424c4ddd901bddbc22b9f910b17096b0b246c7c9011" # pg17-0.114.0
 DOCUMENTDB_ALLOW_INVALID_CERTS = "true"
 
+APTO_REQUEST_BASE_URL = "https://apto_ip:port/gds_licensify_endpoint"
+APTO_MAX_HTTP_CONNECTIONS = "128"
+APTO_MAX_CONNECTIONS_PER_ROUTE = "16"
+
+# Pytho sessions and adapters use timeouts in seconds not miliseconds
+APTO_CONNECTION_TIMEOUT = "3.05"
+APTO_SOCKET_TIMEOUT = "3"
+#APTO_CONNECT_REQUEST_TIMEOUT = "2"
+
 AWS_ACCESS_KEY_ID='testing'
 AWS_SECRET_ACCESS_KEY='testing'
 AWS_SECURITY_TOKEN='testing'
