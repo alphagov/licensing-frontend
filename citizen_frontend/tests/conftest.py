@@ -367,7 +367,7 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     authority_application_reference="test application reference",
     expected_processing_date=now() + timedelta(days=7),
     has_tacit_consent=True,
-    required_payment_amount=PaymentAmount(),
+    required_payment_amount=PaymentAmount(pence=500),
     is_fee_required=False,
     has_variable_fee=False,
     payment_reference_id="test payment reference id",

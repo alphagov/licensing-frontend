@@ -50,7 +50,7 @@ def test_application_uploaded_returns_success_page_when_id_matches_session_ids(
     assertTemplateUsed(response, expected_template)
 
 
-def test_application_uploaded_returns_provide_fee_page_when_required_payment_is_none(
+def test_application_uploaded_returns_provide_fee_page_when_payment_required_but_amount_is_none(
         session_client, mock_get_details
 ):
     application = deepcopy(TEST_LICENCE_APPLICATION)
@@ -61,3 +61,14 @@ def test_application_uploaded_returns_provide_fee_page_when_required_payment_is_
 
     assert response.status_code == 200
     assertTemplateUsed(response, "citizen_frontend/licence_application_provide_fee_amount_page.html")
+
+
+def test_application_uploaded_returns_prepayment_page_when_required_payment_amount_provided(
+        session_client, mock_get_details
+):
+    mock_get_details.return_value = (TEST_LICENCE_APPLICATION, TEST_CUSTOMISATION_FIXED_FEE)
+
+    response = session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
+
+    assert response.status_code == 200
+    assertTemplateUsed(response, "citizen_frontend/licence_application_prepayment_page.html")
