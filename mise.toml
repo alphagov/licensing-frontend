@@ -24,4 +24,3 @@ AWS_SECURITY_TOKEN ='test'
 AWS_SESSION_TOKEN ='test'
 AWS_DEFAULT_REGION ='us-east-1'
 S3_BUCKET = "test-bucket"
-S3_ENDPOINT_URL = "http://ministack:4566"

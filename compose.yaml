@@ -32,7 +32,7 @@ services:
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-testing}
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
       S3_BUCKET: ${S3_BUCKET:-test-bucket}
-      S3_ENDPOINT_URL: ${S3_ENDPOINT_URL:-http://ministack:4566}
+      S3_ENDPOINT_URL: http://ministack:4566
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:
