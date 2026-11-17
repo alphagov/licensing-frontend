@@ -26,6 +26,11 @@ def mock_application_repo(mocker):
     yield mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository")
 
 
+@pytest.fixture
+def mock_get_application_from_id(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository.get_application_from_id")
+
+
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):
     response = client.get(reverse("application_uploaded"))
     assert response.status_code == 404
@@ -79,7 +84,21 @@ def test_application_uploaded_returns_prepayment_page_when_required_payment_amou
     assertTemplateUsed(response, "citizen_frontend/licence_application_prepayment_page.html")
 
 
-def test_get_details_returns_application_from_id(session_client, mock_application_repo):
+def test_get_details_calls_correct_repository_to_get_application_from_id(session_client, mock_application_repo):
     session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
     mock_application_repo.get_application_from_id.assert_called()
+
+
+def test_get_details_calls_licence_look_up_service_with_correct_args(
+        session_client, mock_get_application_from_id, mock_get_licence_interaction_context
+):
+    mock_get_application_from_id.return_value=TEST_LICENCE_APPLICATION
+
+    session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
+
+    mock_get_licence_interaction_context.assert_called_with(
+        TEST_LICENCE_APPLICATION.authority,
+        TEST_LICENCE_APPLICATION.licence,
+        TEST_LICENCE_APPLICATION.service.interaction_id,
+        TEST_LICENCE_APPLICATION.service.interaction_sub_id)

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
@@ -38,6 +39,9 @@ def application_uploaded(request):
 def get_details(application_ref):
     application_repo = LicenceApplicationRepository()
     application = application_repo.get_application_from_id(application_ref)
+    licence, authority, interaction, _ = licence_lookup_service.get_licence_interaction_context(
+        application.authority, application.licence, application.service.interaction_id, application.service.interaction_sub_id
+    )
     customisation = Customisation(is_fee_required=False)
     return application, customisation
 
