@@ -21,6 +21,11 @@ def mock_get_details(mocker):
     yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_details")
 
 
+@pytest.fixture
+def mock_application_repo(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.ApplicationRepository")
+
+
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):
     response = client.get(reverse("application_uploaded"))
     assert response.status_code == 404
@@ -72,3 +77,9 @@ def test_application_uploaded_returns_prepayment_page_when_required_payment_amou
 
     assert response.status_code == 200
     assertTemplateUsed(response, "citizen_frontend/licence_application_prepayment_page.html")
+
+
+def test_get_details_returns_application_from_id(session_client, mock_application_repo):
+    session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
+
+    mock_application_repo.get_application_from_id.assert_called()

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
+from citizen_frontend.repository.application_repository import ApplicationRepository
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
@@ -34,9 +35,10 @@ def application_uploaded(request):
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
 
-
 def get_details(application_ref):
-    pass
+    application = ApplicationRepository.get_application_from_id(application_ref)
+    customisation = Customisation(is_fee_required=False)
+    return application, customisation
 
 
 def mock_no_fee_context():
