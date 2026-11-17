@@ -62,6 +62,8 @@ def generate_application_form(
                 upload_service = ApplicationUploadService()
                 upload_service.handle_form_submission(request.FILES)
 
+                return JsonResponse(status=201, data="Successfully submitted form", safe=False)
+
         else:
             form = ApplicationSubmissionForm(
                 published_customisation=context.get("published_customisation"),

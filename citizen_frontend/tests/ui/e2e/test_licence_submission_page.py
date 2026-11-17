@@ -8,6 +8,27 @@ This requires a seeded_db to run
 """
 
 
+@pytest.fixture
+def ministack_s3():
+    s3 = boto3.client(
+        "s3",
+        endpoint_url="http://localhost:4566",
+        region_name="us-east-1",
+        aws_access_key_id="testing",
+        aws_secret_access_key="testing",
+    )
+    s3.create_bucket(Bucket="test-bucket")
+
+    yield
+
+    content = s3.list_objects(Bucket="test-bucket")["Contents"]
+
+    for object in content:
+        s3.delete_object(Bucket="test-bucket", Key=object["Key"])
+
+    s3.delete_bucket(Bucket="test-bucket")
+
+
 def test_page_has_correct_headings(page: Page):
     page.goto(f"{BASE_URL}{TEST_TEMP_EVENT_APPLY_FORM_URL}")
 
@@ -107,42 +128,25 @@ def test_email_fields_show_error_email_do_not_match(page: Page):
     expect(email_field).to_have_attribute("class", "govuk-input govuk-input--error")
 
 
-def test_form_submission(page: Page, mock_uuid):
-
-    s3 = boto3.client(
-        "s3",
-        endpoint_url="http://localhost:4566",
-        region_name="us-east-1",
-        aws_access_key_id="testing",
-        aws_secret_access_key="testing",
-    )
-    s3.create_bucket(Bucket="test-bucket")
-
+def test_form_submission(page: Page, ministack_s3):
     page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/york/apply-1/form")
 
     page.get_by_test_id("email-field").fill("example@email.com")
     page.get_by_test_id("confirmation-email-field").fill("example@email.com")
 
     application_upload = page.get_by_test_id("application-upload")
-
     application_upload.set_input_files("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf")
 
     declaration_checkbox = page.get_by_test_id("declaration-checkbox")
     declaration_checkbox.click()
 
-    page.get_by_test_id("submit-button").click()
+    with page.expect_response("**/apply-for-a-licence/temporary-event-notice/york/apply-1/form") as response_info:
+        page.get_by_test_id("submit-button").click()
 
-    # with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as pdf_file:
-    # upload_doc = s3.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/test.txt")["Body"]
-    # assert upload_doc.read() == expected
-    content = s3.list_objects(Bucket="test-bucket")["Contents"]
+    response = response_info.value
 
-    assert len(content) == 1
-
-    for object in content:
-        s3.delete_object(Bucket="test-bucket", Key=object["Key"])
-
-    s3.delete_bucket(Bucket="test-bucket")
+    assert response.status == 201
+    assert response.json() == "Successfully submitted form"
 
 
 def test_redirect_after_submission_customisation_has_fee():
