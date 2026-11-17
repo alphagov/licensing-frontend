@@ -4,7 +4,7 @@ import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
-from conftest import TEST_LICENCE_APPLICATION, TEST_CUSTOMISATION_FIXED_FEE
+from conftest import TEST_LICENCE_APPLICATION, TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_NO_FEE
 
 
 @pytest.fixture
@@ -39,8 +39,11 @@ def test_application_uploaded_returns_404_when_id_not_in_session(client):
     ]
 )
 def test_application_uploaded_returns_success_page_when_id_matches_session_ids(
-        session_client, app_ref, expected_template
+        session_client, mock_get_details, app_ref, expected_template
 ):
+    application = deepcopy(TEST_LICENCE_APPLICATION)
+    application.required_payment_amount = None
+    mock_get_details.return_value = (application,TEST_CUSTOMISATION_NO_FEE)
     response = session_client.get(reverse("application_uploaded", query={"id": app_ref}))
 
     assert response.status_code == 200
@@ -52,10 +55,8 @@ def test_application_uploaded_returns_provide_fee_page_when_required_payment_is_
 ):
     application = deepcopy(TEST_LICENCE_APPLICATION)
     application.required_payment_amount = None
-    mock_get_details.return_value = {
-        "application": application,
-        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
-    }
+    mock_get_details.return_value = (application, TEST_CUSTOMISATION_FIXED_FEE)
+
     response = session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
     assert response.status_code == 200

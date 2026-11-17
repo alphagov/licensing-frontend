@@ -18,8 +18,15 @@ def application_uploaded(request):
     if application_ref not in application_refs:
         raise Http404("Application id not in session")
 
-    context = mock_no_fee_context()
-    return render(request, "citizen_frontend/licence_submission_success_page.html", context)
+    application, customisation = get_details(application_ref)
+
+    if customisation.is_fee_required:
+        if application.required_payment_amount is None:
+            context = mock_provide_fee_context()
+            return render(request, "citizen_frontend/licence_application_provide_fee_amount_page.html", context)
+    else:
+        context = mock_no_fee_context()
+        return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
 
 
@@ -30,6 +37,9 @@ def get_details(application_ref):
 def mock_no_fee_context():
     pass
 
+
+def mock_provide_fee_context():
+    pass
 
 def mock_prepayment_context():
     authority = Authority(name="Test Authority", full_name="Test Authority for testing with")
