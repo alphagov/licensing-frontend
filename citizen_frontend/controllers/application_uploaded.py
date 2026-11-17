@@ -5,24 +5,22 @@ from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
-from django.http.response import HttpResponse
 
 
 def application_uploaded(request):
-    try:
-        application_ref = request.GET.get("id")
 
-        if application_ref is None:
-            raise Http404("No application in session") from None
+    application_ref = request.GET.get("id")
 
-        application_refs = request.session.get("applicationReferenceNumbers", [])
-        if application_ref not in application_refs:
-            raise Http404("No application references found") from None
+    if application_ref is None:
+        raise Http404("No application id provided")
 
-        context = mock_no_fee_context()
-        return render(request, "citizen_frontend/licence_submission_success_page.html", context)
-    except Http404:
-        raise
+    application_refs = request.session.get("applicationReferenceNumbers", [])
+    if application_ref not in application_refs:
+        raise Http404("Application id not in session")
+
+    context = mock_no_fee_context()
+    return render(request, "citizen_frontend/licence_submission_success_page.html", context)
+
 
 
 def get_details(application_ref):

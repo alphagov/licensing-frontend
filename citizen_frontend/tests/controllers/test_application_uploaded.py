@@ -1,17 +1,24 @@
+from copy import deepcopy
+
 import pytest
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
-from citizen_frontend.controllers.application_uploaded import application_uploaded
+from conftest import TEST_LICENCE_APPLICATION, TEST_CUSTOMISATION_FIXED_FEE
 
 
 @pytest.fixture
 def session_client(client, settings):
     settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
     session = client.session
-    session["applicationReferenceNumbers"] = ["ApplicationRef1", "ApplicationRef2"]
+    session["applicationReferenceNumbers"] = ["ApplicationRef1", "ApplicationRef2", "ApplicationRef3"]
     session.save()
     return client
+
+
+@pytest.fixture
+def mock_get_details(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_details")
 
 
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):
@@ -31,7 +38,7 @@ def test_application_uploaded_returns_404_when_id_not_in_session(client):
         ("ApplicationRef2", "citizen_frontend/licence_submission_success_page.html"),
     ]
 )
-def test_application_uploaded_returns_200_when_id_matches_session_ids(
+def test_application_uploaded_returns_success_page_when_id_matches_session_ids(
         session_client, app_ref, expected_template
 ):
     response = session_client.get(reverse("application_uploaded", query={"id": app_ref}))
@@ -39,3 +46,17 @@ def test_application_uploaded_returns_200_when_id_matches_session_ids(
     assert response.status_code == 200
     assertTemplateUsed(response, expected_template)
 
+
+def test_application_uploaded_returns_provide_fee_page_when_required_payment_is_none(
+        session_client, mock_get_details
+):
+    application = deepcopy(TEST_LICENCE_APPLICATION)
+    application.required_payment_amount = None
+    mock_get_details.return_value = {
+        "application": application,
+        "customisation": TEST_CUSTOMISATION_FIXED_FEE,
+    }
+    response = session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
+
+    assert response.status_code == 200
+    assertTemplateUsed(response, "citizen_frontend/licence_application_provide_fee_amount_page.html")
