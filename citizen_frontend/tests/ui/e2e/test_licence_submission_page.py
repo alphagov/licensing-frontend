@@ -135,6 +135,11 @@ def test_form_submission(page: Page, mock_uuid):
     # with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as pdf_file:
     # upload_doc = s3.get_object(Bucket="test-bucket", Key=f"{TEST_UUID}/test.txt")["Body"]
     # assert upload_doc.read() == expected
-    s3.list_objects(Bucket="test-bucket")["Contents"]
+    content = s3.list_objects(Bucket="test-bucket")["Contents"]
 
-    # s3.delete_bucket(Bucket="test-bucket")
+    assert len(content) == 1
+
+    for object in content:
+        s3.delete_object(Bucket="test-bucket", Key=object["Key"])
+
+    s3.delete_bucket(Bucket="test-bucket")

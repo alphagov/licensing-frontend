@@ -25,7 +25,7 @@ class DocumentStorage(ABC):
 class S3Service(DocumentStorage):
     def __init__(self):
         super().__init__()
-        self.client = boto3.client("s3")
+        self.client = boto3.client("s3", endpoint_url=os.getenv("S3_ENDPOINT_URL"))
         self.bucket_name = os.getenv("S3_BUCKET")
 
     def store_file(self, path: str, file: BinaryIO, content_type: str | None):
