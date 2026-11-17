@@ -1,9 +1,9 @@
+from common.models.licence_application import LicenceApplication
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
-from common.models.licence_application import LicenceApplication
 
 class LicenceApplicationRepository:
     def __init__(self):

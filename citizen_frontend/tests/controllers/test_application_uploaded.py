@@ -1,10 +1,9 @@
 from copy import deepcopy
 
 import pytest
+from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE_APPLICATION
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
-
-from conftest import TEST_LICENCE_APPLICATION, TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_NO_FEE
 
 
 @pytest.fixture

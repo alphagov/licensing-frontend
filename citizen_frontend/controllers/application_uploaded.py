@@ -1,13 +1,13 @@
-from django.shortcuts import render
-from django.views.decorators.cache import never_cache
-
-from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
+from django.shortcuts import render
+from django.views.decorators.cache import never_cache
+
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 
 
 @never_cache

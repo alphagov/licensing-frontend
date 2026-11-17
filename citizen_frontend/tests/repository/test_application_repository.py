@@ -1,10 +1,10 @@
 import pytest
+from conftest import TEST_LICENCE_APPLICATION
+from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
-from django.core.exceptions import ValidationError
-from conftest import TEST_LICENCE_APPLICATION
 
 
 @pytest.fixture
