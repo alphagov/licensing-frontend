@@ -23,7 +23,7 @@ def mock_get_details(mocker):
 
 @pytest.fixture
 def mock_application_repo(mocker):
-    yield mocker.patch("citizen_frontend.controllers.application_uploaded.ApplicationRepository")
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository")
 
 
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
-from citizen_frontend.repository.application_repository import ApplicationRepository
+from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.payment import Payment
@@ -36,7 +36,7 @@ def application_uploaded(request):
 
 
 def get_details(application_ref):
-    application_repo = ApplicationRepository()
+    application_repo = LicenceApplicationRepository()
     application = application_repo.get_application_from_id(application_ref)
     customisation = Customisation(is_fee_required=False)
     return application, customisation
