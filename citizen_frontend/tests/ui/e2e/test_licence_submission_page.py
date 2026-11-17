@@ -143,3 +143,15 @@ def test_form_submission(page: Page, mock_uuid):
         s3.delete_object(Bucket="test-bucket", Key=object["Key"])
 
     s3.delete_bucket(Bucket="test-bucket")
+
+
+def test_redirect_after_submission_customisation_has_fee():
+    # TODO Page does not exist yet, user should be directed to pre-payment page
+    #   entry for application and payment should be created in relevant collections
+    pass
+
+
+def test_redirect_after_submission_customisation_has_no_fee():
+    # TODO application entry should be created in collections
+    #   user should be redirected to application complete?
+    pass
