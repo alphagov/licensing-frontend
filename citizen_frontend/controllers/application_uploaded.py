@@ -36,7 +36,8 @@ def application_uploaded(request):
 
 
 def get_details(application_ref):
-    application = ApplicationRepository.get_application_from_id(application_ref)
+    application_repo = ApplicationRepository()
+    application = application_repo.get_application_from_id(application_ref)
     customisation = Customisation(is_fee_required=False)
     return application, customisation
 
