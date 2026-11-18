@@ -39,19 +39,29 @@ def test_application_handles_supported_documents(mock_application_upload_service
         mock_application_upload_service, "create_supporting_document_entry_objects"
     )
 
-    supporting_documents = [
-        SimpleUploadedFile(name="supporting_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT),
-        SimpleUploadedFile(name="supporting_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT),
-    ]
+    supporting_documents = {
+        "supporting_document_0": SimpleUploadedFile(
+            name="supporting_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+        ),
+        "supporting_document_1": SimpleUploadedFile(
+            name="supporting_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+        ),
+    }
 
     mock_application_upload_service.handle_supporting_documents(
-        supporting_documents, TEST_UUID, TEST_CUSTOMISATION_NO_FEE
+        supporting_documents, TEST_UUID, TEST_CUSTOMISATION_NO_FEE, True
     )
 
     mock_application_upload_service.upload_document.assert_has_calls(
         [
-            mocker.call(document=supporting_documents[0], path=f"{TEST_UUID}/{supporting_documents[0].name}"),
-            mocker.call(document=supporting_documents[1], path=f"{TEST_UUID}/{supporting_documents[1].name}"),
+            mocker.call(
+                document=supporting_documents["supporting_document_0"],
+                path=f"{TEST_UUID}/{supporting_documents['supporting_document_0'].name}",
+            ),
+            mocker.call(
+                document=supporting_documents["supporting_document_1"],
+                path=f"{TEST_UUID}/{supporting_documents['supporting_document_1'].name}",
+            ),
         ]
     )
 

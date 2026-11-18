@@ -26,8 +26,11 @@ class ApplicationUploadService:
         )
 
         if supporting_documents_online:
-            supporting_documents = [file for key, file in files.items() if key.startswith("supporting_document_")]
-            self.handle_supporting_documents(supporting_documents, upload_id, customisation)
+            # change this to dict so can get the upload number out
+            supporting_documents = {key: file for key, file in files.items() if key.startswith("supporting_document_")}
+            self.handle_supporting_documents(
+                supporting_documents, upload_id, customisation, supporting_documents_online
+            )
 
         application_reference = self.licence_application_repository.create_new_licence_application(application_document)
         return application_reference
@@ -40,37 +43,48 @@ class ApplicationUploadService:
 
         return application_document
 
-    def handle_supporting_documents(self, documents, upload_id: str, customisation: Customisation):
+    def handle_supporting_documents(
+        self, documents, upload_id: str, customisation: Customisation, supporting_document_online: bool
+    ):
         logger.info("Uploading supporting documents")
         supporting_document_object_entries = self.create_supporting_document_entry_objects(
-            files=documents, customisation=customisation, upload_id=upload_id
+            files=documents,
+            customisation=customisation,
+            upload_id=upload_id,
+            supporting_documents_online=supporting_document_online,
         )
-        for document in documents:
-            self.upload_document(document=document, path=f"{upload_id}/{document.name}")
+        for _key, value in documents.items():
+            self.upload_document(document=value, path=f"{upload_id}/{value.name}")
 
         return supporting_document_object_entries
 
     def upload_document(self, document: SimpleUploadedFile, path: str):
         self.document_store.store_file(path=path, file=document, content_type=document.content_type)
 
-    def create_supporting_document_entry_objects(self, files: list[SimpleUploadedFile], customisation, upload_id: str):
+    def create_supporting_document_entry_objects(
+        self, files: dict[str, SimpleUploadedFile], customisation, upload_id: str, supporting_documents_online: bool
+    ):
+
+        if not supporting_documents_online:
+            return [
+                SupportingDocument(definition=supporting_document_definition)
+                for supporting_document_definition in customisation.supporting_document_definitions
+            ]
+
         supporting_document_entries = []
 
         for index, supporting_document_definition in enumerate(customisation.supporting_document_definitions):
-            if files and supporting_document_definition.is_mandatory:
+            file = files.get("supporting_document_" + str(index))
+            if file:
                 entry = SupportingDocument(
-                    _id=f"{upload_id}/{files[index].name}",
-                    file_name=files[index].name,
+                    _id=f"{upload_id}/{file.name}",
+                    file_name=file.name,
                     definition=supporting_document_definition,
                 )
-                supporting_document_entries.append(entry)
-
             else:
-                supporting_document_entries.append(
-                    SupportingDocument(
-                        definition=supporting_document_definition,
-                    )
-                )
+                entry = SupportingDocument(definition=supporting_document_definition)
+            supporting_document_entries.append(entry)
+
         return supporting_document_entries
 
     def create_application_document(self, application_file: SimpleUploadedFile, upload_id: str) -> SupportingDocument:
