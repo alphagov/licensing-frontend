@@ -40,7 +40,10 @@ def get_details(application_ref):
     application_repo = LicenceApplicationRepository()
     application = application_repo.get_application_from_id(application_ref)
     licence, authority, interaction, _ = licence_lookup_service.get_licence_interaction_context(
-        application.authority, application.licence, application.service.interaction_id, application.service.interaction_sub_id
+        application.authority,
+        application.licence,
+        application.service.interaction_id,
+        application.service.interaction_sub_id,
     )
     customisation = Customisation(is_fee_required=False)
     return application, customisation
@@ -52,6 +55,7 @@ def mock_no_fee_context():
 
 def mock_provide_fee_context():
     pass
+
 
 def mock_prepayment_context():
     authority = Authority(name="Test Authority", full_name="Test Authority for testing with")

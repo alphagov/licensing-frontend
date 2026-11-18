@@ -13,9 +13,8 @@ def mock_repository(mocker):
     mocker.patch.object(repo.model.objects, "get")
     return repo
 
-def test_get_application_from_id_calls_database_with_correct_method_and_args(
-        mock_repository
-):
+
+def test_get_application_from_id_calls_database_with_correct_method_and_args(mock_repository):
     mock_repository.get_application_from_id("ApplicationRef1")
 
     mock_repository.model.objects.get.assert_called()

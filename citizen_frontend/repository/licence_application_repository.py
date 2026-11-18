@@ -11,7 +11,7 @@ class LicenceApplicationRepository:
 
     def get_application_from_id(self, application_id):
         try:
-            application = self.model.objects.get(application_reference_number = application_id)
+            application = self.model.objects.get(application_reference_number=application_id)
             application.clean_fields()
             return application
         except ValidationError as e:
