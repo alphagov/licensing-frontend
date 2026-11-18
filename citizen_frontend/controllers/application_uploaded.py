@@ -1,5 +1,7 @@
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
+from common.models.licence_application import LicenceApplication
+from common.models.licence import Licence
 from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
@@ -23,7 +25,7 @@ def application_uploaded(request):
     if application_ref not in application_refs:
         raise Http404("Application id not in session")
 
-    application, customisation = get_details(application_ref)
+    application, licence, authority, interaction, customisation = get_details(application_ref)
 
     if customisation.is_fee_required:
         if application.required_payment_amount is None:
@@ -33,7 +35,7 @@ def application_uploaded(request):
             context = mock_prepayment_context()
             return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
     else:
-        context = mock_no_fee_context()
+        context = build_no_fee_context(application, licence, authority, customisation)
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
 
@@ -52,11 +54,38 @@ def get_details(application_ref):
         application.service.interaction_id,
         application.service.interaction_sub_id,
     )
-    return application, customisation
+    return application, licence, authority, interaction, customisation
 
 
-def mock_no_fee_context():
-    pass
+def format_processing_days(customisation: Customisation):
+    number = customisation.number_of_days_to_process
+    day_type = "working" if customisation.is_processing_days_working_days else "calendar"
+    unit = "days" if number > 1 else "day"
+    return f"{number} {day_type} {unit}"
+#TODO: move this to customisation model?
+
+
+def all_docs_mandatory(customisation: Customisation):
+    docs = customisation.supporting_document_definitions.all()
+    return bool(docs) and all(doc.is_mandatory for doc in docs)
+#TODO: move this to customisation model?
+
+
+def build_no_fee_context(application: LicenceApplication, licence: Licence, authority: Authority, customisation: Customisation):
+    formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
+    has_supporting_documents = customisation.supporting_document_definitions
+    all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
+    processing_days = format_processing_days(customisation)
+    return {
+        "licence_name": licence.name,
+        "authority": authority,
+        "published_customisation": customisation,
+        "application": application,
+        "expected_processing_date": formatted_expected_processing_date,
+        "has_supporting_documents": has_supporting_documents,
+        "all_supporting_documents_required": all_supporting_documents_required,
+        "processing_days": processing_days
+    }
 
 
 def mock_provide_fee_context():
