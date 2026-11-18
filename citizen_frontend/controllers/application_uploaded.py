@@ -7,6 +7,7 @@ from django.shortcuts import render
 from django.views.decorators.cache import never_cache
 
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
+import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 
 
@@ -45,7 +46,12 @@ def get_details(application_ref):
         application.service.interaction_id,
         application.service.interaction_sub_id,
     )
-    customisation = Customisation(is_fee_required=False)
+    customisation = interaction_customisation_repository.find_published_customisation(
+        application.authority,
+        application.service.licence_code,
+        application.service.interaction_id,
+        application.service.interaction_sub_id,
+    )
     return application, customisation
 
 

@@ -1,12 +1,10 @@
 from copy import deepcopy
 
 import pytest
-
 from conftest import (
     TEST_CUSTOMISATION_FIXED_FEE,
     TEST_CUSTOMISATION_NO_FEE,
     TEST_LICENCE_APPLICATION,
-    mock_get_licence_interaction_context,
 )
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
@@ -89,15 +87,22 @@ def test_application_uploaded_returns_prepayment_page_when_required_payment_amou
 
 
 def test_get_details_calls_correct_repository_to_get_application_from_id(
-    session_client, mock_application_repo, mock_get_licence_interaction_context
+    session_client,
+    mock_application_repo,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee
 ):
+    mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
     session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
     mock_application_repo.get_application_from_id.assert_called()
 
 
 def test_get_details_calls_licence_look_up_service_with_correct_args(
-    session_client, mock_application_repo, mock_get_licence_interaction_context
+    session_client,
+    mock_application_repo,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee
 ):
     mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
 
@@ -106,6 +111,24 @@ def test_get_details_calls_licence_look_up_service_with_correct_args(
     mock_get_licence_interaction_context.assert_called_with(
         TEST_LICENCE_APPLICATION.authority,
         TEST_LICENCE_APPLICATION.licence,
+        TEST_LICENCE_APPLICATION.service.interaction_id,
+        TEST_LICENCE_APPLICATION.service.interaction_sub_id,
+    )
+
+
+def test_get_details_calls_interaction_customisation_repository_with_correct_args(
+        session_client,
+        mock_application_repo,
+        mock_get_licence_interaction_context,
+        mock_find_published_customisation_with_fixed_fee
+):
+    mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
+
+    session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
+
+    mock_find_published_customisation_with_fixed_fee.assert_called_with(
+        TEST_LICENCE_APPLICATION.authority,
+        TEST_LICENCE_APPLICATION.service.licence_code,
         TEST_LICENCE_APPLICATION.service.interaction_id,
         TEST_LICENCE_APPLICATION.service.interaction_sub_id,
     )

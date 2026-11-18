@@ -40,6 +40,9 @@ TEST_INTERACTION = LicenceInteractions.APPLY
 TEST_INTERACTION_SUB_ID = "1"
 TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
+TEST_LICENCE_CODE = "1234-5-6"
+TEST_SNAC_CODE = "SNAC"
+
 
 TEST_TEMP_EVENT_APPLY_URL = (
     f"{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
@@ -111,9 +114,6 @@ def mock_get_licence(mocker):
     mock_get = mocker.patch.object(Licence.objects, "get")
     yield mock_get
 
-
-TEST_LICENCE_CODE = "1234-5-6"
-TEST_SNAC_CODE = "SNAC"
 
 TEST_LICENCE_DETAIL = LicenceDetail(
     licence_code=TEST_LICENCE_CODE,
@@ -348,7 +348,7 @@ TEST_LICENCE_AUTH_AND_INTERACTION_RESPONSE = LicenceAuthoritiesAndInteractionsRe
 TEST_LICENCE_APPLICATION = LicenceApplication(
     applicant_email="test@email.com",
     authority=TEST_AUTHORITY.full_name,
-    licence=TEST_LICENCE.id,
+    licence=TEST_LICENCE.url_slug,
     has_supporting_documents_online=True,
     application_pdf=SupportingDocument(
         definition=SupportingDocumentDefinition(), _id=ObjectId(), virus_check_status=VirusCheckStatus.CLEAN.value
