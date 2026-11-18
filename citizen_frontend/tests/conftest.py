@@ -65,6 +65,8 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 
 TEST_UUID = UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479")
 
+TEST_OBJECT_ID = ObjectId("50c8520393867870cb0d775f")
+
 
 @pytest.fixture
 def mock_uuid(mocker):
@@ -171,7 +173,7 @@ TEST_LICENCE_DETAIL = LicenceDetail(
 
 
 TEST_AUTHORITY = Authority(
-    _id=ObjectId("50c8520393867870cb0d775f"),
+    _id=TEST_OBJECT_ID,
     name="Test Authority",
     url_slug="test-authority",
     full_name="Test Authority for testing with",
@@ -210,7 +212,7 @@ TEST_LICENCE_INTERACTION = LicenceInteraction(
 )
 
 TEST_LICENCE = Licence(
-    _id=ObjectId("50c8520393867870cb0d775f"),
+    _id=TEST_OBJECT_ID,
     name="Test Licence",
     licence_code=TEST_LICENCE_CODE,
     legislation_name=["Licensing Act 2003"],
@@ -305,7 +307,7 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
     legislation_name="test-legislation",
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
-    department=bson.ObjectId("50c8520393867870cb0d775f"),
+    department=TEST_OBJECT_ID,
     information_url="https://test-information.com",
     guidance_url="https://test-guidance.com",
     supporting_document_definitions=[

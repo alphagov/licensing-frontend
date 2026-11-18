@@ -60,7 +60,11 @@ def generate_application_form(
 
             if form.is_valid():
                 upload_service = ApplicationUploadService()
-                upload_service.handle_form_submission(request.FILES)
+                application_reference = upload_service.handle_form_submission(request.FILES)
+
+                application_references = request.session.get("applicationReferenceNumbers", [])
+                application_references.append(application_reference)
+                request.session["applicationReferenceNumbers"] = application_references
 
                 return JsonResponse(status=201, data="Successfully submitted form", safe=False)
 
