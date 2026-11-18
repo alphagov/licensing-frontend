@@ -1,7 +1,13 @@
 import pytest
 from common.models.licence_application import SupportingDocument
 from common.models.shared_models import SupportingDocumentDefinition
-from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_UUID
+from conftest import (
+    TEST_AUTHORITY,
+    TEST_CUSTOMISATION_NO_FEE,
+    TEST_LICENCE,
+    TEST_LICENCE_INTERACTION,
+    TEST_UUID,
+)
 from django.core.files.uploadedfile import SimpleUploadedFile
 
 from citizen_frontend.services.application_upload_service import ApplicationUploadService
@@ -70,18 +76,34 @@ def test_application_handles_supported_documents(mock_application_upload_service
 
 # def test_create_supporting_document_entry_objects(mock_application_upload_service, mock_s3):
 #
-#     supporting_documents = [
-#         SimpleUploadedFile(name="supporting_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT),
-#         SimpleUploadedFile(name="supporting_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT),
-#     ]
+#     supporting_documents = {
+#         "supporting_document_0": SimpleUploadedFile(
+#             name="supporting_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+#         ),
+#         "supporting_document_1": SimpleUploadedFile(
+#             name="supporting_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+#         ),
+#     }
 #
-#     expected = [
-#         SupportingDocument(
-#             id=f"{TEST_UUID}/{supporting_documents[0].name}",
-#             file_name=supporting_documents[0].name,
 #
-#         )
-#     ]
+# #
+# #     expected = [
+# #         SupportingDocument(
+# #             id=f"{TEST_UUID}/{supporting_documents[0].name}",
+# #             file_name=supporting_documents[0].name,
+# #
+# #         )
+# #     ]
+
+
+def test_create_supporting_document_entry_objects_supporting_documents_offline():
+    # Opportunity for a refactor here, we do a double check on supporting documents online
+    pass
+
+
+def test_create_supporting_document_entry_objects_handles_optionals():
+    # Not sure how valuable this test is here
+    pass
 
 
 def test_create_application_document_returns_expected_object(mock_application_upload_service, mock_uuid):
@@ -108,26 +130,63 @@ def test_application_upload_service_virus_scans_files_before_uploading():
 
 
 def test_application_upload_service_handles_s3_failures():
+    # handled at the controller level => bubble up
     pass
 
 
-def skip_test_handle_submission_creates_new_entry_in_licence_applications_no_fee_online_documents(
-    mock_application_upload_service, mock_s3
+def test_handle_submission_creates_new_entry_in_licence_applications(
+    mock_application_upload_service, mock_s3, mock_uuid, mocker
 ):
+
+    supporting_docs = mocker.patch.object(
+        mock_application_upload_service,
+        "create_supporting_document_entry_objects",
+        return_value=[
+            SupportingDocument(definition=TEST_CUSTOMISATION_NO_FEE.supporting_document_definitions[0]),
+            SupportingDocument(definition=TEST_CUSTOMISATION_NO_FEE.supporting_document_definitions[1]),
+            SupportingDocument(definition=TEST_CUSTOMISATION_NO_FEE.supporting_document_definitions[2]),
+        ],
+    )
+
     files = {
         "application_upload": SimpleUploadedFile(
             name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
         ),
     }
 
-    mock_application_upload_service.handle_form_submission(files, TEST_CUSTOMISATION_NO_FEE)
+    expected_application_document = mocker.patch.object(
+        mock_application_upload_service,
+        "create_application_document",
+        return_value=SupportingDocument(
+            _id=f"{TEST_UUID}/{files['application_upload'].name}",
+            file_name=files["application_upload"].name,
+            definition=SupportingDocumentDefinition(
+                name="Completed form",
+                description="Downloaded and filled PDF form",
+                is_mandatory=True,
+            ),
+        ),
+    )
+
+    mock_application_upload_service.handle_form_submission(
+        files=files,
+        customisation=TEST_CUSTOMISATION_NO_FEE,
+        email="mock_email",
+        is_supporting_documents_online=True,
+        authority=TEST_AUTHORITY,
+        licence=TEST_LICENCE,
+        interaction=TEST_LICENCE_INTERACTION,
+    )
 
     mock_application_upload_service.licence_application_repository.create_new_licence_application.assert_called_with(
         email="mock_email",
+        application_document=expected_application_document.return_value,
+        supporting_documents=supporting_docs.return_value,
         authority=TEST_AUTHORITY,
         licence=TEST_LICENCE,
         customisation=TEST_CUSTOMISATION_NO_FEE,
-        supporting_documents=[],
+        interaction=TEST_LICENCE_INTERACTION,
+        is_supporting_documents_online=True,
     )
 
 

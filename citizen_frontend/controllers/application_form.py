@@ -64,9 +64,13 @@ def generate_application_form(
 
                 upload_service = ApplicationUploadService()
                 application_reference = upload_service.handle_form_submission(
-                    request.FILES,
+                    files=request.FILES,
+                    email=form.cleaned_data.get("email"),
+                    authority=authority,
+                    licence=licence,
                     customisation=published_customisation,
-                    supporting_documents_online=supporting_documents_online,
+                    interaction=interaction,
+                    is_supporting_documents_online=supporting_documents_online,
                 )
 
                 application_references = request.session.get("applicationReferenceNumbers", [])

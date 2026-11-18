@@ -1,4 +1,7 @@
-from common.models.licence_application import LicenceApplication
+from common.models.authority import Authority
+from common.models.interaction_customisation import Customisation
+from common.models.licence import Licence, LicenceInteraction
+from common.models.licence_application import LicenceApplication, SupportingDocument
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
@@ -19,5 +22,15 @@ class LicenceApplicationRepository:
         except DatabaseError as e:
             raise DocumentDBError from e
 
-    def create_new_licence_application(self):
+    def create_new_licence_application(
+        self,
+        email: str,
+        application_document: SupportingDocument,
+        supporting_documents: list[SupportingDocument],
+        authority: Authority,
+        licence: Licence,
+        customisation: Customisation,
+        interaction: LicenceInteraction,
+        is_supporting_documents_online: bool,
+    ):
         pass

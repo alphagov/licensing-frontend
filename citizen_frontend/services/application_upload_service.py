@@ -1,7 +1,9 @@
 import logging
 import uuid
 
+from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
+from common.models.licence import Licence, LicenceInteraction
 from common.models.licence_application import SupportingDocument
 from common.models.shared_models import SupportingDocumentDefinition
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -18,21 +20,47 @@ class ApplicationUploadService:
         self.document_store = S3Service()
         self.licence_application_repository = LicenceApplicationRepository()
 
-    def handle_form_submission(self, files, customisation: Customisation, supporting_documents_online: bool):
+    def handle_form_submission(
+        self,
+        email: str,
+        files,
+        customisation: Customisation,
+        is_supporting_documents_online: bool,
+        authority: Authority,
+        licence: Licence,
+        interaction: LicenceInteraction,
+    ):
         upload_id = str(uuid.uuid4())
+        # Would it be better to use a bson.ObjectId here to tie everything together
+        # if the document upload happens, but the database insert fails, we'd still be able to find
+        # the objects related to this application. or is it a case of one failure and done.
+        # is audit here to help handle this scenario.
 
         application_document = self.handle_application_form(
             application_file=files["application_upload"], upload_id=upload_id
         )
 
-        if supporting_documents_online:
-            # change this to dict so can get the upload number out
-            supporting_documents = {key: file for key, file in files.items() if key.startswith("supporting_document_")}
-            self.handle_supporting_documents(
-                supporting_documents, upload_id, customisation, supporting_documents_online
-            )
+        supporting_documents_files = {
+            key: file for key, file in files.items() if key.startswith("supporting_document_")
+        }
+        supporting_documents = self.handle_supporting_documents(
+            supporting_documents_files, upload_id, customisation, is_supporting_documents_online
+        )
+        # TODO this needs:
+        #  email, authority, licence, customisation, application document,
+        #  supporting_doc objects, is_supporting_docs_online, interaction,
+        #  COULD do the creation/ Big code smell passing in so many objects/args
 
-        application_reference = self.licence_application_repository.create_new_licence_application(application_document)
+        application_reference = self.licence_application_repository.create_new_licence_application(
+            email=email,
+            application_document=application_document,
+            supporting_documents=supporting_documents,
+            authority=authority,
+            licence=licence,
+            customisation=customisation,
+            interaction=interaction,
+            is_supporting_documents_online=is_supporting_documents_online,
+        )
         return application_reference
 
     def handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
