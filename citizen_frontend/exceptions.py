@@ -13,11 +13,10 @@ class LicenceLookupError(Exception):
     pass
 
 
-
 class DocumentStorageError(Exception):
     pass
 
-  
+
 class PDFGenerationGeneralError(Exception):
     def __init__(self, message):
         super().__init__(message)

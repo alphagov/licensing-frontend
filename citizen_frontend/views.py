@@ -1,5 +1,4 @@
 from common.models.authority import Authority
-from django.http import HttpResponse
 from django.shortcuts import render
 
 
@@ -21,8 +20,3 @@ def display_licence_must_be_applied_for_locally(request, authority_url=None):
         "citizen_frontend/licence_must_be_applied_for_locally_page.html",
         {"title": "This licence must be applied for locally", "authority_url": authority_url},
     )
-
-
-def generate_form(request, authority_slug, licence_slug, licence_code, interaction_id, interaction_sub_id):
-    return HttpResponse("Hello world")
-
