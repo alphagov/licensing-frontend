@@ -26,7 +26,7 @@ def test_get_application_from_id_throws_validation_error(mock_repository, mocker
 
     mocker.patch.object(instance, "clean_fields", side_effect=[ValidationError("field error")])
 
-    with pytest.raises(DataIntegrityError) as e:
+    with pytest.raises(DataIntegrityError):
         mock_repository.get_application_from_id("ApplicationRef1")
 
 
