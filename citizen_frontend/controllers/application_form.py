@@ -59,8 +59,15 @@ def generate_application_form(
             )
 
             if form.is_valid():
+                will_post = form.cleaned_data.get("will_submit_by_post")
+                supporting_documents_online = not published_customisation.is_postal_allowed or not will_post
+
                 upload_service = ApplicationUploadService()
-                application_reference = upload_service.handle_form_submission(request.FILES)
+                application_reference = upload_service.handle_form_submission(
+                    request.FILES,
+                    customisation=published_customisation,
+                    supporting_documents_online=supporting_documents_online,
+                )
 
                 application_references = request.session.get("applicationReferenceNumbers", [])
                 application_references.append(application_reference)

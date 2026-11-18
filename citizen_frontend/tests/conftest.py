@@ -332,9 +332,9 @@ TEST_CUSTOMISATION_NO_FEE = Customisation(
     information_url="https://test-information.com",
     guidance_url="https://test-guidance.com",
     supporting_document_definitions=[
-        SupportingDocumentDefinition(name="test", is_mandatory=True),
-        SupportingDocumentDefinition(name="test2", is_mandatory=False),
-        SupportingDocumentDefinition(name="test3", is_mandatory=False),
+        SupportingDocumentDefinition(name="test", description="test-def", is_mandatory=True),
+        SupportingDocumentDefinition(name="test2", description="test-def2", is_mandatory=False),
+        SupportingDocumentDefinition(name="test3", description="test-def3", is_mandatory=False),
     ],
 )
 
