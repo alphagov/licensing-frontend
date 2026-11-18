@@ -1,7 +1,9 @@
 from copy import deepcopy
 
 import pytest
-from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE_APPLICATION
+
+from conftest import TEST_CUSTOMISATION_FIXED_FEE, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE_APPLICATION, \
+    mock_get_licence_interaction_context
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
@@ -22,12 +24,9 @@ def mock_get_details(mocker):
 
 @pytest.fixture
 def mock_application_repo(mocker):
-    yield mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository")
-
-
-@pytest.fixture
-def mock_get_application_from_id(mocker):
-    yield mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository.get_application_from_id")
+    mock_repo = mocker.MagicMock()
+    mocker.patch("citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository", return_value=mock_repo)
+    yield mock_repo
 
 
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):
@@ -83,16 +82,18 @@ def test_application_uploaded_returns_prepayment_page_when_required_payment_amou
     assertTemplateUsed(response, "citizen_frontend/licence_application_prepayment_page.html")
 
 
-def test_get_details_calls_correct_repository_to_get_application_from_id(session_client, mock_application_repo):
+def test_get_details_calls_correct_repository_to_get_application_from_id(
+        session_client, mock_application_repo, mock_get_licence_interaction_context
+):
     session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
     mock_application_repo.get_application_from_id.assert_called()
 
 
 def test_get_details_calls_licence_look_up_service_with_correct_args(
-        session_client, mock_get_application_from_id, mock_get_licence_interaction_context
+        session_client, mock_application_repo, mock_get_licence_interaction_context
 ):
-    mock_get_application_from_id.return_value=TEST_LICENCE_APPLICATION
+    mock_application_repo.get_application_from_id.return_value=TEST_LICENCE_APPLICATION
 
     session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
