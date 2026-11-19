@@ -53,10 +53,6 @@ class ApplicationSubmissionService:
             supporting_documents = self.handle_supporting_documents(
                 supporting_documents_files, upload_id, customisation, is_supporting_documents_online
             )
-            # TODO this needs:
-            #  email, authority, licence, customisation, application document,
-            #  supporting_doc objects, is_supporting_docs_online, interaction,
-            #  COULD do the creation/ Big code smell passing in so many objects/args
 
             application_reference = self.licence_application_repository.create_new_licence_application(
                 email=email,

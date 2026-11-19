@@ -5,7 +5,7 @@ from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TE
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from citizen_frontend.exceptions import DocumentStorageError
+from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
 from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
 
 
@@ -160,7 +160,7 @@ def test_submit_handles_document_storage_failures_throws_500_response(
     mock_call = mocker.patch(
         "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
     )
-    mock_call.side_effect = DocumentStorageError("Failed to upload document")
+    mock_call.side_effect = LicenceSubmissionError("Failed to upload document")
 
     response = session_client.post(
         submit_url_path(),

@@ -87,7 +87,7 @@ def generate_application_form(
         context.update({"form": form})
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
-    except exceptions.DocumentStorageError as e:
+    except exceptions.LicenceSubmissionError as e:
         logger.error("Failed to submit licence application")
         return JsonResponse({"error": str(e)}, status=500)
     except Exception as e:
