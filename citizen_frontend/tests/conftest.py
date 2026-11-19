@@ -74,6 +74,12 @@ def mock_uuid(mocker):
     yield TEST_UUID
 
 
+@pytest.fixture
+def mock_bson_object_id(mocker):
+    mocker.patch("bson.ObjectId", return_value=TEST_OBJECT_ID)
+    yield TEST_OBJECT_ID
+
+
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
     pass

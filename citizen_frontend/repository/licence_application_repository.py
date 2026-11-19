@@ -1,7 +1,8 @@
+import bson
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
-from common.models.licence_application import LicenceApplication, SupportingDocument
+from common.models.licence_application import LicenceApplication, Service, SupportingDocument
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 
@@ -33,4 +34,30 @@ class LicenceApplicationRepository:
         interaction: LicenceInteraction,
         is_supporting_documents_online: bool,
     ):
-        pass
+
+        service = Service(
+            licence_code=licence.licence_code,
+            interaction_id=interaction.interaction_id,
+            interaction_sub_id=interaction.interaction_sub_id,
+        )
+
+        entry_id = bson.ObjectId()
+
+        new_application_entry = LicenceApplication(
+            _id=entry_id,
+            applicant_email=email,
+            authority=authority.url_slug,
+            licence=licence.url_slug,
+            has_supporting_documents_online=is_supporting_documents_online,
+            application_pdf=application_document,
+            service=service,
+            has_tacit_consent=customisation.has_tacit_consent,
+            is_fee_required=customisation.is_fee_required,
+            required_payment_amount=customisation.fixed_fee_amount,
+            supporting_documents=supporting_documents,
+        )
+
+        new_application_entry.full_clean()
+        new_application_entry.save()
+
+        return entry_id
