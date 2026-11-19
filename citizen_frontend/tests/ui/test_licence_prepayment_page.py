@@ -18,15 +18,6 @@ def test_licence_application_prepayment_page_url(live_server):
 
 
 @pytest.fixture
-def session_client(client, settings):
-	settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-	session = client.session
-	session["applicationReferenceNumbers"] = ["ApplicationRef1"]
-	session.save()
-	return client
-
-
-@pytest.fixture
 def mock_get_details_return_values(mock_get_details):
 	mock_get_details.return_value = TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_CUSTOMISATION_FIXED_FEE
 	return mock_get_details

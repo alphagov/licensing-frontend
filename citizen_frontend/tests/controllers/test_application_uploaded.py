@@ -10,14 +10,6 @@ from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
 
 
-@pytest.fixture
-def session_client(client, settings):
-    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    session = client.session
-    session["applicationReferenceNumbers"] = ["ApplicationRef1", "ApplicationRef2", "ApplicationRef3"]
-    session.save()
-    return client
-
 
 @pytest.fixture
 def mock_application_repo(mocker):
@@ -26,7 +18,6 @@ def mock_application_repo(mocker):
         "citizen_frontend.controllers.application_uploaded.LicenceApplicationRepository", return_value=mock_repo
     )
     yield mock_repo
-
 
 
 @pytest.fixture
