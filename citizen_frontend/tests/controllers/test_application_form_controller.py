@@ -26,9 +26,8 @@ def submit_url_path():
 
 
 @pytest.fixture
-def application_upload_service(mock_s3, mock_s3_client, mocker):
+def application_upload_service(mock_s3, mock_s3_client, mock_licence_application_repo):
     service = ApplicationUploadService()
-    mocker.patch.object(service, "licence_application_repository", return_value=mocker.MagicMock())
     yield service
 
 

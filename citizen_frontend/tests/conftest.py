@@ -34,6 +34,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 from citizen_frontend.services.document_storage import S3Service
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
@@ -119,6 +120,15 @@ def mock_s3(mock_s3_client):
 def mock_s3_service(mock_s3_client):
     service = S3Service()
     yield service
+
+
+@pytest.fixture
+def mock_licence_application_repo(mocker):
+    repo = LicenceApplicationRepository()
+    mocker.patch.object(repo.model.objects, "get")
+    mocker.patch.object(repo.model, "save")
+    mocker.patch.object(repo.model, "full_clean")
+    yield repo
 
 
 @pytest.fixture
