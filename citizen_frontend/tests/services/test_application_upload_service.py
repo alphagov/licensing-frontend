@@ -135,7 +135,7 @@ def test_application_upload_service_handles_s3_failures():
 
 
 def test_handle_submission_creates_new_entry_in_licence_applications(
-    mock_application_upload_service, mock_s3, mock_uuid, mocker
+    mock_application_upload_service, mock_s3, mock_uuid, mocker, mock_bson_object_id
 ):
 
     supporting_docs = mocker.patch.object(
