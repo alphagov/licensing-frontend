@@ -4,7 +4,7 @@ import pytest
 from conftest import (
     TEST_CUSTOMISATION_FIXED_FEE,
     TEST_CUSTOMISATION_NO_FEE,
-    TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION,
+    TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_DEPARTMENT,
 )
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
@@ -28,6 +28,12 @@ def mock_application_repo(mocker):
     yield mock_repo
 
 
+
+@pytest.fixture
+def mock_get_department(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_department", return_value=TEST_DEPARTMENT)
+
+
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):
     response = client.get(reverse("application_uploaded"))
     assert response.status_code == 404
@@ -46,7 +52,7 @@ def test_application_uploaded_returns_404_when_id_not_in_session(client):
     ],
 )
 def test_application_uploaded_returns_success_page_when_id_matches_session_ids(
-    session_client, mock_get_details, app_ref, expected_template
+    session_client, mock_get_details, mock_get_department, app_ref, expected_template
 ):
     application = deepcopy(TEST_LICENCE_APPLICATION)
     application.required_payment_amount = None
