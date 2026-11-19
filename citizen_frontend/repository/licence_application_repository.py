@@ -69,7 +69,9 @@ class LicenceApplicationRepository:
             return entry_id
         except ValidationError as e:
             logger.error("Failed to create new licence application entry %s, validation error: %s", entry_id, e)
-            raise DataIntegrityError from e
+            raise DataIntegrityError(
+                f"LicenceApplication validation error: {e.messages}, failed to create new object"
+            ) from e
         except DatabaseError as e:
             logger.error("Failed to create new licence application entry %s, database error: %s", entry_id, e)
             raise DocumentDBError("Failed to create new object") from e

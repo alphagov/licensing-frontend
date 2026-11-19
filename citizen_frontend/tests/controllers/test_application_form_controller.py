@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError
-from citizen_frontend.services.application_upload_service import ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
 
 
 @pytest.fixture

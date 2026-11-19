@@ -8,6 +8,12 @@ from common.models.licence_application import SupportingDocument
 from common.models.shared_models import SupportingDocumentDefinition
 from django.core.files.uploadedfile import SimpleUploadedFile
 
+from citizen_frontend.exceptions import (
+    DataIntegrityError,
+    DocumentDBError,
+    DocumentStorageError,
+    LicenceSubmissionError,
+)
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 from citizen_frontend.services.document_storage import S3Service
 
@@ -30,38 +36,42 @@ class ApplicationSubmissionService:
         licence: Licence,
         interaction: LicenceInteraction,
     ):
-        upload_id = str(uuid.uuid4())
-        # Would it be better to use a bson.ObjectId here to tie everything together
-        # if the document upload happens, but the database insert fails, we'd still be able to find
-        # the objects related to this application. or is it a case of one failure and done.
-        # is audit here to help handle this scenario.
+        try:
+            upload_id = str(uuid.uuid4())
+            # Would it be better to use a bson.ObjectId here to tie everything together
+            # if the document upload happens, but the database insert fails, we'd still be able to find
+            # the objects related to this application. or is it a case of one failure and done.
+            # is audit here to help handle this scenario.
 
-        application_document = self.handle_application_form(
-            application_file=files["application_upload"], upload_id=upload_id
-        )
+            application_document = self.handle_application_form(
+                application_file=files["application_upload"], upload_id=upload_id
+            )
 
-        supporting_documents_files = {
-            key: file for key, file in files.items() if key.startswith("supporting_document_")
-        }
-        supporting_documents = self.handle_supporting_documents(
-            supporting_documents_files, upload_id, customisation, is_supporting_documents_online
-        )
-        # TODO this needs:
-        #  email, authority, licence, customisation, application document,
-        #  supporting_doc objects, is_supporting_docs_online, interaction,
-        #  COULD do the creation/ Big code smell passing in so many objects/args
+            supporting_documents_files = {
+                key: file for key, file in files.items() if key.startswith("supporting_document_")
+            }
+            supporting_documents = self.handle_supporting_documents(
+                supporting_documents_files, upload_id, customisation, is_supporting_documents_online
+            )
+            # TODO this needs:
+            #  email, authority, licence, customisation, application document,
+            #  supporting_doc objects, is_supporting_docs_online, interaction,
+            #  COULD do the creation/ Big code smell passing in so many objects/args
 
-        application_reference = self.licence_application_repository.create_new_licence_application(
-            email=email,
-            application_document=application_document,
-            supporting_documents=supporting_documents,
-            authority=authority,
-            licence=licence,
-            customisation=customisation,
-            interaction=interaction,
-            is_supporting_documents_online=is_supporting_documents_online,
-        )
-        return application_reference
+            application_reference = self.licence_application_repository.create_new_licence_application(
+                email=email,
+                application_document=application_document,
+                supporting_documents=supporting_documents,
+                authority=authority,
+                licence=licence,
+                customisation=customisation,
+                interaction=interaction,
+                is_supporting_documents_online=is_supporting_documents_online,
+            )
+            return application_reference
+        except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
+            # What gets logged here, how do we link submission/application to user, email...?
+            raise LicenceSubmissionError("Failed to submit application") from e
 
     def handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
         application_document = self.create_application_document(application_file, upload_id)
