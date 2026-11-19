@@ -1,4 +1,9 @@
+from datetime import timedelta
+
+from django.utils.timezone import now
+
 from common.models.authority import Authority
+from common.models.department import Department
 from common.models.interaction_customisation import Customisation
 from common.models.licence_application import LicenceApplication
 from common.models.licence import Licence
@@ -28,12 +33,12 @@ def application_uploaded(request):
     application, licence, authority, interaction, customisation = get_details(application_ref)
 
     if customisation.is_fee_required:
-        if application.required_payment_amount is None:
-            context = mock_provide_fee_context()
-            return render(request, "citizen_frontend/licence_application_provide_fee_amount_page.html", context)
         if application.required_payment_amount.pence > 0:
             context = mock_prepayment_context()
             return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
+        else:
+            context = mock_provide_fee_context()
+            return render(request, "citizen_frontend/licence_application_provide_fee_amount_page.html", context)
     else:
         context = build_no_fee_context(application, licence, authority, customisation)
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
@@ -54,7 +59,30 @@ def get_details(application_ref):
         application.service.interaction_id,
         application.service.interaction_sub_id,
     )
+    if customisation is None:
+        raise Http404("No customisation found")
     return application, licence, authority, interaction, customisation
+
+
+def build_no_fee_context(application: LicenceApplication, licence: Licence, authority, interaction, customisation: Customisation):
+    formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
+    has_supporting_documents = customisation.supporting_document_definitions
+    all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
+    processing_days = format_processing_days(customisation)
+    department = get_department(authority)
+
+    return {
+        "licence_name": licence.name,
+        "authority": authority,
+        "published_customisation": customisation,
+        "application": application,
+        "expected_processing_date": formatted_expected_processing_date,
+        "has_supporting_documents": has_supporting_documents,
+        "all_supporting_documents_required": all_supporting_documents_required,
+        "processing_days": processing_days,
+        "is_paid": False,
+        "department": department,
+    }
 
 
 def format_processing_days(customisation: Customisation):
@@ -71,21 +99,8 @@ def all_docs_mandatory(customisation: Customisation):
 #TODO: move this to customisation model?
 
 
-def build_no_fee_context(application: LicenceApplication, licence: Licence, authority: Authority, customisation: Customisation):
-    formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
-    has_supporting_documents = customisation.supporting_document_definitions
-    all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
-    processing_days = format_processing_days(customisation)
-    return {
-        "licence_name": licence.name,
-        "authority": authority,
-        "published_customisation": customisation,
-        "application": application,
-        "expected_processing_date": formatted_expected_processing_date,
-        "has_supporting_documents": has_supporting_documents,
-        "all_supporting_documents_required": all_supporting_documents_required,
-        "processing_days": processing_days
-    }
+def get_department(authority: Authority):
+    pass
 
 
 def mock_provide_fee_context():
@@ -104,3 +119,33 @@ def mock_prepayment_context():
         "published_customisation": published_customisation,
         "step": "3",
     }
+
+
+def mock_no_fee_context():
+    authority = Authority(name="Test Authority", full_name="Test Authority  Full Name")
+    customisation = Customisation(
+        is_fee_required=True,
+        number_of_days_to_process=3,
+    )
+    application = LicenceApplication(
+        applicant_email="test@email.com",
+        application_reference_number="TestApplicationRef",
+        authority=authority.full_name,
+        has_supporting_documents_online=True,
+        expected_processing_date=now() + timedelta(days=7),
+        has_tacit_consent=True,
+    )
+    licence = Licence(name="Test Licence")
+    department = Department(
+        authority_slug="test-authority",
+        name="Test Department",
+        helpline_phone_number="01234 567 890",
+        helpline_email_address="department@email.com",
+        address_line_1="A building",
+        address_line_2="A street",
+        address_line_3="A line three",
+        address_line_4="London",
+        postcode="A12 21A",
+        notification_email_address="notify@email.com",
+        default_privacy_notice_url="test-privacy-notice-url"
+    )
