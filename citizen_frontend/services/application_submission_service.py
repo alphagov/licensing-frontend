@@ -37,6 +37,7 @@ class ApplicationSubmissionService:
         interaction: LicenceInteraction,
     ):
         try:
+            logger.info("Handling application submission")
             upload_id = str(uuid.uuid4())
             # Would it be better to use a bson.ObjectId here to tie everything together
             # if the document upload happens, but the database insert fails, we'd still be able to find
