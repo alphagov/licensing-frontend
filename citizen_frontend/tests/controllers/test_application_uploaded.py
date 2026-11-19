@@ -2,13 +2,16 @@ from copy import deepcopy
 
 import pytest
 from conftest import (
+    TEST_AUTHORITY,
     TEST_CUSTOMISATION_FIXED_FEE,
     TEST_CUSTOMISATION_NO_FEE,
-    TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_DEPARTMENT,
+    TEST_DEPARTMENT,
+    TEST_INTERACTION,
+    TEST_LICENCE,
+    TEST_LICENCE_APPLICATION,
 )
 from django.urls import reverse
 from pytest_django.asserts import assertTemplateUsed
-
 
 
 @pytest.fixture

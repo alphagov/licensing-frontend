@@ -7,6 +7,7 @@ from conftest import (
 	TEST_LICENCE_APPLICATION,
 )
 
+
 @pytest.fixture(autouse=True)
 def setup_prepayment_page(session_client, mock_get_details_return_values):
 	pass
