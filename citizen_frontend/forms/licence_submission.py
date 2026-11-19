@@ -116,7 +116,7 @@ class ApplicationSubmissionForm(forms.Form):
             self.fields["will_submit_by_post"] = forms.BooleanField(
                 label="OK, I'll submit all the documents by post instead",
                 required=False,
-                widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "will-post-checkbox"}),
+                widget=forms.CheckboxInput(attrs={"data-testid": "will-post-checkbox"}),
             )
 
             fieldset_additions.append("will_submit_by_post")
@@ -131,7 +131,7 @@ class ApplicationSubmissionForm(forms.Form):
             label="Ticking this box indicates you have read and understood the above declaration",
             required=True,
             error_messages={"required": "Please check the tick box to accept the declaration"},
-            widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "declaration-checkbox"}),
+            widget=forms.CheckboxInput(attrs={"data-testid": "declaration-checkbox"}),
         )
 
         fieldset_additions.append("declaration")
