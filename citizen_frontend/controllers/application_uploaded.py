@@ -1,7 +1,4 @@
-from datetime import timedelta
-
 from common.models.authority import Authority
-from common.models.department import Department
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence
 from common.models.licence_application import LicenceApplication
@@ -9,7 +6,6 @@ from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
 from django.shortcuts import render
-from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
 
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
@@ -82,7 +78,7 @@ def build_no_fee_context(application: LicenceApplication, licence: Licence, auth
         "processing_days": processing_days,
         "is_paid": False,
         "department": department,
-        "step": "3"
+        "step": "3",
     }
 
 
@@ -91,13 +87,17 @@ def format_processing_days(customisation: Customisation):
     day_type = "working" if customisation.is_processing_days_working_days else "calendar"
     unit = "days" if number > 1 else "day"
     return f"{number} {day_type} {unit}"
-#TODO: move this to customisation model?
+
+
+# TODO: move this to customisation model?
 
 
 def all_docs_mandatory(customisation: Customisation):
     docs = customisation.supporting_document_definitions
     return bool(docs) and all(doc.is_mandatory for doc in docs)
-#TODO: move this to customisation model?
+
+
+# TODO: move this to customisation model?
 
 
 def get_department(authority: Authority):
@@ -124,31 +124,31 @@ def mock_prepayment_context():
     }
 
 
-def mock_no_fee_context():
-    authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
-    customisation = Customisation(
-        is_fee_required=False,
-        number_of_days_to_process=3,
-    )
-    application = LicenceApplication(
-        applicant_email="test@email.com",
-        application_reference_number="TestApplicationRef",
-        authority=authority.full_name,
-        has_supporting_documents_online=True,
-        expected_processing_date=now() + timedelta(days=7),
-        has_tacit_consent=True,
-    )
-    licence = Licence(name="Test Licence")
-    department = Department(
-        authority_slug="test-authority",
-        name="Test Department",
-        helpline_phone_number="01234 567 890",
-        helpline_email_address="department@email.com",
-        address_line_1="A building",
-        address_line_2="A street",
-        address_line_3="A line three",
-        address_line_4="London",
-        postcode="A12 21A",
-        notification_email_address="notify@email.com",
-        default_privacy_notice_url="test-privacy-notice-url"
-    )
+# def mock_no_fee_context():
+#     authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
+#     customisation = Customisation(
+#         is_fee_required=False,
+#         number_of_days_to_process=3,
+#     )
+#     application = LicenceApplication(
+#         applicant_email="test@email.com",
+#         application_reference_number="TestApplicationRef",
+#         authority=authority.full_name,
+#         has_supporting_documents_online=True,
+#         expected_processing_date=now() + timedelta(days=7),
+#         has_tacit_consent=True,
+#     )
+#     licence = Licence(name="Test Licence")
+#     department = Department(
+#         authority_slug="test-authority",
+#         name="Test Department",
+#         helpline_phone_number="01234 567 890",
+#         helpline_email_address="department@email.com",
+#         address_line_1="A building",
+#         address_line_2="A street",
+#         address_line_3="A line three",
+#         address_line_4="London",
+#         postcode="A12 21A",
+#         notification_email_address="notify@email.com",
+#         default_privacy_notice_url="test-privacy-notice-url"
+#     )

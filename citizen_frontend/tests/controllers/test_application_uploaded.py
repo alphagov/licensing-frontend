@@ -50,7 +50,13 @@ def test_application_uploaded_returns_success_page_when_id_matches_session_ids(
 ):
     application = deepcopy(TEST_LICENCE_APPLICATION)
     application.required_payment_amount = None
-    mock_get_details.return_value = (application, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_CUSTOMISATION_NO_FEE)
+    mock_get_details.return_value = (
+        application,
+        TEST_LICENCE,
+        TEST_AUTHORITY,
+        TEST_INTERACTION,
+        TEST_CUSTOMISATION_NO_FEE,
+    )
     response = session_client.get(reverse("application_uploaded", query={"id": app_ref}))
 
     assert response.status_code == 200
@@ -62,7 +68,13 @@ def test_application_uploaded_returns_provide_fee_page_when_payment_required_but
 ):
     application = deepcopy(TEST_LICENCE_APPLICATION)
     application.required_payment_amount = None
-    mock_get_details.return_value = (application, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_CUSTOMISATION_FIXED_FEE)
+    mock_get_details.return_value = (
+        application,
+        TEST_LICENCE,
+        TEST_AUTHORITY,
+        TEST_INTERACTION,
+        TEST_CUSTOMISATION_FIXED_FEE,
+    )
 
     response = session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
@@ -73,7 +85,13 @@ def test_application_uploaded_returns_provide_fee_page_when_payment_required_but
 def test_application_uploaded_returns_prepayment_page_when_required_payment_amount_provided(
     session_client, mock_get_details
 ):
-    mock_get_details.return_value = (TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_CUSTOMISATION_FIXED_FEE)
+    mock_get_details.return_value = (
+        TEST_LICENCE_APPLICATION,
+        TEST_LICENCE,
+        TEST_AUTHORITY,
+        TEST_INTERACTION,
+        TEST_CUSTOMISATION_FIXED_FEE,
+    )
 
     response = session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
 
@@ -85,7 +103,7 @@ def test_get_details_calls_correct_repository_to_get_application_from_id(
     session_client,
     mock_application_repo,
     mock_get_licence_interaction_context,
-    mock_find_published_customisation_with_fixed_fee
+    mock_find_published_customisation_with_fixed_fee,
 ):
     mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
     session_client.get(reverse("application_uploaded", query={"id": "ApplicationRef1"}))
@@ -97,7 +115,7 @@ def test_get_details_calls_licence_look_up_service_with_correct_args(
     session_client,
     mock_application_repo,
     mock_get_licence_interaction_context,
-    mock_find_published_customisation_with_fixed_fee
+    mock_find_published_customisation_with_fixed_fee,
 ):
     mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
 
@@ -112,10 +130,10 @@ def test_get_details_calls_licence_look_up_service_with_correct_args(
 
 
 def test_get_details_calls_interaction_customisation_repository_with_correct_args(
-        session_client,
-        mock_application_repo,
-        mock_get_licence_interaction_context,
-        mock_find_published_customisation_with_fixed_fee
+    session_client,
+    mock_application_repo,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_fixed_fee,
 ):
     mock_application_repo.get_application_from_id.return_value = TEST_LICENCE_APPLICATION
 

@@ -33,5 +33,5 @@ def test_get_department_from_authority_slug_throws_validation_error(mock_reposit
 def test_get_department_from_authority_slug_throws_database_error(mock_repository, mocker):
     mock_repository.model.objects.get.side_effect = DatabaseError()
 
-    with pytest.raises(DocumentDBError) as e:
+    with pytest.raises(DocumentDBError):
         mock_repository.get_department_from_authority_slug("authority-slug")
