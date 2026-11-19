@@ -39,10 +39,10 @@ class ApplicationSubmissionService:
         try:
             logger.info("Handling application submission")
             upload_id = str(uuid.uuid4())
-            # Would it be better to use a bson.ObjectId here to tie everything together
-            # if the document upload happens, but the database insert fails, we'd still be able to find
-            # the objects related to this application. or is it a case of one failure and done.
-            # is audit here to help handle this scenario.
+            # TODO Would it be better to use a bson.ObjectId here to tie everything together
+            #   if the document upload happens, but the database insert fails, we'd still be able to find
+            #   the objects related to this application. or is it a case of one failure and done.
+            #   is audit here to help handle this scenario.
 
             application_document = self.handle_application_form(
                 application_file=files["application_upload"], upload_id=upload_id
@@ -67,7 +67,7 @@ class ApplicationSubmissionService:
             )
             return application_reference
         except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
-            # What gets logged here, how do we link submission/application to user, email...?
+            # TODO What gets logged here, how do we link submission/application to user, email...?
             raise LicenceSubmissionError(f"Failed to submit application: {e.args}") from e
 
     def handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
@@ -132,9 +132,3 @@ class ApplicationSubmissionService:
                 is_mandatory=True,
             ),
         )
-
-
-# TODO we need to build out the correct number of supporting documents
-#  with correct definitions as part of application object.
-#  These need uploading first, take the path as the SupportingDocument.id
-#  Create the service object, believe this can get most info from an interaction
