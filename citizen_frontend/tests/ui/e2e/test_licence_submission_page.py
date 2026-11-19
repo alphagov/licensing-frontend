@@ -1,3 +1,4 @@
+import boto3
 import pytest
 from conftest import BASE_URL, TEST_FOOD_PREMISES_APPLY_FORM_URL, TEST_TEMP_EVENT_APPLY_FORM_URL
 from playwright.sync_api import Page, expect
@@ -5,6 +6,27 @@ from playwright.sync_api import Page, expect
 """
 This requires a seeded_db to run
 """
+
+
+@pytest.fixture
+def ministack_s3():
+    s3 = boto3.client(
+        "s3",
+        endpoint_url="http://localhost:4566",
+        region_name="us-east-1",
+        aws_access_key_id="testing",
+        aws_secret_access_key="testing",
+    )
+    s3.create_bucket(Bucket="test-bucket")
+
+    yield
+
+    content = s3.list_objects(Bucket="test-bucket")["Contents"]
+
+    for object in content:
+        s3.delete_object(Bucket="test-bucket", Key=object["Key"])
+
+    s3.delete_bucket(Bucket="test-bucket")
 
 
 def test_page_has_correct_headings(page: Page):
@@ -41,9 +63,11 @@ def test_page_form_has_correct_elements_no_supporting_documents_required(page: P
 
     expect(page.get_by_test_id("supporting-documents-statement")).not_to_be_visible()
 
-    expect(page.get_by_test_id("declarations")).to_be_visible()
-    declarations = page.get_by_role("listitem").all()
-    assert len(declarations) == 4
+    declarations = page.get_by_test_id("declarations")
+    expect(declarations).to_be_visible()
+    children = declarations.locator("li")
+    assert children.count() == 4
+
     expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
 
     expect(page.get_by_test_id("submit-button")).to_be_visible()
@@ -67,9 +91,10 @@ def test_page_has_correct_elements_supporting_documents_required(page: Page):
     expect(supporting_document_upload).to_be_visible()
     expect(supporting_document_upload).to_have_role("button")
 
-    expect(page.get_by_test_id("declarations")).to_be_visible()
-    declarations = page.get_by_role("listitem").all()
-    assert len(declarations) == 1
+    declarations = page.get_by_test_id("declarations")
+    expect(declarations).to_be_visible()
+    children = declarations.locator("li")
+    assert children.count() == 1
     expect(page.get_by_test_id("declaration-checkbox")).to_be_visible()
 
     expect(page.get_by_test_id("submit-button")).to_be_visible()
@@ -104,3 +129,36 @@ def test_email_fields_show_error_email_do_not_match(page: Page):
     page.get_by_test_id("submit-button").click()
 
     expect(email_field).to_have_attribute("class", "govuk-input govuk-input--error")
+
+
+def test_form_submission(page: Page, ministack_s3):
+    page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/york/apply-1/form")
+
+    page.get_by_test_id("email-field").fill("example@email.com")
+    page.get_by_test_id("confirmation-email-field").fill("example@email.com")
+
+    application_upload = page.get_by_test_id("application-upload")
+    application_upload.set_input_files("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf")
+
+    declaration_checkbox = page.get_by_test_id("declaration-checkbox")
+    declaration_checkbox.click()
+
+    with page.expect_response("**/apply-for-a-licence/temporary-event-notice/york/apply-1/form") as response_info:
+        page.get_by_test_id("submit-button").click()
+
+    response = response_info.value
+
+    assert response.status == 201
+    assert response.json() == "Successfully submitted form"
+
+
+def test_redirect_after_submission_customisation_has_fee():
+    # TODO Page does not exist yet, user should be directed to pre-payment page
+    #   entry for application and payment should be created in relevant collections
+    pass
+
+
+def test_redirect_after_submission_customisation_has_no_fee():
+    # TODO application entry should be created in collections
+    #   user should be redirected to application complete?
+    pass

@@ -1,7 +1,9 @@
 import os
 from copy import deepcopy
 from datetime import timedelta
+from uuid import UUID
 
+import boto3
 import bson
 import pytest
 from bs4 import BeautifulSoup
@@ -17,8 +19,10 @@ from common.models.licence import AdministrativeArea, Licence, LicenceForm, Lice
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from common.models.payment import Payment, PaymentStatus
 from common.models.shared_models import PaymentAmount, SupportingDocumentDefinition
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.timezone import now
+from moto import mock_aws
 
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
@@ -30,6 +34,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.services.document_storage import S3Service
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
 SERVICE_SLUG = "apply-for-a-licence"
@@ -58,6 +63,14 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
     f"{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}/form"
 )
 
+TEST_UUID = UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+
+
+@pytest.fixture
+def mock_uuid(mocker):
+    mocker.patch("uuid.uuid4", return_value=TEST_UUID)
+    yield TEST_UUID
+
 
 @pytest.fixture(scope="session", autouse=True)
 def django_db_setup():
@@ -83,13 +96,37 @@ def get_dom_parser(client):
 
 
 @pytest.fixture
-def test_introduction_page_url(live_server):
-    return f"{live_server.url}/{SERVICE_SLUG}/test-licence/test-authority/apply-1"
+def mock_s3_client():
+    with mock_aws():
+        yield boto3.client("s3", region_name="us-east-1")
 
 
 @pytest.fixture
-def test_submit_form_page_url(live_server):
-    return f"{live_server.url}/{TEST_TEMP_EVENT_APPLY_FORM_URL}"
+def mock_s3(mock_s3_client):
+    test_bucket = mock_s3_client.create_bucket(Bucket="test-bucket")
+    yield test_bucket
+
+
+@pytest.fixture
+def mock_s3_service(mock_s3_client):
+    service = S3Service()
+    yield service
+
+
+@pytest.fixture
+def test_introduction_page_url():
+    def _url(**overrides) -> str:
+        defaults = {
+            "licence_slug": TEST_LICENCE.url_slug,
+            "authority_slug": TEST_AUTHORITY.url_slug,
+            "interaction_id": "apply",
+            "interaction_sub_id": TEST_LICENCE.licence_interactions[0].interaction_sub_id,
+        }
+
+        merged_kwargs = {**defaults, **overrides}
+        return reverse("begin_application_steps", kwargs=merged_kwargs)
+
+    return _url
 
 
 @pytest.fixture
@@ -419,23 +456,18 @@ def mock_lookup_service(mocker):
 
 
 @pytest.fixture
-def licence_interaction_context():
-    yield (
-        deepcopy(TEST_LICENCE),
-        deepcopy(TEST_AUTHORITY),
-        deepcopy(TEST_LICENCE_INTERACTION),
-        deepcopy(TEST_LICENCE_DETAIL),
-    )
-
-
-@pytest.fixture
-def mock_get_licence_interaction_context(mocker, licence_interaction_context):
+def mock_get_licence_interaction_context(mocker):
     mock_get_context = mocker.patch.object(
         licence_lookup_service,
         "get_licence_interaction_context",
         autospec=True,
     )
-    mock_get_context.return_value = licence_interaction_context
+    mock_get_context.return_value = (
+        deepcopy(TEST_LICENCE),
+        deepcopy(TEST_AUTHORITY),
+        deepcopy(TEST_LICENCE_INTERACTION),
+        deepcopy(TEST_LICENCE_DETAIL),
+    )
     return mock_get_context
 
 
@@ -451,17 +483,6 @@ def mock_find_published_customisation_with_fixed_fee(mocker):
 
 
 @pytest.fixture
-def mock_find_published_customisation_with_variable_fee(mocker):
-    mock_find_published_customisation_with_fixed_fee = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation_with_fixed_fee.return_value = deepcopy(TEST_CUSTOMISATION_VARIABLE_FEE)
-    return mock_find_published_customisation_with_fixed_fee
-
-
-@pytest.fixture
 def mock_find_published_customisation_with_no_fee(mocker):
     mock_find_published_customisation_with_no_fee = mocker.patch.object(
         interaction_customisation_repository,
@@ -470,13 +491,3 @@ def mock_find_published_customisation_with_no_fee(mocker):
     )
     mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_NO_FEE)
     return mock_find_published_customisation_with_no_fee
-
-
-@pytest.fixture
-def mock_find_published_customisation_returns_none(mocker):
-    mock_find_published_customisation = mocker.patch.object(
-        interaction_customisation_repository,
-        "find_published_customisation",
-        autospec=True,
-    )
-    mock_find_published_customisation.return_value = None

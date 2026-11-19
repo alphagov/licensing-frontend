@@ -6,6 +6,10 @@ services:
       - PASSWORD=${DOCUMENTDB_PASSWORD:-password}
     ports:
       - ${DOCUMENTDB_PORT:-10260}:10260
+  ministack:
+    image: ministackorg/ministack:latest
+    ports:
+      - "4566:4566"
   citizen_frontend:
     depends_on:
       - document_db
@@ -22,6 +26,13 @@ services:
       DOCUMENTDB_PORT: ${DOCUMENTDB_PORT}
       DOCUMENTDB_HOST: ${DOCUMENTDB_HOST:-document_db}
       DOCUMENTDB_ALLOW_INVALID_CERTS: ${DOCUMENTDB_ALLOW_INVALID_CERTS}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-testing}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-testing}
+      AWS_SECURITY_TOKEN: ${AWS_SECURITY_TOKEN:-testing}
+      AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN:-testing}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      S3_BUCKET: ${S3_BUCKET:-test-bucket}
+      S3_ENDPOINT_URL: http://ministack:4566
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:

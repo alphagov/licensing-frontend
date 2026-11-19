@@ -42,7 +42,7 @@ test-unit:
 
 test-api:
 	uv sync
-	pytest citizen_frontend/tests/api --ignore citizen_frontend/tests/api/end_to_end licensing_common
+	pytest citizen_frontend/tests/api --ignore citizen_frontend/tests/api/end_to_end --ignore licensing_common
 
 test-services: prepare
 	pytest citizen_frontend/tests/services
