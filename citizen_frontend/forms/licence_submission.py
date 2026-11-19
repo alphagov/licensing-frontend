@@ -131,7 +131,7 @@ class ApplicationSubmissionForm(forms.Form):
             label="Ticking this box indicates you have read and understood the above declaration",
             required=True,
             error_messages={"required": "Please check the tick box to accept the declaration"},
-            widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "declaration-checkbox"}),
+            widget=forms.CheckboxInput(attrs={"data-testid": "declaration-checkbox"}),
         )
 
         fieldset_additions.append("declaration")
