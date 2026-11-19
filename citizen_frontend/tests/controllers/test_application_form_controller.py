@@ -3,6 +3,7 @@ from copy import deepcopy
 import pytest
 from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_OBJECT_ID, TEST_UUID
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
@@ -59,7 +60,10 @@ def test_application_form_submission_happy_path(
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
 ):
-    mock_redirect = mocker.patch("citizen_frontend.controllers.application_form.redirect")
+    mock_redirect = mocker.patch(
+        "citizen_frontend.controllers.application_form.redirect",
+        return_value=HttpResponseRedirect(reverse("application_uploaded", query={"id": TEST_UUID})),
+    )
 
     mocker.patch(
         "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"

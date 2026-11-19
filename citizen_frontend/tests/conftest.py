@@ -352,6 +352,7 @@ TEST_CUSTOMISATION_NO_FEE = Customisation(
         SupportingDocumentDefinition(name="test2", description="test-def2", is_mandatory=False),
         SupportingDocumentDefinition(name="test3", description="test-def3", is_mandatory=False),
     ],
+    fixed_fee_amount=PaymentAmount(pence=0),
 )
 
 
