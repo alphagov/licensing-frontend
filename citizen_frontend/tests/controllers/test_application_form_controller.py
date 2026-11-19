@@ -6,7 +6,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError
-from citizen_frontend.services.application_upload_service import ApplicationUploadService
+from citizen_frontend.services.application_upload_service import ApplicationSubmissionService
 
 
 @pytest.fixture
@@ -27,7 +27,7 @@ def submit_url_path():
 
 @pytest.fixture
 def application_upload_service(mock_s3, mock_s3_client, mock_licence_application_repo):
-    service = ApplicationUploadService()
+    service = ApplicationSubmissionService()
     yield service
 
 
@@ -158,7 +158,7 @@ def test_submit_handles_document_storage_failures_throws_500_response(
     mock_find_published_customisation_with_no_fee,
 ):
     mock_call = mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationUploadService.handle_form_submission"
+        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
     )
     mock_call.side_effect = DocumentStorageError("Failed to upload document")
 
@@ -189,7 +189,7 @@ def test_submit_writes_new_application_reference_to_session_on_successful_submis
     submit_url_path,
 ):
     mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationUploadService.handle_form_submission"
+        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
     ).return_value = str(TEST_OBJECT_ID)
 
     session_client.post(

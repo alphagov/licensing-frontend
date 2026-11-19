@@ -10,12 +10,12 @@ from conftest import (
 )
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from citizen_frontend.services.application_upload_service import ApplicationUploadService
+from citizen_frontend.services.application_upload_service import ApplicationSubmissionService
 
 
 @pytest.fixture
 def mock_application_upload_service(mock_s3_service, mocker):
-    service = ApplicationUploadService()
+    service = ApplicationSubmissionService()
     mocker.patch.object(service, "licence_application_repository")
     yield service
 

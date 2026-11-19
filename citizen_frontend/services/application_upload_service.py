@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-class ApplicationUploadService:
+class ApplicationSubmissionService:
     def __init__(self):
         self.document_store = S3Service()
         self.licence_application_repository = LicenceApplicationRepository()
