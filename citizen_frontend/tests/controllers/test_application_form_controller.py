@@ -27,7 +27,7 @@ def submit_url_path():
 
 
 @pytest.fixture
-def application_upload_service(mock_s3, mock_s3_client, mock_licence_application_repo):
+def application_submission_service(mock_s3, mock_s3_client, mock_licence_application_repo):
     service = ApplicationSubmissionService()
     yield service
 
@@ -97,7 +97,7 @@ def test_application_form_submission_happy_path(
 
 
 def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
-    application_upload_service,
+    application_submission_service,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
@@ -106,8 +106,8 @@ def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
 ):
     session_client.post(submit_url_path(), data=VALID_FORM_SUBMISSION)
 
-    application_form = application_upload_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
-    supporting_document = application_upload_service.document_store.get_file(
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = application_submission_service.document_store.get_file(
         key=f"{TEST_UUID}/supporting_document_0.pdf"
     )
 
@@ -116,7 +116,7 @@ def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
 
 
 def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowed_will_post_checked_mandatory_document(
-    application_upload_service,
+    application_submission_service,
     mock_uuid,
     session_client,
     mock_get_licence_interaction_context,
@@ -141,19 +141,19 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
         },
     )
 
-    application_form = application_upload_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
 
     assert application_form.read() == MOCK_PDF_CONTENT
 
     # Raise error because object does not exist.
     with pytest.raises(DocumentStorageError) as e:
-        application_upload_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
+        application_submission_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
 
     assert e.value.args[0] == "Failed to get file from S3."
 
 
 def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_post_not_checked_mandatory_document(
-    application_upload_service,
+    application_submission_service,
     mock_uuid,
     session_client,
     mock_get_licence_interaction_context,
@@ -179,8 +179,8 @@ def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_p
         },
     )
 
-    application_form = application_upload_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
-    supporting_document = application_upload_service.document_store.get_file(
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = application_submission_service.document_store.get_file(
         key=f"{TEST_UUID}/supporting_document_0.pdf"
     )
 

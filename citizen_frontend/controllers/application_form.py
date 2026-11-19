@@ -88,9 +88,8 @@ def generate_application_form(
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
     except exceptions.LicenceSubmissionError as e:
-        # logger.error("Failed to submit licence application: $s", e.args)
+        logger.error("Failed to submit licence application: $s", e)
         return JsonResponse({"error": str(e)}, status=500)
     except Exception as e:
         logger.error(e)
-        # return JsonResponse({"error": str(e)}, status=500)
         raise Http404("Incorrect licence, or authority does not exist") from e
