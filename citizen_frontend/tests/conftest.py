@@ -162,9 +162,6 @@ def mock_licence_repository(mocker):
     return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
 
 
-TEST_LICENCE_CODE = "1234-5-6"
-TEST_SNAC_CODE = "SNAC"
-
 TEST_LICENCE_DETAIL = LicenceDetail(
     licence_code=TEST_LICENCE_CODE,
     offered_by_authority=True,
