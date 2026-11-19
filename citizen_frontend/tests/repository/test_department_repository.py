@@ -1,10 +1,10 @@
 import pytest
+from conftest import TEST_DEPARTMENT
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 from citizen_frontend.repository.department_repository import DepartmentRepository
-from conftest import TEST_DEPARTMENT
 
 
 @pytest.fixture

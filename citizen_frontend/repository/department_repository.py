@@ -1,7 +1,7 @@
+from common.models.department import Department
 from django.core.exceptions import ValidationError
 from django.db.utils import DatabaseError
 
-from common.models.department import Department
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
 

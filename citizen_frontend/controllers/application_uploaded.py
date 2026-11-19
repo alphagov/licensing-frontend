@@ -1,22 +1,21 @@
 from datetime import timedelta
 
-from django.utils.timezone import now
-
 from common.models.authority import Authority
 from common.models.department import Department
 from common.models.interaction_customisation import Customisation
-from common.models.licence_application import LicenceApplication
 from common.models.licence import Licence
+from common.models.licence_application import LicenceApplication
 from common.models.payment import Payment
 from common.models.shared_models import PaymentAmount
 from django.http import Http404
 from django.shortcuts import render
+from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
 
-import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
-from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
+import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.repository.department_repository import DepartmentRepository
+from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 
 
 @never_cache
@@ -34,7 +33,7 @@ def application_uploaded(request):
     application, licence, authority, interaction, customisation = get_details(application_ref)
 
     if customisation.is_fee_required:
-        if application.required_payment_amount.pence > 0:
+        if application.required_payment_amount and application.required_payment_amount.pence > 0:
             context = mock_prepayment_context()
             return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
         else:
@@ -96,7 +95,7 @@ def format_processing_days(customisation: Customisation):
 
 
 def all_docs_mandatory(customisation: Customisation):
-    docs = customisation.supporting_document_definitions.all()
+    docs = customisation.supporting_document_definitions
     return bool(docs) and all(doc.is_mandatory for doc in docs)
 #TODO: move this to customisation model?
 
@@ -112,7 +111,7 @@ def mock_provide_fee_context():
 
 
 def mock_prepayment_context():
-    authority = Authority(name="Test Authority", full_name="Test Authority for testing with")
+    authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
     payment = Payment(amount=PaymentAmount(pence=500), payment_provider="WorldPay")
     published_customisation = Customisation(is_fee_required=True)
 
@@ -126,7 +125,7 @@ def mock_prepayment_context():
 
 
 def mock_no_fee_context():
-    authority = Authority(name="Test Authority", full_name="Test Authority  Full Name")
+    authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
     customisation = Customisation(
         is_fee_required=False,
         number_of_days_to_process=3,

@@ -127,7 +127,7 @@ TEST_AUTHORITY = Authority(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Authority",
     url_slug="test-authority",
-    full_name="Test Authority for testing with",
+    full_name="Test Authority Full Name",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
@@ -470,3 +470,17 @@ def mock_find_published_customisation_returns_none(mocker):
         autospec=True,
     )
     mock_find_published_customisation.return_value = None
+
+
+@pytest.fixture
+def mock_get_details(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_details")
+
+
+@pytest.fixture
+def session_client(client, settings):
+    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    session = client.session
+    session["applicationReferenceNumbers"] = ["ApplicationRef1", "ApplicationRef2", "ApplicationRef3"]
+    session.save()
+    return client

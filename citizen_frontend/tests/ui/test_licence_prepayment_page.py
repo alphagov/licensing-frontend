@@ -1,42 +1,67 @@
 import pytest
-from conftest import TEST_AUTHORITY, TEST_LICENCE
+from conftest import (
+	TEST_AUTHORITY,
+	TEST_CUSTOMISATION_FIXED_FEE,
+	TEST_INTERACTION,
+	TEST_LICENCE,
+	TEST_LICENCE_APPLICATION,
+)
+
+@pytest.fixture(autouse=True)
+def setup_prepayment_page(session_client, mock_get_details_return_values):
+	pass
 
 
 @pytest.fixture
 def test_licence_application_prepayment_page_url(live_server):
-    return f"{live_server}/apply-for-a-licence/uploaded"
+	return f"{live_server}/apply-for-a-licence/uploaded?id=ApplicationRef1"
+
+
+@pytest.fixture
+def session_client(client, settings):
+	settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+	session = client.session
+	session["applicationReferenceNumbers"] = ["ApplicationRef1"]
+	session.save()
+	return client
+
+
+@pytest.fixture
+def mock_get_details_return_values(mock_get_details):
+	mock_get_details.return_value = TEST_LICENCE_APPLICATION, TEST_LICENCE, TEST_AUTHORITY, TEST_INTERACTION, TEST_CUSTOMISATION_FIXED_FEE
+	return mock_get_details
 
 
 def test_page_has_correct_headings(get_dom_parser, test_licence_application_prepayment_page_url):
-    dom = get_dom_parser(test_licence_application_prepayment_page_url)
-    heading_text = dom.get_by_test_id("page-heading").get_text()
+	dom = get_dom_parser(test_licence_application_prepayment_page_url)
+	heading_text = dom.get_by_test_id("page-heading").get_text()
 
-    assert heading_text == f"{TEST_LICENCE.name} from {TEST_AUTHORITY.full_name}"
+	assert heading_text == f"{TEST_LICENCE.name} from {TEST_AUTHORITY.full_name}"
 
 
 def test_page_is_step_3_of_4(get_dom_parser, test_licence_application_prepayment_page_url):
-    dom = get_dom_parser(test_licence_application_prepayment_page_url)
-    steps_text = dom.get_by_test_id("steps").get_text()
+	dom = get_dom_parser(test_licence_application_prepayment_page_url)
+	steps_text = dom.get_by_test_id("steps").get_text()
 
-    assert "Step 3 of 4" in steps_text
+	assert "Step 3 of 4" in steps_text
 
 
 def test_page_has_correct_fee_amount(get_dom_parser, test_licence_application_prepayment_page_url):
-    dom = get_dom_parser(test_licence_application_prepayment_page_url)
-    fee_text = dom.get_by_test_id("fee-info").get_text()
+	dom = get_dom_parser(test_licence_application_prepayment_page_url)
+	fee_text = dom.get_by_test_id("fee-info").get_text()
 
-    assert "£5.00" in fee_text
+	assert "£5.00" in fee_text
 
 
 def test_page_references_correct_payment_provider(get_dom_parser, test_licence_application_prepayment_page_url):
-    dom = get_dom_parser(test_licence_application_prepayment_page_url)
-    fee_text = dom.get_by_test_id("fee-info").get_text()
+	dom = get_dom_parser(test_licence_application_prepayment_page_url)
+	fee_text = dom.get_by_test_id("fee-info").get_text()
 
-    assert "WorldPay" in fee_text
+	assert "WorldPay" in fee_text
 
 
 def test_page_has_button_to_continue_to_provider(get_dom_parser, test_licence_application_prepayment_page_url):
-    dom = get_dom_parser(test_licence_application_prepayment_page_url)
-    button_text = dom.get_by_test_id("pay-button").get_text()
+	dom = get_dom_parser(test_licence_application_prepayment_page_url)
+	button_text = dom.get_by_test_id("pay-button").get_text()
 
-    assert "Continue to WorldPay website" in button_text
+	assert "Continue to WorldPay website" in button_text
