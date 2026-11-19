@@ -83,6 +83,7 @@ def build_no_fee_context(application: LicenceApplication, licence: Licence, auth
         "processing_days": processing_days,
         "is_paid": False,
         "department": department,
+        "step": "3"
     }
 
 
@@ -127,7 +128,7 @@ def mock_prepayment_context():
 def mock_no_fee_context():
     authority = Authority(name="Test Authority", full_name="Test Authority  Full Name")
     customisation = Customisation(
-        is_fee_required=True,
+        is_fee_required=False,
         number_of_days_to_process=3,
     )
     application = LicenceApplication(
