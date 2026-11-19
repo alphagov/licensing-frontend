@@ -1,12 +1,14 @@
+import datetime
 import logging
 
 import bson
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
-from common.models.licence_application import LicenceApplication, Service, SupportingDocument
+from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
+from django.utils import timezone
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
@@ -49,6 +51,16 @@ class LicenceApplicationRepository:
                 interaction_sub_id=interaction.interaction_sub_id,
             )
 
+            has_fixed_fee_amount = customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0
+
+            # TODO create method/util/function to handle working days, does python do this?
+            now = timezone.now()
+            expected_process_date = (
+                now + datetime.timedelta(days=customisation.number_of_days_to_process)
+                if customisation.number_of_days_to_process
+                else now + datetime.timedelta(days=30)
+            )
+
             new_application_entry = LicenceApplication(
                 _id=entry_id,
                 applicant_email=email,
@@ -61,12 +73,15 @@ class LicenceApplicationRepository:
                 is_fee_required=customisation.is_fee_required,
                 required_payment_amount=customisation.fixed_fee_amount,
                 supporting_documents=supporting_documents,
+                has_variable_fee=customisation.is_fee_required and not has_fixed_fee_amount,
+                application_status=ApplicationStatus(),
+                expected_processing_date=expected_process_date,
             )
 
             new_application_entry.full_clean()
             new_application_entry.save()
 
-            return entry_id
+            return str(entry_id)
         except ValidationError as e:
             logger.error("Failed to create new licence application entry %s, validation error: %s", entry_id, e)
             raise DataIntegrityError(
@@ -74,4 +89,4 @@ class LicenceApplicationRepository:
             ) from e
         except DatabaseError as e:
             logger.error("Failed to create new licence application entry %s, database error: %s", entry_id, e)
-            raise DocumentDBError("Failed to create new object") from e
+            raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e

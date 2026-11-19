@@ -67,7 +67,7 @@ class ApplicationSubmissionService:
             return application_reference
         except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
             # What gets logged here, how do we link submission/application to user, email...?
-            raise LicenceSubmissionError("Failed to submit application") from e
+            raise LicenceSubmissionError(f"Failed to submit application: {e.args}") from e
 
     def handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
         application_document = self.create_application_document(application_file, upload_id)

@@ -1,5 +1,9 @@
+import os
+from urllib.parse import parse_qs, urlparse
+
 import boto3
 import pytest
+from common.models.licence_application import LicenceApplication
 from conftest import BASE_URL, TEST_FOOD_PREMISES_APPLY_FORM_URL, TEST_TEMP_EVENT_APPLY_FORM_URL
 from playwright.sync_api import Page, expect
 
@@ -132,6 +136,7 @@ def test_email_fields_show_error_email_do_not_match(page: Page):
 
 
 def test_form_submission(page: Page, ministack_s3):
+    os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
     page.goto(f"{BASE_URL}/apply-for-a-licence/temporary-event-notice/york/apply-1/form")
 
     page.get_by_test_id("email-field").fill("example@email.com")
@@ -143,13 +148,20 @@ def test_form_submission(page: Page, ministack_s3):
     declaration_checkbox = page.get_by_test_id("declaration-checkbox")
     declaration_checkbox.click()
 
-    with page.expect_response("**/apply-for-a-licence/temporary-event-notice/york/apply-1/form") as response_info:
-        page.get_by_test_id("submit-button").click()
+    page.get_by_test_id("submit-button").click()
 
-    response = response_info.value
+    page.wait_for_url("**/uploaded?**")
 
-    assert response.status == 201
-    assert response.json() == "Successfully submitted form"
+    # Pull newly created object id out of the url
+    redirect_url = page.url
+    parsed_url = urlparse(redirect_url)
+    query_params = parse_qs(parsed_url.query)
+    application_id = query_params.get("id", [None])[0]
+
+    # Check the newly created object against what has been filled in form
+    application = LicenceApplication.objects.get(_id=application_id)
+    assert application.applicant_email == "example@email.com"
+    application.delete()
 
 
 def test_redirect_after_submission_customisation_has_fee():

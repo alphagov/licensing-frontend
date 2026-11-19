@@ -78,7 +78,7 @@ def generate_application_form(
                 application_references.append(application_reference)
                 request.session["applicationReferenceNumbers"] = application_references
 
-                redirect(reverse("application_uploaded", query={"id": application_reference}))
+                return redirect(reverse("application_uploaded", query={"id": application_reference}))
 
         else:
             form = ApplicationSubmissionForm(
@@ -89,8 +89,9 @@ def generate_application_form(
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
     except exceptions.LicenceSubmissionError as e:
-        logger.error("Failed to submit licence application")
+        logger.error("Failed to submit licence application: $s", e.args)
         return JsonResponse({"error": str(e)}, status=500)
     except Exception as e:
         logger.error(e)
+        return JsonResponse({"error": str(e)}, status=500)
         raise Http404("Incorrect licence, or authority does not exist") from e

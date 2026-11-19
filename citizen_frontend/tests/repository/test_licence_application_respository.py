@@ -41,7 +41,7 @@ def test_create_new_licence_application_calls_db_with_correct_args(mock_licence_
     mock_licence_application_repo.model.full_clean.assert_called()
     mock_licence_application_repo.model.save.assert_called()
 
-    assert actual == mock_bson_object_id
+    assert actual == str(mock_bson_object_id)
 
 
 def test_create_new_licence_application_handles_clean_errors(mock_licence_application_repo):
@@ -59,4 +59,4 @@ def test_create_new_licence_application_handles_db_errors(mock_licence_applicati
     with pytest.raises(DocumentDBError) as e:
         mock_licence_application_repo.create_new_licence_application(**VALID_LICENCE_APPLICATION_ARGS)
 
-    assert e.value.args[0] == "Failed to create new object"
+    assert e.value.args[0] == "Failed to create new object, DB error: ()"
