@@ -52,6 +52,46 @@ VALID_FORM_SUBMISSION = {
 }
 
 
+def test_application_form_submission_happy_path(
+    session_client,
+    mocker,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_no_fee,
+    submit_url_path,
+):
+    mock_redirect = mocker.patch("citizen_frontend.controllers.application_form.redirect")
+
+    mocker.patch(
+        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
+    ).return_value = str(TEST_OBJECT_ID)
+
+    expected_redirect_url = reverse("application_uploaded", query={"id": TEST_OBJECT_ID})
+
+    session_client.post(
+        submit_url_path(),
+        data={
+            "email": "anemail@example.com",
+            "confirmation_email": "anemail@example.com",
+            "application_upload": SimpleUploadedFile(
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_0": SimpleUploadedFile(
+                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_1": SimpleUploadedFile(
+                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_2": SimpleUploadedFile(
+                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "declaration": "on",
+        },
+    )
+
+    assert str(TEST_OBJECT_ID) in session_client.session["applicationReferenceNumbers"]
+    mock_redirect.assert_called_with(expected_redirect_url)
+
+
 def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
     application_upload_service,
     mock_get_licence_interaction_context,
@@ -107,12 +147,6 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
 
     assert e.value.args[0] == "Failed to get file from S3."
 
-    # TODO, research what happens when is_postal allowed, and will submit via post is checked
-    #   Does the application still creat an entry for them, or does it just exit user journey?...
-    #  looks like only the PDF is uploaded AND only supporting documentation is allowed via post
-
-    #  would be nice to be able to dynamically disable the supporting document uploads using HTMX here
-
 
 def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_post_not_checked_mandatory_document(
     application_upload_service,
@@ -150,7 +184,7 @@ def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_p
     assert supporting_document.read() == MOCK_PDF_CONTENT
 
 
-def test_submit_handles_document_storage_failures_throws_500_response(
+def test_licence_application_form_submission_throws_500_response_on_error(
     session_client,
     mocker,
     submit_url_path,
@@ -179,38 +213,3 @@ def test_submit_handles_document_storage_failures_throws_500_response(
     )
 
     assert response.status_code == 500
-
-
-def test_submit_writes_new_application_reference_to_session_on_successful_submission(
-    session_client,
-    mocker,
-    mock_get_licence_interaction_context,
-    mock_find_published_customisation_with_no_fee,
-    submit_url_path,
-):
-    mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
-    ).return_value = str(TEST_OBJECT_ID)
-
-    session_client.post(
-        submit_url_path(),
-        data={
-            "email": "anemail@example.com",
-            "confirmation_email": "anemail@example.com",
-            "application_upload": SimpleUploadedFile(
-                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-            ),
-            "supporting_document_0": SimpleUploadedFile(
-                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-            ),
-            "supporting_document_1": SimpleUploadedFile(
-                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-            ),
-            "supporting_document_2": SimpleUploadedFile(
-                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-            ),
-            "declaration": "on",
-        },
-    )
-
-    assert str(TEST_OBJECT_ID) in session_client.session["applicationReferenceNumbers"]

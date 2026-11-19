@@ -1,7 +1,8 @@
 import logging
 
 from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 import citizen_frontend.exceptions as exceptions
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
@@ -77,7 +78,7 @@ def generate_application_form(
                 application_references.append(application_reference)
                 request.session["applicationReferenceNumbers"] = application_references
 
-                return JsonResponse(status=201, data="Successfully submitted form", safe=False)
+                redirect(reverse("application_uploaded", query={"id": application_reference}))
 
         else:
             form = ApplicationSubmissionForm(
