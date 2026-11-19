@@ -16,6 +16,7 @@ from django.views.decorators.cache import never_cache
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 import citizen_frontend.repository.interaction_customisation_repository as interaction_customisation_repository
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
+from citizen_frontend.repository.department_repository import DepartmentRepository
 
 
 @never_cache
@@ -64,7 +65,7 @@ def get_details(application_ref):
     return application, licence, authority, interaction, customisation
 
 
-def build_no_fee_context(application: LicenceApplication, licence: Licence, authority, interaction, customisation: Customisation):
+def build_no_fee_context(application: LicenceApplication, licence: Licence, authority, customisation: Customisation):
     formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
     has_supporting_documents = customisation.supporting_document_definitions
     all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
@@ -100,7 +101,9 @@ def all_docs_mandatory(customisation: Customisation):
 
 
 def get_department(authority: Authority):
-    pass
+    department_repo = DepartmentRepository()
+    department = department_repo.get_department_from_authority_slug(authority.url_slug)
+    return department
 
 
 def mock_provide_fee_context():
