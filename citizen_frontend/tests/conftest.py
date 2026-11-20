@@ -128,6 +128,7 @@ def mock_licence_application_repo(mocker):
     mocker.patch.object(repo.model.objects, "get")
     mocker.patch.object(repo.model, "save")
     mocker.patch.object(repo.model, "full_clean")
+    mocker.patch.object(repo, "counter_repo")
     yield repo
 
 

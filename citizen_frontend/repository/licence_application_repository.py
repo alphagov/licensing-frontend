@@ -1,7 +1,6 @@
 import datetime
 import logging
 
-import bson
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
@@ -9,8 +8,10 @@ from common.models.licence_application import ApplicationStatus, LicenceApplicat
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
 from django.utils import timezone
+from pymongo import ReturnDocument
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
+from config import settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -19,6 +20,7 @@ logger.setLevel(logging.INFO)
 class LicenceApplicationRepository:
     def __init__(self):
         self.model = LicenceApplication
+        self.counter_repo = CounterRepository()
 
     def get_application_from_id(self, application_id):
         try:
@@ -42,8 +44,8 @@ class LicenceApplicationRepository:
         is_supporting_documents_online: bool,
     ):
         try:
-            entry_id = bson.ObjectId()
-            logger.info("Creating new licence application entry %s", entry_id)
+            count = self.counter_repo.get_next_count()
+            logger.info("Creating new licence application entry %s-%s", authority.url_slug, count)
 
             service = Service(
                 licence_code=licence.licence_code,
@@ -62,9 +64,9 @@ class LicenceApplicationRepository:
             )
 
             new_application_entry = LicenceApplication(
-                _id=entry_id,
                 applicant_email=email,
                 authority=authority.url_slug,
+                application_reference_number=f"{authority.url_slug}-{count}",
                 licence=licence.url_slug,
                 has_supporting_documents_online=is_supporting_documents_online,
                 application_pdf=application_document,
@@ -81,12 +83,47 @@ class LicenceApplicationRepository:
             new_application_entry.full_clean()
             new_application_entry.save()
 
-            return str(entry_id)
+            return new_application_entry.application_reference_number
         except ValidationError as e:
-            logger.error("Failed to create new licence application entry %s, validation error: %s", entry_id, e)
+            logger.error(
+                "Failed to create new licence application entry %s, validation error: %s",
+                new_application_entry.application_reference_number,
+                e,
+            )
             raise DataIntegrityError(
                 f"LicenceApplication validation error: {e.messages}, failed to create new object"
             ) from e
         except DatabaseError as e:
-            logger.error("Failed to create new licence application entry %s, database error: %s", entry_id, e)
+            # Could get a DB from counters here and then we would not have created the licence application obj yet
+            # This would lead to NameError exception I imagine
+            logger.error(
+                "Failed to create new licence application entry %s, database error: %s",
+                new_application_entry.application_reference_number,
+                e,
+            )
             raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e
+
+
+"""
+This counter repository is only called when creating a new licence application object.
+
+It is used to set the, in conjunction with the authority slug of the authority the licence application is for,
+licence application application reference number attribute.
+
+The application reference number is used down stream for the following:
+   - in a querystring for endpoints that query licence application process and status, and whether payment is due.
+   - in the case of a due payment, the creation of unique transaction id for access paysuite.
+"""
+
+
+class CounterRepository:
+    @staticmethod
+    def get_next_count() -> int:
+        db = settings.DATABASES["default"]
+        doc = db["counters"].find_one_and_update(
+            {"counterName": "applicationCounter"},
+            {"$inc": {"nextId": 1}},
+            upsert=True,
+            return_document=ReturnDocument.AFTER,
+        )
+        return int(doc["nextId"])
