@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 import pytest
-from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_OBJECT_ID, TEST_UUID
+from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_UUID
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import HttpResponseRedirect
 from django.urls import reverse
@@ -65,11 +65,12 @@ def test_application_form_submission_happy_path(
         return_value=HttpResponseRedirect(reverse("application_uploaded", query={"id": TEST_UUID})),
     )
 
+    expected_application_reference_number = f"{TEST_AUTHORITY.url_slug}-1"
     mocker.patch(
         "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
-    ).return_value = str(TEST_OBJECT_ID)
+    ).return_value = expected_application_reference_number
 
-    expected_redirect_url = reverse("application_uploaded", query={"id": TEST_OBJECT_ID})
+    expected_redirect_url = reverse("application_uploaded", query={"id": expected_application_reference_number})
 
     session_client.post(
         submit_url_path(),
@@ -92,7 +93,7 @@ def test_application_form_submission_happy_path(
         },
     )
 
-    assert str(TEST_OBJECT_ID) in session_client.session["applicationReferenceNumbers"]
+    assert expected_application_reference_number in session_client.session["applicationReferenceNumbers"]
     mock_redirect.assert_called_with(expected_redirect_url)
 
 

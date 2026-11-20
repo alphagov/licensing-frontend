@@ -33,7 +33,7 @@ VALID_LICENCE_APPLICATION_ARGS = {
 }
 
 
-def test_create_new_licence_application_calls_db_with_correct_args(mock_licence_application_repo, mock_bson_object_id):
+def test_create_new_licence_application_calls_db_with_correct_args(mock_licence_application_repo):
     mock_licence_application_repo.model.full_clean.side_effect = None
     mock_licence_application_repo.counter_repo.get_next_count.return_value = 1
 
@@ -45,9 +45,7 @@ def test_create_new_licence_application_calls_db_with_correct_args(mock_licence_
     assert actual == f"{TEST_AUTHORITY.url_slug}-1"
 
 
-def test_create_new_licence_application_calls_counter_repository_for_new_count(
-    mock_licence_application_repo, mock_bson_object_id
-):
+def test_create_new_licence_application_calls_counter_repository_for_new_count(mock_licence_application_repo):
     mock_licence_application_repo.model.full_clean.side_effect = None
 
     mock_licence_application_repo.create_new_licence_application(**VALID_LICENCE_APPLICATION_ARGS)
