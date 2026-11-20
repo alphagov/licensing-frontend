@@ -6,12 +6,12 @@ from common.models.interaction_customisation import Customisation
 from common.models.licence import Licence, LicenceInteraction
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from django.core.exceptions import ValidationError
-from django.db import DatabaseError
+from django.db import DatabaseError, connection
 from django.utils import timezone
 from pymongo import ReturnDocument
+from pymongo.errors import PyMongoError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
-from config import settings
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -93,7 +93,7 @@ class LicenceApplicationRepository:
             raise DataIntegrityError(
                 f"LicenceApplication validation error: {e.messages}, failed to create new object"
             ) from e
-        except DatabaseError as e:
+        except (DatabaseError, DocumentDBError) as e:
             # Could get a DB from counters here and then we would not have created the licence application obj yet
             # This would lead to NameError exception I imagine
             logger.error(
@@ -119,11 +119,16 @@ The application reference number is used down stream for the following:
 class CounterRepository:
     @staticmethod
     def get_next_count() -> int:
-        db = settings.DATABASES["default"]
-        doc = db["counters"].find_one_and_update(
-            {"counterName": "applicationCounter"},
-            {"$inc": {"nextId": 1}},
-            upsert=True,
-            return_document=ReturnDocument.AFTER,
-        )
-        return int(doc["nextId"])
+        try:
+            coll = connection.get_collection("counters")
+            doc = coll.find_one_and_update(
+                {"counterName": "applicationCounter"},
+                {"$inc": {"nextId": 1}},
+                upsert=True,
+                return_document=ReturnDocument.AFTER,
+                projection={"nextId": 1},
+            )
+            return int(doc["nextId"])
+        except PyMongoError as e:
+            logger.error("Failed to get counter")
+            raise DocumentDBError(f"Failed to get counter, DB error: {e}") from e

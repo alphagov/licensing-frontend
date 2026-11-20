@@ -159,7 +159,7 @@ def test_form_submission(page: Page, ministack_s3):
     application_id = query_params.get("id", [None])[0]
 
     # Check the newly created object against what has been filled in form
-    application = LicenceApplication.objects.get(_id=application_id)
+    application = LicenceApplication.objects.get(application_reference_number=application_id)
     assert application.applicant_email == "example@email.com"
     application.delete()
 
