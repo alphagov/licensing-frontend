@@ -13,6 +13,7 @@ services:
   citizen_frontend:
     depends_on:
       - document_db
+      - ministack
     build:
       context: .
       dockerfile: Dockerfile

@@ -34,6 +34,7 @@ from citizen_frontend.api.models.api_responses import (
 )
 from citizen_frontend.enums.licence_interactions import LicenceInteractions
 from citizen_frontend.enums.payment_type import PaymentType
+from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
 from citizen_frontend.services.document_storage import S3Service
 
 BASE_URL = os.getenv("BASE_URL", "http://127.0.0.1:8000")
@@ -64,6 +65,8 @@ TEST_FOOD_PREMISES_APPLY_FORM_URL = (
 )
 
 TEST_UUID = UUID("f47ac10b-58cc-4372-a567-0e02b2c3d479")
+
+TEST_OBJECT_ID = ObjectId("50c8520393867870cb0d775f")
 
 
 @pytest.fixture
@@ -111,6 +114,16 @@ def mock_s3(mock_s3_client):
 def mock_s3_service(mock_s3_client):
     service = S3Service()
     yield service
+
+
+@pytest.fixture
+def mock_licence_application_repo(mocker):
+    repo = LicenceApplicationRepository()
+    mocker.patch.object(repo.model.objects, "get")
+    mocker.patch.object(repo.model, "save")
+    mocker.patch.object(repo.model, "full_clean")
+    mocker.patch.object(repo, "counter_repo")
+    yield repo
 
 
 @pytest.fixture
@@ -171,7 +184,7 @@ TEST_LICENCE_DETAIL = LicenceDetail(
 
 
 TEST_AUTHORITY = Authority(
-    _id=ObjectId("50c8520393867870cb0d775f"),
+    _id=TEST_OBJECT_ID,
     name="Test Authority",
     url_slug="test-authority",
     full_name="Test Authority for testing with",
@@ -210,7 +223,7 @@ TEST_LICENCE_INTERACTION = LicenceInteraction(
 )
 
 TEST_LICENCE = Licence(
-    _id=ObjectId("50c8520393867870cb0d775f"),
+    _id=TEST_OBJECT_ID,
     name="Test Licence",
     licence_code=TEST_LICENCE_CODE,
     legislation_name=["Licensing Act 2003"],
@@ -305,7 +318,7 @@ TEST_CUSTOMISATION_FIXED_FEE = Customisation(
     legislation_name="test-legislation",
     introduction_text="test-introduction",
     declarations=["test-declaration1", "test-declaration2"],
-    department=bson.ObjectId("50c8520393867870cb0d775f"),
+    department=TEST_OBJECT_ID,
     information_url="https://test-information.com",
     guidance_url="https://test-guidance.com",
     supporting_document_definitions=[
@@ -330,10 +343,11 @@ TEST_CUSTOMISATION_NO_FEE = Customisation(
     information_url="https://test-information.com",
     guidance_url="https://test-guidance.com",
     supporting_document_definitions=[
-        SupportingDocumentDefinition(name="test", is_mandatory=True),
-        SupportingDocumentDefinition(name="test2", is_mandatory=False),
-        SupportingDocumentDefinition(name="test3", is_mandatory=False),
+        SupportingDocumentDefinition(name="test", description="test-def", is_mandatory=True),
+        SupportingDocumentDefinition(name="test2", description="test-def2", is_mandatory=False),
+        SupportingDocumentDefinition(name="test3", description="test-def3", is_mandatory=False),
     ],
+    fixed_fee_amount=PaymentAmount(pence=0),
 )
 
 

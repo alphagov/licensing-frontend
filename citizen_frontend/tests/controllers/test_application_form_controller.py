@@ -3,10 +3,11 @@ from copy import deepcopy
 import pytest
 from conftest import TEST_AUTHORITY, TEST_CUSTOMISATION_NO_FEE, TEST_LICENCE, TEST_UUID
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.http import HttpResponseRedirect
 from django.urls import reverse
 
-from citizen_frontend.exceptions import DocumentStorageError
-from citizen_frontend.services.application_upload_service import ApplicationUploadService
+from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
+from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
 
 
 @pytest.fixture
@@ -26,46 +27,99 @@ def submit_url_path():
 
 
 @pytest.fixture
-def store_service(mock_s3, mock_s3_client):
-    service = ApplicationUploadService()
+def application_submission_service(mock_s3, mock_s3_client, mock_licence_application_repo):
+    service = ApplicationSubmissionService()
     yield service
 
 
-def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
-    store_service,
+@pytest.fixture
+def session_client(client, settings):
+    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    return client
+
+
+MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
+
+VALID_FORM_SUBMISSION = {
+    "email": "anemail@example.com",
+    "confirmation_email": "anemail@example.com",
+    "application_upload": SimpleUploadedFile(
+        name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "supporting_document_0": SimpleUploadedFile(
+        name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "declaration": "on",
+}
+
+
+def test_application_form_submission_happy_path(
+    session_client,
+    mocker,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
-    mock_uuid,
-    client,
 ):
-    expected_content = b"%PDF-1.4 fake pdf content"
-    client.post(
+    mock_redirect = mocker.patch(
+        "citizen_frontend.controllers.application_form.redirect",
+        return_value=HttpResponseRedirect(reverse("application_uploaded", query={"id": TEST_UUID})),
+    )
+
+    expected_application_reference_number = f"{TEST_AUTHORITY.url_slug}-1"
+    mocker.patch(
+        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
+    ).return_value = expected_application_reference_number
+
+    expected_redirect_url = reverse("application_uploaded", query={"id": expected_application_reference_number})
+
+    session_client.post(
         submit_url_path(),
         data={
             "email": "anemail@example.com",
             "confirmation_email": "anemail@example.com",
             "application_upload": SimpleUploadedFile(
-                name="application_upload.pdf", content_type="application/pdf", content=expected_content
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "supporting_document_0": SimpleUploadedFile(
-                name="supporting_document_0.pdf", content_type="application/pdf", content=expected_content
+                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_1": SimpleUploadedFile(
+                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_2": SimpleUploadedFile(
+                name="supporting_document_1.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "declaration": "on",
         },
     )
 
-    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
-    supporting_document = store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
+    assert expected_application_reference_number in session_client.session["applicationReferenceNumbers"]
+    mock_redirect.assert_called_with(expected_redirect_url)
 
-    assert application_form.read() == expected_content
-    assert supporting_document.read() == expected_content
+
+def test_submit_uploads_application_documents_to_s3_when_postal_is_not_allowed(
+    application_submission_service,
+    mock_get_licence_interaction_context,
+    mock_find_published_customisation_with_no_fee,
+    submit_url_path,
+    mock_uuid,
+    session_client,
+):
+    session_client.post(submit_url_path(), data=VALID_FORM_SUBMISSION)
+
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = application_submission_service.document_store.get_file(
+        key=f"{TEST_UUID}/supporting_document_0.pdf"
+    )
+
+    assert application_form.read() == MOCK_PDF_CONTENT
+    assert supporting_document.read() == MOCK_PDF_CONTENT
 
 
 def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowed_will_post_checked_mandatory_document(
-    store_service,
+    application_submission_service,
     mock_uuid,
-    client,
+    session_client,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
@@ -75,39 +129,34 @@ def test_submit_does_not_upload_supporting_documents_to_s3_when_postal_is_allowe
 
     mock_find_published_customisation_with_no_fee.return_value = postal_allowed_free_customisation
 
-    expected_content = b"%PDF-1.4 fake pdf content"
-    client.post(
+    session_client.post(
         submit_url_path(),
         data={
             "email": "anemail@example.com",
             "confirmation_email": "anemail@example.com",
             "application_upload": SimpleUploadedFile(
-                name="application_upload.pdf", content_type="application/pdf", content=expected_content
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "declaration": "on",
             "will_submit_by_post": "on",
         },
     )
 
-    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
 
-    assert application_form.read() == expected_content
+    assert application_form.read() == MOCK_PDF_CONTENT
 
     # Raise error because object does not exist.
-    with pytest.raises(DocumentStorageError):
-        store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
+    with pytest.raises(DocumentStorageError) as e:
+        application_submission_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
 
-    # TODO, research what happens when is_postal allowed, and will submit via post is checked
-    #   Does the application still creat an entry for them, or does it just exit user journey?...
-    #  looks like only the PDF is uploaded AND only supporting documentation is allowed via post
-
-    #  would be nice to be able to dynamically disable the supporting document uploads using HTMX here
+    assert e.value.args[0] == "Failed to get file from S3."
 
 
 def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_post_not_checked_mandatory_document(
-    store_service,
+    application_submission_service,
     mock_uuid,
-    client,
+    session_client,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
     submit_url_path,
@@ -115,55 +164,56 @@ def test_submit_uploads_supporting_documents_to_s3_when_postal_is_allowed_will_p
     postal_allowed_free_customisation = deepcopy(TEST_CUSTOMISATION_NO_FEE)
     postal_allowed_free_customisation.is_postal_allowed = True
 
-    expected_content = b"%PDF-1.4 fake pdf content"
-    client.post(
+    session_client.post(
         submit_url_path(),
         data={
             "email": "anemail@example.com",
             "confirmation_email": "anemail@example.com",
             "application_upload": SimpleUploadedFile(
-                name="application_upload.pdf", content_type="application/pdf", content=expected_content
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "supporting_document_0": SimpleUploadedFile(
-                name="supporting_document_0.pdf", content_type="application/pdf", content=expected_content
+                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "declaration": "on",
             "will_submit_by_post": "off",
         },
     )
 
-    application_form = store_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
-    supporting_document = store_service.document_store.get_file(key=f"{TEST_UUID}/supporting_document_0.pdf")
+    application_form = application_submission_service.document_store.get_file(key=f"{TEST_UUID}/application_upload.pdf")
+    supporting_document = application_submission_service.document_store.get_file(
+        key=f"{TEST_UUID}/supporting_document_0.pdf"
+    )
 
-    assert application_form.read() == expected_content
-    assert supporting_document.read() == expected_content
+    assert application_form.read() == MOCK_PDF_CONTENT
+    assert supporting_document.read() == MOCK_PDF_CONTENT
 
 
-def test_submit_handles_document_storage_failures_throws_500_question(
-    client,
+def test_licence_application_form_submission_throws_500_response_on_error(
+    session_client,
     mocker,
     submit_url_path,
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
 ):
     mock_call = mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationUploadService.handle_form_submission"
+        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
     )
-    mock_call.side_effect = DocumentStorageError("Failed to upload document")
+    mock_call.side_effect = LicenceSubmissionError("Failed to upload document")
 
-    expected_content = b"%PDF-1.4 fake pdf content"
-    response = client.post(
+    response = session_client.post(
         submit_url_path(),
         data={
             "email": "anemail@example.com",
             "confirmation_email": "anemail@example.com",
             "application_upload": SimpleUploadedFile(
-                name="application_upload.pdf", content_type="application/pdf", content=expected_content
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "supporting_document_0": SimpleUploadedFile(
-                name="supporting_document_0.pdf", content_type="application/pdf", content=expected_content
+                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
             ),
             "declaration": "on",
+            "will_submit_by_post": "off",
         },
     )
 

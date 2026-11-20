@@ -1,14 +1,15 @@
 import logging
 
 from django.http import Http404, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
+from django.urls import reverse
 
 import citizen_frontend.exceptions as exceptions
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
-from citizen_frontend.services.application_upload_service import ApplicationUploadService
+from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)
@@ -59,11 +60,25 @@ def generate_application_form(
             )
 
             if form.is_valid():
-                upload_service = ApplicationUploadService()
-                upload_service.handle_form_submission(request.FILES)
+                will_post = form.cleaned_data.get("will_submit_by_post")
+                supporting_documents_online = not published_customisation.is_postal_allowed or not will_post
 
-                return JsonResponse(status=201, data="Successfully submitted form", safe=False)
+                upload_service = ApplicationSubmissionService()
+                application_reference = upload_service.handle_form_submission(
+                    files=request.FILES,
+                    email=form.cleaned_data.get("email"),
+                    authority=authority,
+                    licence=licence,
+                    customisation=published_customisation,
+                    interaction=interaction,
+                    is_supporting_documents_online=supporting_documents_online,
+                )
 
+                application_references = request.session.get("applicationReferenceNumbers", [])
+                application_references.append(application_reference)
+                request.session["applicationReferenceNumbers"] = application_references
+
+                return redirect(reverse("application_uploaded", query={"id": application_reference}))
         else:
             form = ApplicationSubmissionForm(
                 published_customisation=context.get("published_customisation"),
@@ -72,8 +87,9 @@ def generate_application_form(
         context.update({"form": form})
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
-    except exceptions.DocumentStorageError as e:
+    except exceptions.LicenceSubmissionError as e:
         logger.error("Failed to submit licence application")
+        logger.error(e)
         return JsonResponse({"error": str(e)}, status=500)
     except Exception as e:
         logger.error(e)
