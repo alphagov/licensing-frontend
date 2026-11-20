@@ -1,12 +1,14 @@
 import logging
 
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import render
 
+import citizen_frontend.exceptions as exceptions
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
+from citizen_frontend.services.application_upload_service import ApplicationUploadService
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)
@@ -52,11 +54,15 @@ def generate_application_form(
         if request.method == "POST":
             form = ApplicationSubmissionForm(
                 request.POST,
+                request.FILES,
                 published_customisation=context.get("published_customisation"),
             )
 
             if form.is_valid():
-                pass
+                upload_service = ApplicationUploadService()
+                upload_service.handle_form_submission(request.FILES)
+
+                return JsonResponse(status=201, data="Successfully submitted form", safe=False)
 
         else:
             form = ApplicationSubmissionForm(
@@ -66,7 +72,9 @@ def generate_application_form(
         context.update({"form": form})
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
-
+    except exceptions.DocumentStorageError as e:
+        logger.error("Failed to submit licence application")
+        return JsonResponse({"error": str(e)}, status=500)
     except Exception as e:
         logger.error(e)
         raise Http404("Incorrect licence, or authority does not exist") from e

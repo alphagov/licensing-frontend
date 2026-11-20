@@ -49,6 +49,7 @@ class ApplicationSubmissionForm(forms.Form):
     )
 
     def __init__(self, *args, published_customisation: Customisation, **kwargs):
+        self.customisation = kwargs.pop("published_customisation", published_customisation)
         super().__init__(*args, **kwargs)
 
         logger.info("Building Application Submission Form")
@@ -58,13 +59,7 @@ class ApplicationSubmissionForm(forms.Form):
         ]
 
         if published_customisation.supporting_document_definitions:
-            (
-                layout_items.append(
-                    self.build_supporting_documents_fieldset(
-                        {"supporting_documents": published_customisation.supporting_document_definitions}
-                    )
-                )
-            )
+            (layout_items.append(self.build_supporting_documents_fieldset({"customisation": published_customisation})))
 
         if published_customisation.declarations:
             layout_items.append(
@@ -98,7 +93,8 @@ class ApplicationSubmissionForm(forms.Form):
             ),
         ]
 
-        supporting_documents = context["supporting_documents"]
+        customisation = context["customisation"]
+        supporting_documents = customisation.supporting_document_definitions
 
         for index, document in enumerate(supporting_documents):
             label = document.name if document.is_mandatory else f"{document.name}(optional)"
@@ -115,6 +111,16 @@ class ApplicationSubmissionForm(forms.Form):
 
             fieldset_additions.append(f"supporting_document_{index}")
 
+        if customisation.is_postal_allowed:
+            logger.info("Adding is postal")
+            self.fields["will_submit_by_post"] = forms.BooleanField(
+                label="OK, I'll submit all the documents by post instead",
+                required=False,
+                widget=forms.CheckboxInput(attrs={"data-testid": "will-post-checkbox"}),
+            )
+
+            fieldset_additions.append("will_submit_by_post")
+
         return Fieldset(*fieldset_additions, legend="Supporting Documents", legend_tag="h2", legend_size="s")
 
     def build_declarations_fieldset(self, context):
@@ -125,7 +131,7 @@ class ApplicationSubmissionForm(forms.Form):
             label="Ticking this box indicates you have read and understood the above declaration",
             required=True,
             error_messages={"required": "Please check the tick box to accept the declaration"},
-            widget=forms.CheckboxInput(attrs={"class": "govuk-checkbox", "data-testid": "declaration-checkbox"}),
+            widget=forms.CheckboxInput(attrs={"data-testid": "declaration-checkbox"}),
         )
 
         fieldset_additions.append("declaration")
@@ -141,3 +147,13 @@ class ApplicationSubmissionForm(forms.Form):
                 "Email addresses must match",
             )
             self.add_error("confirmation_email", "Email addresses must match")
+
+        if self.customisation.is_postal_allowed:
+            mandatory_supporting_documents = [
+                document for document in self.customisation.supporting_document_definitions if document.is_mandatory
+            ]
+
+            if self.data.get("will_submit_by_post") not in ["off", "false", "False"]:
+                for index, _document in enumerate(mandatory_supporting_documents):
+                    del self._errors[f"supporting_document_{index}"]
+                    logger.info("Mandatory documents are being posted")
