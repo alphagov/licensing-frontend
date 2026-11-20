@@ -61,18 +61,16 @@ def get_details(application_ref):
 
 
 def build_no_fee_context(application: LicenceApplication, licence: Licence, authority, customisation: Customisation):
-    formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
     has_supporting_documents = customisation.supporting_document_definitions
     all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
     processing_days = format_processing_days(customisation)
     department = get_department(authority)
 
-    return {
+    context = {
         "licence_name": licence.name,
         "authority": authority,
         "published_customisation": customisation,
         "application": application,
-        "expected_processing_date": formatted_expected_processing_date,
         "has_supporting_documents": has_supporting_documents,
         "all_supporting_documents_required": all_supporting_documents_required,
         "processing_days": processing_days,
@@ -80,6 +78,15 @@ def build_no_fee_context(application: LicenceApplication, licence: Licence, auth
         "department": department,
         "step": "3",
     }
+    if application.expected_processing_date:
+        formatted_expected_processing_date = application.expected_processing_date.strftime("%d %B %Y")
+        context.update(
+            {
+                "expected_processing_date": formatted_expected_processing_date,
+            }
+        )
+
+    return context
 
 
 def format_processing_days(customisation: Customisation):
@@ -124,7 +131,7 @@ def mock_prepayment_context():
     }
 
 
-# def mock_no_fee_context():
+# def mock_no_fee_context_for_local_render():
 #     authority = Authority(name="Test Authority", full_name="Test Authority Full Name")
 #     customisation = Customisation(
 #         is_fee_required=False,
