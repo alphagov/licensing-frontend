@@ -58,12 +58,14 @@ class LicenceApplicationRepository:
 
             has_fixed_fee_amount = customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0
 
-            # TODO create method/util/function to handle working days, does python do this?
-            now = timezone.now()
-            expected_process_date = (
-                now + datetime.timedelta(days=customisation.number_of_days_to_process)
-                if customisation.number_of_days_to_process
-                else now + datetime.timedelta(days=30)
+            expected_process_date = self._calculate_expected_processing_date(
+                is_working_days=customisation.is_processing_days_working_days,
+                processing_days=(
+                    customisation.is_processing_days_working_days
+                    if customisation.is_processing_days_working_days
+                    else 30
+                ),
+                country=authority.countries[0] if authority.countries else "England",
             )
 
             new_application_entry = LicenceApplication(
@@ -106,7 +108,12 @@ class LicenceApplicationRepository:
             )
             raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e
 
-    def calculate_expected_processing_date(self, is_working_days, processing_days=30) -> timedelta | Any:
+    def _calculate_expected_processing_date(
+        self,
+        is_working_days: bool,
+        country: str,
+        processing_days: int,
+    ) -> timedelta | Any:
         expected_date = timezone.now().date()
 
         if not is_working_days:
@@ -118,10 +125,11 @@ class LicenceApplicationRepository:
         if is_weekend_start:
             processing_days += 2 if start_day == 5 else 1
 
-        days_added = 0
-
         bank_holidays = BankHolidays()
-        holidays = {holiday["date"] for holiday in bank_holidays.get_holidays()}
+        division = self._get_division(country)
+        holidays = {holiday["date"] for holiday in bank_holidays.get_holidays(division)}
+
+        days_added = 0
 
         while days_added < processing_days:
             expected_date += datetime.timedelta(days=1)
@@ -133,6 +141,16 @@ class LicenceApplicationRepository:
                 days_added += 1
 
         return expected_date
+
+    @staticmethod
+    def _get_division(country):
+        divisions = {
+            "England": "england-and-wales",
+            "NI": "northern-ireland",
+            "Wales": "england-and-wales",
+            "Scotland": "scotland",
+        }
+        return divisions[country]
 
 
 """

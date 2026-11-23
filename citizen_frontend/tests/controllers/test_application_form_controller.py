@@ -61,13 +61,13 @@ def test_application_form_submission_happy_path(
     submit_url_path,
 ):
     mock_redirect = mocker.patch(
-        "citizen_frontend.controllers.application_form.redirect",
+        "citizen_frontend.controllers.application_form_controller.redirect",
         return_value=HttpResponseRedirect(reverse("application_uploaded", query={"id": TEST_UUID})),
     )
 
     expected_application_reference_number = f"{TEST_AUTHORITY.url_slug}-1"
     mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
+        "citizen_frontend.controllers.application_form_controller.ApplicationSubmissionService.handle_form_submission"
     ).return_value = expected_application_reference_number
 
     expected_redirect_url = reverse("application_uploaded", query={"id": expected_application_reference_number})
@@ -197,7 +197,7 @@ def test_licence_application_form_submission_throws_500_response_on_error(
     mock_find_published_customisation_with_no_fee,
 ):
     mock_call = mocker.patch(
-        "citizen_frontend.controllers.application_form.ApplicationSubmissionService.handle_form_submission"
+        "citizen_frontend.controllers.application_form_controller.ApplicationSubmissionService.handle_form_submission"
     )
     mock_call.side_effect = LicenceSubmissionError("Failed to upload document")
 
