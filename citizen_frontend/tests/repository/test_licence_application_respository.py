@@ -12,6 +12,7 @@ from conftest import (
 )
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError
+from freezegun import freeze_time
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
 
@@ -82,3 +83,43 @@ def test_calculate_expected_processing_date_only_working_days_false(mock_licence
         is_working_days=False,
     )
     assert actual == expected_processing_date.date()
+
+
+@freeze_time("2026-11-27")
+def test_calculate_expected_processing_date_working_days_true_handles_weekends(mock_licence_application_repo):
+    number_of_days_to_process = 2
+    expected_processing_date = datetime.fromisoformat("2026-12-01")
+
+    actual = mock_licence_application_repo.calculate_expected_processing_date(
+        processing_days=number_of_days_to_process,
+        is_working_days=True,
+    )
+
+    assert actual == expected_processing_date.date()
+
+
+#   test("2020-06-12 shouldn't be a holiday in England, but 2020-03-18 should be one in N.I.") {
+#     CalendarApiClient.isBankHoliday("england", LocalDate.parse("2020-06-12")) should be(false)
+#     CalendarApiClient.isBankHoliday("ni", LocalDate.parse("2020-03-17")) should be(true)
+#   }
+#
+#   test("2020-01-01 should be a holiday in Wales, but 2020-07-12 shouldn't be one in Scotland") {
+#     CalendarApiClient.getBankHolidays("wales") should contain(LocalDate.parse("2020-01-01"))
+#     CalendarApiClient.getBankHolidays("Scotland") should not contain (LocalDate.parse("2020-07-12"))
+#     CalendarApiClient.getBankHolidays("ni") should contain(LocalDate.parse("2020-07-13"))
+#   }
+#
+#   test("Next working day after Good Thursday is the Tuesday after Easter") {
+#     Calendar.plusDaysWithHolidays("England", DateTime.parse("2020-04-09"), 1)
+#     should be(LocalDateTime.parse("2020-04-14"))
+#   }
+#
+#   test("7 working days after 2020-12-28 is 2021-01-08 (New Year Holiday)") {
+#     Calendar.plusDaysWithHolidays("england", DateTime.parse("2020-12-28"), 7)
+#     should be(LocalDateTime.parse("2021-01-08"))
+#   }
+#
+#   test("5 working days after Sunday should be the Monday after next") {
+#     Calendar.plusDaysWithHolidays("england", DateTime.parse("2020-07-05"), 5)
+#     should be(LocalDateTime.parse("2020-07-13"))
+#   }

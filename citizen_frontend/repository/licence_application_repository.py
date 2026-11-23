@@ -1,5 +1,7 @@
 import datetime
 import logging
+from datetime import timedelta
+from typing import Any
 
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
@@ -103,9 +105,24 @@ class LicenceApplicationRepository:
             )
             raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e
 
-    def calculate_expected_processing_date(self, processing_days, is_working_days) -> datetime.datetime:
-        day = timezone.now() + datetime.timedelta(days=processing_days)
-        return day.date()
+    def calculate_expected_processing_date(self, is_working_days, processing_days=30) -> timedelta | Any:
+        expected_date = timezone.now().date()
+        if not is_working_days:
+            expected_date += datetime.timedelta(days=processing_days)
+
+        else:
+            days_added = 0
+
+            while days_added < processing_days:
+                expected_date += datetime.timedelta(days=1)
+
+                is_weekend = datetime.date.weekday(expected_date) >= 5
+                # is_holiday = current_date in holidays
+
+                if not is_weekend:
+                    days_added += 1
+
+        return expected_date
 
 
 """

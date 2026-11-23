@@ -21,6 +21,7 @@ dev = [
     "pytest-playwright>=0.8.0",
     "ruff>=0.15.22",
     "moto[s3]>=5.2.5",
+    "freezegun>=1.5.5",
 ]
 
 [tool.ruff]
