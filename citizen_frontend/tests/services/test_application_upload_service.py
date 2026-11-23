@@ -5,7 +5,6 @@ from conftest import (
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_NO_FEE,
     TEST_LICENCE,
-    TEST_LICENCE_INTERACTION,
     TEST_UUID,
 )
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -16,31 +15,62 @@ from citizen_frontend.exceptions import (
     DocumentStorageError,
     LicenceSubmissionError,
 )
-from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import Application, ApplicationSubmissionService
+
+MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
+
+VALID_FORM_SUBMISSION = {
+    "email": "anemail@example.com",
+    "confirmation_email": "anemail@example.com",
+    "application_upload": SimpleUploadedFile(
+        name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "supporting_document_0": SimpleUploadedFile(
+        name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "declaration": "on",
+}
 
 
 @pytest.fixture
-def mock_application_upload_service(mock_s3_service, mocker):
-    service = ApplicationSubmissionService()
+def mock_application():
+    yield Application(
+        email=VALID_FORM_SUBMISSION["email"],
+        files={
+            "application_upload": SimpleUploadedFile(
+                name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+            "supporting_document_0": SimpleUploadedFile(
+                name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+            ),
+        },
+        licence=TEST_LICENCE,
+        authority=TEST_AUTHORITY,
+        customisation=TEST_CUSTOMISATION_NO_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        is_supporting_documents_online=False,
+    )
+
+
+@pytest.fixture
+def mock_application_upload_service(mock_s3_service, mocker, mock_application):
+    service = ApplicationSubmissionService(mock_application)
     mocker.patch.object(service, "licence_application_repository")
     yield service
-
-
-MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 
 
 def test_application_upload_service_uploads_submitted_forms_to_s3(
     mock_s3, mock_application_upload_service, mock_uuid, mock_s3_client
 ):
-    mock_application = SimpleUploadedFile(
+    mock_file_upload = SimpleUploadedFile(
         name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
     )
 
-    mock_application_upload_service._upload_document(mock_application, f"{TEST_UUID}/{mock_application.name}")
+    mock_application_upload_service._upload_document(mock_file_upload, f"{TEST_UUID}/{mock_file_upload.name}")
 
     file = mock_s3_client.get_object(
         Bucket="test-bucket",
-        Key=f"{TEST_UUID}/{mock_application.name}",
+        Key=f"{TEST_UUID}/{mock_file_upload.name}",
     )
     assert file["Body"].read() == MOCK_PDF_CONTENT
 
@@ -81,13 +111,13 @@ def test_application_handles_supported_documents(mock_application_upload_service
 
 
 def test_create_application_document_returns_expected_object(mock_application_upload_service, mock_uuid):
-    mock_application = SimpleUploadedFile(
+    mock_file_upload = SimpleUploadedFile(
         name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
     )
 
     expected_object = SupportingDocument(
-        _id=f"{TEST_UUID}/{mock_application.name}",
-        file_name=mock_application.name,
+        _id=f"{TEST_UUID}/{mock_file_upload.name}",
+        file_name=mock_file_upload.name,
         definition=SupportingDocumentDefinition(
             name="Completed form",
             description="Downloaded and filled PDF form",
@@ -95,11 +125,12 @@ def test_create_application_document_returns_expected_object(mock_application_up
         ),
     )
 
-    actual = mock_application_upload_service._create_application_document(mock_application, TEST_UUID)
+    actual = mock_application_upload_service._create_application_document(mock_file_upload, TEST_UUID)
     assert actual._id == expected_object._id
 
 
 def test_application_upload_service_virus_scans_files_before_uploading():
+    # TODO separate ticket
     pass
 
 
@@ -113,22 +144,8 @@ def test_application_upload_service_handles_application_licence_repository_error
         side_effect=error,
     )
 
-    mock_application = {
-        "application_upload": SimpleUploadedFile(
-            name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-        )
-    }
-
     with pytest.raises(LicenceSubmissionError):
-        mock_application_upload_service.handle_form_submission(
-            files=mock_application,
-            customisation=TEST_CUSTOMISATION_NO_FEE,
-            email="mock_email",
-            is_supporting_documents_online=True,
-            authority=TEST_AUTHORITY,
-            licence=TEST_LICENCE,
-            interaction=TEST_LICENCE_INTERACTION,
-        )
+        mock_application_upload_service.handle_form_submission()
 
 
 def test_application_upload_service_handles_document_storage_errors(
@@ -140,27 +157,15 @@ def test_application_upload_service_handles_document_storage_errors(
         side_effect=DocumentStorageError,
     )
 
-    mock_application = {
-        "application_upload": SimpleUploadedFile(
-            name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-        )
-    }
-
     with pytest.raises(LicenceSubmissionError):
-        mock_application_upload_service.handle_form_submission(
-            files=mock_application,
-            customisation=TEST_CUSTOMISATION_NO_FEE,
-            email="mock_email",
-            is_supporting_documents_online=True,
-            authority=TEST_AUTHORITY,
-            licence=TEST_LICENCE,
-            interaction=TEST_LICENCE_INTERACTION,
-        )
+        mock_application_upload_service.handle_form_submission()
 
 
 def test_handle_submission_creates_new_entry_in_licence_applications(
     mock_application_upload_service, mock_s3, mock_uuid, mocker
 ):
+
+    mock_application_upload_service.application.is_supporting_documents_online = True
 
     supporting_docs = mocker.patch.object(
         mock_application_upload_service,
@@ -172,18 +177,12 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
         ],
     )
 
-    files = {
-        "application_upload": SimpleUploadedFile(
-            name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
-        ),
-    }
-
     expected_application_document = mocker.patch.object(
         mock_application_upload_service,
         "_create_application_document",
         return_value=SupportingDocument(
-            _id=f"{TEST_UUID}/{files['application_upload'].name}",
-            file_name=files["application_upload"].name,
+            _id=f"{TEST_UUID}/{mock_application_upload_service.application.files['application_upload'].name}",
+            file_name=mock_application_upload_service.application.files["application_upload"].name,
             definition=SupportingDocumentDefinition(
                 name="Completed form",
                 description="Downloaded and filled PDF form",
@@ -192,24 +191,16 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
         ),
     )
 
-    mock_application_upload_service.handle_form_submission(
-        files=files,
-        customisation=TEST_CUSTOMISATION_NO_FEE,
-        email="mock_email",
-        is_supporting_documents_online=True,
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        interaction=TEST_LICENCE_INTERACTION,
-    )
+    mock_application_upload_service.handle_form_submission()
 
     mock_application_upload_service.licence_application_repository.create_new_licence_application.assert_called_with(
-        email="mock_email",
+        email=mock_application_upload_service.application.email,
         application_document=expected_application_document.return_value,
         supporting_documents=supporting_docs.return_value,
         authority=TEST_AUTHORITY,
         licence=TEST_LICENCE,
         customisation=TEST_CUSTOMISATION_NO_FEE,
-        interaction=TEST_LICENCE_INTERACTION,
+        interaction=mock_application_upload_service.application.interaction,
         is_supporting_documents_online=True,
     )
 

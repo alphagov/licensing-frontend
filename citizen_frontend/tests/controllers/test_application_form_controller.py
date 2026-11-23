@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
-from citizen_frontend.services.application_submission_service import ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import Application, ApplicationSubmissionService
 
 
 @pytest.fixture
@@ -26,18 +26,6 @@ def submit_url_path():
     return _url
 
 
-@pytest.fixture
-def application_submission_service(mock_s3, mock_s3_client, mock_licence_application_repo):
-    service = ApplicationSubmissionService()
-    yield service
-
-
-@pytest.fixture
-def session_client(client, settings):
-    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    return client
-
-
 MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 
 VALID_FORM_SUBMISSION = {
@@ -51,6 +39,31 @@ VALID_FORM_SUBMISSION = {
     ),
     "declaration": "on",
 }
+
+mock_application = Application(
+    email=VALID_FORM_SUBMISSION["email"],
+    files={
+        "application_upload": VALID_FORM_SUBMISSION["application_upload"],
+        "supporting_document_0": VALID_FORM_SUBMISSION["supporting_document_0"],
+    },
+    licence=TEST_LICENCE,
+    authority=TEST_AUTHORITY,
+    customisation=TEST_CUSTOMISATION_NO_FEE,
+    interaction=TEST_LICENCE.licence_interactions[0],
+    is_supporting_documents_online=False,
+)
+
+
+@pytest.fixture
+def application_submission_service(mock_s3, mock_s3_client, mock_licence_application_repo):
+    service = ApplicationSubmissionService(mock_application)
+    yield service
+
+
+@pytest.fixture
+def session_client(client, settings):
+    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    return client
 
 
 def test_application_form_submission_happy_path(

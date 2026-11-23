@@ -1,5 +1,6 @@
 import logging
 import uuid
+from dataclasses import dataclass
 
 from common.models.authority import Authority
 from common.models.interaction_customisation import Customisation
@@ -21,21 +22,24 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
+@dataclass
+class Application:
+    files: dict[str, SimpleUploadedFile]
+    email: str
+    authority: Authority
+    licence: Licence
+    customisation: Customisation
+    interaction: LicenceInteraction
+    is_supporting_documents_online: bool
+
+
 class ApplicationSubmissionService:
-    def __init__(self):
+    def __init__(self, application):
+        self.application = application
         self.document_store = S3Service()
         self.licence_application_repository = LicenceApplicationRepository()
 
-    def handle_form_submission(
-        self,
-        email: str,
-        files,
-        customisation: Customisation,
-        is_supporting_documents_online: bool,
-        authority: Authority,
-        licence: Licence,
-        interaction: LicenceInteraction,
-    ):
+    def handle_form_submission(self):
         try:
             logger.info("Handling application submission")
             upload_id = str(uuid.uuid4())
@@ -45,25 +49,28 @@ class ApplicationSubmissionService:
             #   is audit here to help handle this scenario.
 
             application_document = self._handle_application_form(
-                application_file=files["application_upload"], upload_id=upload_id
+                application_file=self.application.files["application_upload"], upload_id=upload_id
             )
 
             supporting_documents_files = {
-                key: file for key, file in files.items() if key.startswith("supporting_document_")
+                key: file for key, file in self.application.files.items() if key.startswith("supporting_document_")
             }
             supporting_documents = self._handle_supporting_documents(
-                supporting_documents_files, upload_id, customisation, is_supporting_documents_online
+                supporting_documents_files,
+                upload_id,
+                self.application.customisation,
+                self.application.is_supporting_documents_online,
             )
 
             application_reference = self.licence_application_repository.create_new_licence_application(
-                email=email,
+                email=self.application.email,
                 application_document=application_document,
                 supporting_documents=supporting_documents,
-                authority=authority,
-                licence=licence,
-                customisation=customisation,
-                interaction=interaction,
-                is_supporting_documents_online=is_supporting_documents_online,
+                authority=self.application.authority,
+                licence=self.application.licence,
+                customisation=self.application.customisation,
+                interaction=self.application.interaction,
+                is_supporting_documents_online=self.application.is_supporting_documents_online,
             )
             return application_reference
         except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
@@ -94,7 +101,7 @@ class ApplicationSubmissionService:
         return supporting_document_object_entries
 
     def _upload_document(self, document: SimpleUploadedFile, path: str):
-        self.document_store.store_file(path=path, file=document, content_type=document.content_type)
+        self.document_store.store_file(path=path, file=document.file, content_type=document.content_type)
 
     def _create_supporting_document_entry_objects(
         self, files: dict[str, SimpleUploadedFile], customisation, upload_id: str, supporting_documents_online: bool
