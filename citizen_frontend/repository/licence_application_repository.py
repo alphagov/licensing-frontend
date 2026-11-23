@@ -103,6 +103,10 @@ class LicenceApplicationRepository:
             )
             raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e
 
+    def calculate_expected_processing_date(self, processing_days, is_working_days) -> datetime.datetime:
+        day = timezone.now() + datetime.timedelta(days=processing_days)
+        return day.date()
+
 
 """
 This counter repository is only called when creating a new licence application object.

@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 import pytest
 from common.models.licence_application import SupportingDocument
 from common.models.shared_models import SupportingDocumentDefinition
@@ -69,3 +71,14 @@ def test_create_new_licence_application_handles_db_errors(mock_licence_applicati
         mock_licence_application_repo.create_new_licence_application(**VALID_LICENCE_APPLICATION_ARGS)
 
     assert e.value.args[0] == "Failed to create new object, DB error: ()"
+
+
+def test_calculate_expected_processing_date_only_working_days_false(mock_licence_application_repo):
+    number_of_days_to_process = 20
+    expected_processing_date = datetime.today() + timedelta(days=number_of_days_to_process)
+
+    actual = mock_licence_application_repo.calculate_expected_processing_date(
+        processing_days=number_of_days_to_process,
+        is_working_days=False,
+    )
+    assert actual == expected_processing_date.date()
