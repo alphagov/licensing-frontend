@@ -98,6 +98,17 @@ def test_calculate_expected_processing_date_working_days_true_handles_weekends(m
     assert actual == expected_processing_date.date()
 
 
+@freeze_time("2026-11-08")
+def test_5_working_days_sunday_submission_expected_processing_date_is_week_monday(mock_licence_application_repo):
+    expected_date = datetime(2026, 11, 16).date()
+    actual = mock_licence_application_repo.calculate_expected_processing_date(
+        processing_days=5,
+        is_working_days=True,
+    )
+
+    assert actual == expected_date
+
+
 #   test("2020-06-12 shouldn't be a holiday in England, but 2020-03-18 should be one in N.I.") {
 #     CalendarApiClient.isBankHoliday("england", LocalDate.parse("2020-06-12")) should be(false)
 #     CalendarApiClient.isBankHoliday("ni", LocalDate.parse("2020-03-17")) should be(true)

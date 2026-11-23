@@ -107,20 +107,27 @@ class LicenceApplicationRepository:
 
     def calculate_expected_processing_date(self, is_working_days, processing_days=30) -> timedelta | Any:
         expected_date = timezone.now().date()
+
         if not is_working_days:
-            expected_date += datetime.timedelta(days=processing_days)
+            return expected_date + datetime.timedelta(days=processing_days)
 
-        else:
-            days_added = 0
+        start_day = datetime.date.weekday(expected_date)
+        is_weekend_start = start_day >= 5
 
-            while days_added < processing_days:
-                expected_date += datetime.timedelta(days=1)
+        if is_weekend_start:
+            processing_days += 2 if start_day == 5 else 1
 
-                is_weekend = datetime.date.weekday(expected_date) >= 5
-                # is_holiday = current_date in holidays
+        days_added = 0
 
-                if not is_weekend:
-                    days_added += 1
+        while days_added < processing_days:
+            expected_date += datetime.timedelta(days=1)
+
+            is_weekend = datetime.date.weekday(expected_date) >= 5
+
+            # is_holiday = current_date in holidays
+
+            if not is_weekend:
+                days_added += 1
 
         return expected_date
 
