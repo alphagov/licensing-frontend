@@ -44,14 +44,14 @@ class ApplicationSubmissionService:
             #   the objects related to this application. or is it a case of one failure and done.
             #   is audit here to help handle this scenario.
 
-            application_document = self.handle_application_form(
+            application_document = self._handle_application_form(
                 application_file=files["application_upload"], upload_id=upload_id
             )
 
             supporting_documents_files = {
                 key: file for key, file in files.items() if key.startswith("supporting_document_")
             }
-            supporting_documents = self.handle_supporting_documents(
+            supporting_documents = self._handle_supporting_documents(
                 supporting_documents_files, upload_id, customisation, is_supporting_documents_online
             )
 
@@ -70,33 +70,33 @@ class ApplicationSubmissionService:
             # TODO What gets logged here, how do we link submission/application to user, email...?
             raise LicenceSubmissionError(f"Failed to submit application: {e.args}") from e
 
-    def handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
-        application_document = self.create_application_document(application_file, upload_id)
+    def _handle_application_form(self, application_file, upload_id: str) -> SupportingDocument:
+        application_document = self._create_application_document(application_file, upload_id)
         logger.info("Uploading application form")
 
-        self.upload_document(document=application_file, path=application_document._id)
+        self._upload_document(document=application_file, path=application_document._id)
 
         return application_document
 
-    def handle_supporting_documents(
+    def _handle_supporting_documents(
         self, documents, upload_id: str, customisation: Customisation, supporting_document_online: bool
     ):
         logger.info("Uploading supporting documents")
-        supporting_document_object_entries = self.create_supporting_document_entry_objects(
+        supporting_document_object_entries = self._create_supporting_document_entry_objects(
             files=documents,
             customisation=customisation,
             upload_id=upload_id,
             supporting_documents_online=supporting_document_online,
         )
         for _key, value in documents.items():
-            self.upload_document(document=value, path=f"{upload_id}/{value.name}")
+            self._upload_document(document=value, path=f"{upload_id}/{value.name}")
 
         return supporting_document_object_entries
 
-    def upload_document(self, document: SimpleUploadedFile, path: str):
+    def _upload_document(self, document: SimpleUploadedFile, path: str):
         self.document_store.store_file(path=path, file=document, content_type=document.content_type)
 
-    def create_supporting_document_entry_objects(
+    def _create_supporting_document_entry_objects(
         self, files: dict[str, SimpleUploadedFile], customisation, upload_id: str, supporting_documents_online: bool
     ):
 
@@ -122,7 +122,7 @@ class ApplicationSubmissionService:
 
         return supporting_document_entries
 
-    def create_application_document(self, application_file: SimpleUploadedFile, upload_id: str) -> SupportingDocument:
+    def _create_application_document(self, application_file: SimpleUploadedFile, upload_id: str) -> SupportingDocument:
         return SupportingDocument(
             _id=f"{upload_id}/{application_file.name}",
             file_name=application_file.name,

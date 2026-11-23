@@ -36,7 +36,7 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
         name="application.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
     )
 
-    mock_application_upload_service.upload_document(mock_application, f"{TEST_UUID}/{mock_application.name}")
+    mock_application_upload_service._upload_document(mock_application, f"{TEST_UUID}/{mock_application.name}")
 
     file = mock_s3_client.get_object(
         Bucket="test-bucket",
@@ -46,9 +46,9 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
 
 
 def test_application_handles_supported_documents(mock_application_upload_service, mocker, mock_uuid):
-    mocker.patch.object(mock_application_upload_service, "upload_document")
+    mocker.patch.object(mock_application_upload_service, "_upload_document")
     mock_object_creation = mocker.patch.object(
-        mock_application_upload_service, "create_supporting_document_entry_objects"
+        mock_application_upload_service, "_create_supporting_document_entry_objects"
     )
 
     supporting_documents = {
@@ -60,11 +60,11 @@ def test_application_handles_supported_documents(mock_application_upload_service
         ),
     }
 
-    mock_application_upload_service.handle_supporting_documents(
+    mock_application_upload_service._handle_supporting_documents(
         supporting_documents, TEST_UUID, TEST_CUSTOMISATION_NO_FEE, True
     )
 
-    mock_application_upload_service.upload_document.assert_has_calls(
+    mock_application_upload_service._upload_document.assert_has_calls(
         [
             mocker.call(
                 document=supporting_documents["supporting_document_0"],
@@ -95,7 +95,7 @@ def test_create_application_document_returns_expected_object(mock_application_up
         ),
     )
 
-    actual = mock_application_upload_service.create_application_document(mock_application, TEST_UUID)
+    actual = mock_application_upload_service._create_application_document(mock_application, TEST_UUID)
     assert actual._id == expected_object._id
 
 
@@ -164,7 +164,7 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
 
     supporting_docs = mocker.patch.object(
         mock_application_upload_service,
-        "create_supporting_document_entry_objects",
+        "_create_supporting_document_entry_objects",
         return_value=[
             SupportingDocument(definition=TEST_CUSTOMISATION_NO_FEE.supporting_document_definitions[0]),
             SupportingDocument(definition=TEST_CUSTOMISATION_NO_FEE.supporting_document_definitions[1]),
@@ -180,7 +180,7 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
 
     expected_application_document = mocker.patch.object(
         mock_application_upload_service,
-        "create_application_document",
+        "_create_application_document",
         return_value=SupportingDocument(
             _id=f"{TEST_UUID}/{files['application_upload'].name}",
             file_name=files["application_upload"].name,
