@@ -10,6 +10,7 @@ from common.models.licence_application import ApplicationStatus, LicenceApplicat
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, connection
 from django.utils import timezone
+from govuk_bank_holidays.bank_holidays import BankHolidays
 from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 
@@ -119,14 +120,16 @@ class LicenceApplicationRepository:
 
         days_added = 0
 
+        bank_holidays = BankHolidays()
+        holidays = {holiday["date"] for holiday in bank_holidays.get_holidays()}
+
         while days_added < processing_days:
             expected_date += datetime.timedelta(days=1)
 
             is_weekend = datetime.date.weekday(expected_date) >= 5
+            is_holiday = expected_date in holidays
 
-            # is_holiday = current_date in holidays
-
-            if not is_weekend:
+            if not is_weekend and not is_holiday:
                 days_added += 1
 
         return expected_date

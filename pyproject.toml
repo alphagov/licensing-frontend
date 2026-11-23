@@ -10,6 +10,7 @@ dependencies = [
     "requests>=2.34.2",
     "whitenoise>=6.12.0",
     "boto3>=1.44.1",
+    "govuk-bank-holidays>=0.19",
 ]
 
 [dependency-groups]

@@ -337,6 +337,18 @@ wheels = [
 ]
 
 [[package]]
+name = "govuk-bank-holidays"
+version = "0.19"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/b6/b7/59ecbef6a66d9281dfca4fcf9afda630354bcc24698d7338fc24ed065b79/govuk_bank_holidays-0.19.tar.gz", hash = "sha256:01aabb85968bebb6c91b2fda21e14c0179328e003ab48f2f543318114273edf6", size = 16141, upload-time = "2026-02-25T13:12:09.993Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f2/be/cf1c406a591a81df20bb2a8b51f78fa2d86524d3ce3bd5525a204c01a835/govuk_bank_holidays-0.19-py3-none-any.whl", hash = "sha256:8825af86d98c8da26e4485fa44b50b8dcfca8dc051387984c79008308501bc17", size = 14286, upload-time = "2026-02-25T13:12:08.523Z" },
+]
+
+[[package]]
 name = "greenlet"
 version = "3.5.4"
 source = { registry = "https://pypi.org/simple" }
@@ -460,6 +472,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "boto3" },
     { name = "crispy-forms-gds" },
+    { name = "govuk-bank-holidays" },
     { name = "gunicorn" },
     { name = "licensing-common" },
     { name = "pydantic" },
@@ -483,6 +496,7 @@ dev = [
 requires-dist = [
     { name = "boto3", specifier = ">=1.44.1" },
     { name = "crispy-forms-gds", specifier = ">=2.0.1" },
+    { name = "govuk-bank-holidays", specifier = ">=0.19" },
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "licensing-common", virtual = "licensing_common" },
     { name = "pydantic", specifier = ">=2.13.4" },

@@ -99,13 +99,25 @@ def test_calculate_expected_processing_date_working_days_true_handles_weekends(m
 
 
 @freeze_time("2026-11-08")
-def test_5_working_days_sunday_submission_expected_processing_date_is_week_monday(mock_licence_application_repo):
+def test_calculate_expected_processing_date_5_working_days_sunday_submission_expected_processing_date_is_week_monday(
+    mock_licence_application_repo,
+):
     expected_date = datetime(2026, 11, 16).date()
     actual = mock_licence_application_repo.calculate_expected_processing_date(
         processing_days=5,
         is_working_days=True,
     )
 
+    assert actual == expected_date
+
+
+@freeze_time("2026-12-24")
+def test_calculate_expected_processing_days_handles_holidays(mock_licence_application_repo):
+    expected_date = datetime(2026, 12, 30).date()
+    actual = mock_licence_application_repo.calculate_expected_processing_date(
+        processing_days=2,
+        is_working_days=True,
+    )
     assert actual == expected_date
 
 
