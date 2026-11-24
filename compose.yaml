@@ -10,9 +10,34 @@ services:
     image: ministackorg/ministack:latest
     ports:
       - "4566:4566"
+
+  clamav:
+    image: clamav/clamav:stable-debian13-slim
+    container_name: clamav
+    restart: unless-stopped
+    ports:
+      - "3310:3310"
+    environment:
+      - CLAMAV_NO_FRESHCLAM=true
+#    don't think this is needed if not running the _base image version
+#    volumes:
+#      - clamav_db:/var/lib/clamav
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+    healthcheck:
+      test: [ "CMD", "clamdcheck.sh" ]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
   citizen_frontend:
     depends_on:
       - document_db
+      - ministack
+      - clamav
     build:
       context: .
       dockerfile: Dockerfile
@@ -33,6 +58,7 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
       S3_BUCKET: ${S3_BUCKET:-test-bucket}
       S3_ENDPOINT_URL: http://ministack:4566
+      VIRUS_SCANNER_ENDPOINT: http://clamav:3310
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:
@@ -51,3 +77,6 @@ services:
         - action: rebuild
           path: ./uv.lock
           target: app/uv.lock
+
+#volumes:
+#  clamav_db:
