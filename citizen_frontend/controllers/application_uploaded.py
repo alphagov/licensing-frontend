@@ -27,6 +27,8 @@ def application_uploaded(request):
         raise Http404("Application id not in session")
 
     application, licence, authority, interaction, customisation = get_details(application_ref)
+    if customisation is None:
+        raise Http404("No customisation found")
 
     if customisation.is_fee_required:
         if application.required_payment_amount and application.required_payment_amount.pence > 0:
@@ -55,8 +57,6 @@ def get_details(application_ref):
         application.service.interaction_id,
         application.service.interaction_sub_id,
     )
-    if customisation is None:
-        raise Http404("No customisation found")
     return application, licence, authority, interaction, customisation
 
 
