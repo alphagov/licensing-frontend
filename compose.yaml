@@ -19,9 +19,6 @@ services:
       - "3310:3310"
     environment:
       - CLAMAV_NO_FRESHCLAM=true
-#    don't think this is needed if not running the _base image version
-#    volumes:
-#      - clamav_db:/var/lib/clamav
     deploy:
       resources:
         limits:
@@ -77,6 +74,3 @@ services:
         - action: rebuild
           path: ./uv.lock
           target: app/uv.lock
-
-#volumes:
-#  clamav_db:
