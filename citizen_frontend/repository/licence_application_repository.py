@@ -3,9 +3,7 @@ import logging
 from datetime import timedelta
 from typing import Any
 
-from common.models.authority import Authority
-from common.models.interaction_customisation import Customisation
-from common.models.licence import Licence, LicenceInteraction
+from common.enums.countries import Countries
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, connection
@@ -24,6 +22,12 @@ class LicenceApplicationRepository:
     def __init__(self):
         self.model = LicenceApplication
         self.counter_repo = CounterRepository()
+        self.divisions = {
+            Countries.ENGLAND.value: "england-and-wales",
+            Countries.NORTHERN_IRELAND.value: "northern-ireland",
+            Countries.WALES.value: "england-and-wales",
+            Countries.SCOTLAND.value: "scotland",
+        }
 
     def get_application_from_id(self, application_id):
         try:
@@ -37,50 +41,52 @@ class LicenceApplicationRepository:
 
     def create_new_licence_application(
         self,
-        email: str,
+        application_submission,
         application_document: SupportingDocument,
         supporting_documents: list[SupportingDocument],
-        authority: Authority,
-        licence: Licence,
-        customisation: Customisation,
-        interaction: LicenceInteraction,
-        is_supporting_documents_online: bool,
     ):
         try:
             count = self.counter_repo.get_next_count()
-            logger.info("Creating new licence application entry %s-%s", authority.url_slug, count)
-
-            service = Service(
-                licence_code=licence.licence_code,
-                interaction_id=interaction.interaction_id,
-                interaction_sub_id=interaction.interaction_sub_id,
+            logger.info(
+                "Creating new licence application entry %s-%s", application_submission.authority.url_slug, count
             )
 
-            has_fixed_fee_amount = customisation.fixed_fee_amount and customisation.fixed_fee_amount.pence > 0
+            service = Service(
+                licence_code=application_submission.licence.licence_code,
+                interaction_id=application_submission.interaction.interaction_id,
+                interaction_sub_id=application_submission.interaction.interaction_sub_id,
+            )
+
+            has_fixed_fee_amount = (
+                application_submission.customisation.fixed_fee_amount
+                and application_submission.customisation.fixed_fee_amount.pence > 0
+            )
 
             expected_process_date = self._calculate_expected_processing_date(
-                is_working_days=customisation.is_processing_days_working_days,
+                is_working_days=application_submission.customisation.is_processing_days_working_days,
                 processing_days=(
-                    customisation.is_processing_days_working_days
-                    if customisation.is_processing_days_working_days
+                    application_submission.customisation.is_processing_days_working_days
+                    if application_submission.customisation.is_processing_days_working_days
                     else 30
                 ),
-                country=authority.countries[0] if authority.countries else "England",
+                country=application_submission.authority.countries[0]
+                if application_submission.authority.countries
+                else "England",
             )
 
             new_application_entry = LicenceApplication(
-                applicant_email=email,
-                authority=authority.url_slug,
-                application_reference_number=f"{authority.url_slug}-{count}",
-                licence=licence.url_slug,
-                has_supporting_documents_online=is_supporting_documents_online,
+                applicant_email=application_submission.email,
+                authority=application_submission.authority.url_slug,
+                application_reference_number=f"{application_submission.authority.url_slug}-{count}",
+                licence=application_submission.licence.url_slug,
+                has_supporting_documents_online=application_submission.is_supporting_documents_online,
                 application_pdf=application_document,
                 service=service,
-                has_tacit_consent=customisation.has_tacit_consent,
-                is_fee_required=customisation.is_fee_required,
-                required_payment_amount=customisation.fixed_fee_amount,
+                has_tacit_consent=application_submission.customisation.has_tacit_consent,
+                is_fee_required=application_submission.customisation.is_fee_required,
+                required_payment_amount=application_submission.customisation.fixed_fee_amount,
                 supporting_documents=supporting_documents,
-                has_variable_fee=customisation.is_fee_required and not has_fixed_fee_amount,
+                has_variable_fee=application_submission.customisation.is_fee_required and not has_fixed_fee_amount,
                 application_status=ApplicationStatus(),
                 expected_processing_date=expected_process_date,
             )
@@ -126,7 +132,7 @@ class LicenceApplicationRepository:
             processing_days += 2 if start_day == 5 else 1
 
         bank_holidays = BankHolidays()
-        division = self._get_division(country)
+        division = self.divisions.get(country)
         holidays = {holiday["date"] for holiday in bank_holidays.get_holidays(division)}
 
         days_added = 0
@@ -141,16 +147,6 @@ class LicenceApplicationRepository:
                 days_added += 1
 
         return expected_date
-
-    @staticmethod
-    def _get_division(country):
-        divisions = {
-            "England": "england-and-wales",
-            "NI": "northern-ireland",
-            "Wales": "england-and-wales",
-            "Scotland": "scotland",
-        }
-        return divisions[country]
 
 
 """

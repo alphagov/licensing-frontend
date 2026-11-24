@@ -15,7 +15,7 @@ from citizen_frontend.exceptions import (
     DocumentStorageError,
     LicenceSubmissionError,
 )
-from citizen_frontend.services.application_submission_service import Application, ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import ApplicationSubmission, ApplicationSubmissionService
 
 MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 
@@ -34,7 +34,7 @@ VALID_FORM_SUBMISSION = {
 
 @pytest.fixture
 def mock_application():
-    yield Application(
+    yield ApplicationSubmission(
         email=VALID_FORM_SUBMISSION["email"],
         files={
             "application_upload": SimpleUploadedFile(
@@ -145,7 +145,7 @@ def test_application_upload_service_handles_application_licence_repository_error
     )
 
     with pytest.raises(LicenceSubmissionError):
-        mock_application_upload_service.handle_form_submission()
+        mock_application_upload_service.submit_form()
 
 
 def test_application_upload_service_handles_document_storage_errors(
@@ -158,7 +158,7 @@ def test_application_upload_service_handles_document_storage_errors(
     )
 
     with pytest.raises(LicenceSubmissionError):
-        mock_application_upload_service.handle_form_submission()
+        mock_application_upload_service.submit_form()
 
 
 def test_handle_submission_creates_new_entry_in_licence_applications(
@@ -191,17 +191,12 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
         ),
     )
 
-    mock_application_upload_service.handle_form_submission()
+    mock_application_upload_service.submit_form()
 
     mock_application_upload_service.licence_application_repository.create_new_licence_application.assert_called_with(
-        email=mock_application_upload_service.application.email,
         application_document=expected_application_document.return_value,
         supporting_documents=supporting_docs.return_value,
-        authority=TEST_AUTHORITY,
-        licence=TEST_LICENCE,
-        customisation=TEST_CUSTOMISATION_NO_FEE,
-        interaction=mock_application_upload_service.application.interaction,
-        is_supporting_documents_online=True,
+        application_submission=mock_application_upload_service.application,
     )
 
 

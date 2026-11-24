@@ -9,7 +9,7 @@ from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
-from citizen_frontend.services.application_submission_service import Application, ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import ApplicationSubmission, ApplicationSubmissionService
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)
@@ -63,9 +63,7 @@ def generate_application_form(
                 will_post = form.cleaned_data.get("will_submit_by_post")
                 supporting_documents_online = not published_customisation.is_postal_allowed or not will_post
 
-                # TODO wrap args in a data model e.g Application, that is passed into Serivce, self.application
-                #   call submit_application() => application reference
-                application_submission = Application(
+                application_submission = ApplicationSubmission(
                     files=request.FILES,
                     email=form.cleaned_data.get("email"),
                     authority=authority,
@@ -74,7 +72,7 @@ def generate_application_form(
                     interaction=interaction,
                     is_supporting_documents_online=supporting_documents_online,
                 )
-                application_reference = ApplicationSubmissionService(application_submission).handle_form_submission()
+                application_reference = ApplicationSubmissionService(application_submission).submit_form()
 
                 application_references = request.session.get("applicationReferenceNumbers", [])
                 application_references.append(application_reference)

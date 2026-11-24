@@ -7,17 +7,44 @@ from conftest import (
     TEST_AUTHORITY,
     TEST_CUSTOMISATION_NO_FEE,
     TEST_LICENCE,
-    TEST_LICENCE_INTERACTION,
     TEST_UUID,
 )
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
 from freezegun import freeze_time
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
+from citizen_frontend.services.application_submission_service import ApplicationSubmission
+
+MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
+
+VALID_FORM_SUBMISSION = {
+    "email": "anemail@example.com",
+    "confirmation_email": "anemail@example.com",
+    "application_upload": SimpleUploadedFile(
+        name="application_upload.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "supporting_document_0": SimpleUploadedFile(
+        name="supporting_document_0.pdf", content_type="application/pdf", content=MOCK_PDF_CONTENT
+    ),
+    "declaration": "on",
+}
 
 VALID_LICENCE_APPLICATION_ARGS = {
-    "email": "example@example.com",
+    "application_submission": ApplicationSubmission(
+        email=VALID_FORM_SUBMISSION["email"],
+        files={
+            "application_upload": VALID_FORM_SUBMISSION["application_upload"],
+            "supporting_document_0": VALID_FORM_SUBMISSION["supporting_document_0"],
+        },
+        licence=TEST_LICENCE,
+        authority=TEST_AUTHORITY,
+        customisation=TEST_CUSTOMISATION_NO_FEE,
+        interaction=TEST_LICENCE.licence_interactions[0],
+        is_supporting_documents_online=False,
+    ),
+    "supporting_documents": [],
     "application_document": SupportingDocument(
         id=f"{TEST_UUID}/file.pdf",
         file_name="file.pdf",
@@ -27,12 +54,6 @@ VALID_LICENCE_APPLICATION_ARGS = {
             is_mandatory=True,
         ),
     ),
-    "supporting_documents": [],
-    "authority": TEST_AUTHORITY,
-    "licence": TEST_LICENCE,
-    "customisation": TEST_CUSTOMISATION_NO_FEE,
-    "interaction": TEST_LICENCE_INTERACTION,
-    "is_supporting_documents_online": True,
 }
 
 

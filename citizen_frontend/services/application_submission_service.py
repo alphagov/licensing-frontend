@@ -23,7 +23,7 @@ logger.setLevel(logging.INFO)
 
 
 @dataclass
-class Application:
+class ApplicationSubmission:
     files: dict[str, SimpleUploadedFile]
     email: str
     authority: Authority
@@ -39,7 +39,7 @@ class ApplicationSubmissionService:
         self.document_store = S3Service()
         self.licence_application_repository = LicenceApplicationRepository()
 
-    def handle_form_submission(self):
+    def submit_form(self):
         try:
             logger.info("Handling application submission")
             upload_id = str(uuid.uuid4())
@@ -63,14 +63,9 @@ class ApplicationSubmissionService:
             )
 
             application_reference = self.licence_application_repository.create_new_licence_application(
-                email=self.application.email,
+                application_submission=self.application,
                 application_document=application_document,
                 supporting_documents=supporting_documents,
-                authority=self.application.authority,
-                licence=self.application.licence,
-                customisation=self.application.customisation,
-                interaction=self.application.interaction,
-                is_supporting_documents_online=self.application.is_supporting_documents_online,
             )
             return application_reference
         except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
