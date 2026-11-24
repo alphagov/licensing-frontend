@@ -64,8 +64,10 @@ def licence_submission_success_page(
     application: LicenceApplication, licence: Licence, authority, customisation: Customisation
 ):
     has_supporting_documents = customisation.supporting_document_definitions
-    all_supporting_documents_required = has_supporting_documents and all_docs_mandatory(customisation)
-    processing_days = format_processing_days(customisation)
+    all_supporting_documents_required = (
+        has_supporting_documents and customisation.all_supporting_documents_are_mandatory
+    )
+    processing_days = customisation.format_processing_days
     department = get_department(authority)
 
     context = {
@@ -94,24 +96,6 @@ def get_department(authority: Authority):
     department_repo = DepartmentRepository()
     department = department_repo.get_department_from_authority_slug(authority.url_slug)
     return department
-
-
-def format_processing_days(customisation: Customisation):
-    number = customisation.number_of_days_to_process
-    day_type = "working" if customisation.is_processing_days_working_days else "calendar"
-    unit = "days" if number > 1 else "day"
-    return f"{number} {day_type} {unit}"
-
-
-# TODO: move this to customisation model?
-
-
-def all_docs_mandatory(customisation: Customisation):
-    docs = customisation.supporting_document_definitions
-    return bool(docs) and all(doc.is_mandatory for doc in docs)
-
-
-# TODO: move this to customisation model?
 
 
 def mock_provide_fee_context():
