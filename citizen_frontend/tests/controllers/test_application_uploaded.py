@@ -25,7 +25,7 @@ def mock_application_repo(mocker):
 
 @pytest.fixture
 def mock_get_department(mocker):
-    yield mocker.patch("citizen_frontend.services.page_context_builder.get_department", return_value=TEST_DEPARTMENT)
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_department", return_value=TEST_DEPARTMENT)
 
 
 def test_application_uploaded_returns_404_when_no_id_in_query_string(client):

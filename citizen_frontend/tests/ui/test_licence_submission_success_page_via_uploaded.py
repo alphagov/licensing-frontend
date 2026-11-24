@@ -41,7 +41,7 @@ def mock_uploaded_context(mocker):
 
 @pytest.fixture
 def mock_get_department(mocker):
-    yield mocker.patch("citizen_frontend.services.page_context_builder.get_department", return_value=TEST_DEPARTMENT)
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_department", return_value=TEST_DEPARTMENT)
 
 
 def test_page_has_correct_headings(get_dom_parser, test_uploaded_success_url, mock_get_details_return_values):
