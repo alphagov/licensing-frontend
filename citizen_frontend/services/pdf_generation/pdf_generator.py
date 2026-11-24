@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.urls import reverse
 
 from citizen_frontend.exceptions import FormNotFoundException
-from citizen_frontend.repository.base_repo import DepartmentRepo
+from citizen_frontend.repository.department_repository import DepartmentRepository
 from citizen_frontend.services.pdf_generation.pdf_provider import get_pdf_provider
 
 logger = logging.getLogger(__name__)
@@ -17,13 +17,13 @@ logger.setLevel(logging.INFO)
 class PdfGenerator:
     def __init__(self):
         self.pdf_provider = get_pdf_provider()
-        self.department_repository = DepartmentRepo()
+        self.department_repository = DepartmentRepository()
 
     def handle_request(
         self, authority: Authority, licence: Licence, interaction: LicenceInteraction, customisation: Customisation
     ):
         try:
-            department = self.department_repository.get_by_id(department_id=customisation.department)
+            department = self.department_repository.get_department_by_id(department_id=customisation.department)
 
             return_url = self.create_return_url(
                 authority_slug=authority.url_slug,
