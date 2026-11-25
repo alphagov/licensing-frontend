@@ -45,6 +45,9 @@ TEST_INTERACTION = LicenceInteractions.APPLY
 TEST_INTERACTION_SUB_ID = "1"
 TEST_INTERACTION_SUB_ID_INT = 2
 TEST_INTERACTION_ID = 14
+TEST_LICENCE_CODE = "1234-5-6"
+TEST_SNAC_CODE = "SNAC"
+
 
 TEST_TEMP_EVENT_APPLY_URL = (
     f"{SERVICE_SLUG}/{TEMP_EVENT_SLUG}/{TEST_AUTH_SLUG}/{TEST_INTERACTION}-{TEST_INTERACTION_SUB_ID}"
@@ -159,9 +162,6 @@ def mock_licence_repository(mocker):
     return mocker.patch.object(licence_lookup_service, "licence_repository", autospec=True)
 
 
-TEST_LICENCE_CODE = "1234-5-6"
-TEST_SNAC_CODE = "SNAC"
-
 TEST_LICENCE_DETAIL = LicenceDetail(
     licence_code=TEST_LICENCE_CODE,
     offered_by_authority=True,
@@ -174,7 +174,7 @@ TEST_AUTHORITY = Authority(
     _id=ObjectId("50c8520393867870cb0d775f"),
     name="Test Authority",
     url_slug="test-authority",
-    full_name="Test Authority for testing with",
+    full_name="Test Authority Full Name",
     agency_id=1,
     countries=[Countries.ENGLAND, Countries.WALES],
     licence_details=[TEST_LICENCE_DETAIL],
@@ -409,7 +409,7 @@ TEST_DEPARTMENT = Department(
 TEST_LICENCE_APPLICATION = LicenceApplication(
     applicant_email="test@email.com",
     authority=TEST_AUTHORITY.full_name,
-    licence=TEST_LICENCE.id,
+    licence=TEST_LICENCE.url_slug,
     has_supporting_documents_online=True,
     application_pdf=SupportingDocument(
         definition=SupportingDocumentDefinition(), _id=ObjectId(), virus_check_status=VirusCheckStatus.CLEAN.value
@@ -428,7 +428,7 @@ TEST_LICENCE_APPLICATION = LicenceApplication(
     authority_application_reference="test application reference",
     expected_processing_date=now() + timedelta(days=7),
     has_tacit_consent=True,
-    required_payment_amount=PaymentAmount(),
+    required_payment_amount=PaymentAmount(pence=500),
     is_fee_required=False,
     has_variable_fee=False,
     payment_reference_id="test payment reference id",
@@ -491,3 +491,27 @@ def mock_find_published_customisation_with_no_fee(mocker):
     )
     mock_find_published_customisation_with_no_fee.return_value = deepcopy(TEST_CUSTOMISATION_NO_FEE)
     return mock_find_published_customisation_with_no_fee
+
+
+@pytest.fixture
+def mock_find_published_customisation_returns_none(mocker):
+    mock_find_published_customisation = mocker.patch.object(
+        interaction_customisation_repository,
+        "find_published_customisation",
+        autospec=True,
+    )
+    mock_find_published_customisation.return_value = None
+
+
+@pytest.fixture
+def mock_get_details(mocker):
+    yield mocker.patch("citizen_frontend.controllers.application_uploaded.get_details")
+
+
+@pytest.fixture
+def session_client(client, settings):
+    settings.SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    session = client.session
+    session["applicationReferenceNumbers"] = ["ApplicationRef1", "ApplicationRef2", "ApplicationRef3"]
+    session.save()
+    return client

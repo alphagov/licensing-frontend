@@ -39,14 +39,14 @@ def test_pdf_generator_calls_correct_services_with_args(mock_service, mocker):
         customisation=TEST_CUSTOMISATION_FIXED_FEE,
     )
 
-    mock_service.department_repository.get_by_id.assert_called_with(
+    mock_service.department_repository.get_department_by_id.assert_called_with(
         department_id=(TEST_CUSTOMISATION_FIXED_FEE.department)
     )
 
     mock_service.pdf_provider.request_pdf_form.assert_called_with(
         authority=TEST_AUTHORITY,
         licence=TEST_LICENCE,
-        department=mock_service.department_repository.get_by_id.return_value,
+        department=mock_service.department_repository.get_department_by_id.return_value,
         customisation=TEST_CUSTOMISATION_FIXED_FEE,
         return_url=mock_service.create_return_url(
             licence_slug=TEST_LICENCE.url_slug,
