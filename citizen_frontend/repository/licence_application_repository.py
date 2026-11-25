@@ -1,14 +1,9 @@
 import datetime
 import logging
-from datetime import timedelta
-from typing import Any
 
-from common.enums.countries import Countries
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, connection
-from django.utils import timezone
-from govuk_bank_holidays.bank_holidays import BankHolidays
 from pymongo import ReturnDocument
 from pymongo.errors import PyMongoError
 
@@ -22,12 +17,6 @@ class LicenceApplicationRepository:
     def __init__(self):
         self.model = LicenceApplication
         self.counter_repo = CounterRepository()
-        self.divisions = {
-            Countries.ENGLAND.value: "england-and-wales",
-            Countries.NORTHERN_IRELAND.value: "northern-ireland",
-            Countries.WALES.value: "england-and-wales",
-            Countries.SCOTLAND.value: "scotland",
-        }
 
     def get_application_from_id(self, application_id):
         try:
@@ -44,6 +33,7 @@ class LicenceApplicationRepository:
         application_submission,
         application_document: SupportingDocument,
         supporting_documents: list[SupportingDocument],
+        expected_processing_date: datetime.date,
     ):
         try:
             count = self.counter_repo.get_next_count()
@@ -62,24 +52,12 @@ class LicenceApplicationRepository:
                 and application_submission.customisation.fixed_fee_amount.pence > 0
             )
 
-            expected_process_date = self._calculate_expected_processing_date(
-                is_working_days=application_submission.customisation.is_processing_days_working_days,
-                processing_days=(
-                    application_submission.customisation.is_processing_days_working_days
-                    if application_submission.customisation.is_processing_days_working_days
-                    else 30
-                ),
-                country=application_submission.authority.countries[0]
-                if application_submission.authority.countries
-                else "England",
-            )
-
             new_application_entry = LicenceApplication(
                 applicant_email=application_submission.email,
                 authority=application_submission.authority.url_slug,
                 application_reference_number=f"{application_submission.authority.url_slug}-{count}",
                 licence=application_submission.licence.url_slug,
-                has_supporting_documents_online=application_submission.is_supporting_documents_online,
+                has_supporting_documents_online=application_submission.are_supporting_documents_online,
                 application_pdf=application_document,
                 service=service,
                 has_tacit_consent=application_submission.customisation.has_tacit_consent,
@@ -88,7 +66,7 @@ class LicenceApplicationRepository:
                 supporting_documents=supporting_documents,
                 has_variable_fee=application_submission.customisation.is_fee_required and not has_fixed_fee_amount,
                 application_status=ApplicationStatus(),
-                expected_processing_date=expected_process_date,
+                expected_processing_date=expected_processing_date,
             )
 
             new_application_entry.full_clean()
@@ -113,40 +91,6 @@ class LicenceApplicationRepository:
                 e,
             )
             raise DocumentDBError(f"Failed to create new object, DB error: {e.args}") from e
-
-    def _calculate_expected_processing_date(
-        self,
-        is_working_days: bool,
-        country: str,
-        processing_days: int,
-    ) -> timedelta | Any:
-        expected_date = timezone.now().date()
-
-        if not is_working_days:
-            return expected_date + datetime.timedelta(days=processing_days)
-
-        start_day = datetime.date.weekday(expected_date)
-        is_weekend_start = start_day >= 5
-
-        if is_weekend_start:
-            processing_days += 2 if start_day == 5 else 1
-
-        bank_holidays = BankHolidays()
-        division = self.divisions.get(country)
-        holidays = {holiday["date"] for holiday in bank_holidays.get_holidays(division)}
-
-        days_added = 0
-
-        while days_added < processing_days:
-            expected_date += datetime.timedelta(days=1)
-
-            is_weekend = datetime.date.weekday(expected_date) >= 5
-            is_holiday = expected_date in holidays
-
-            if not is_weekend and not is_holiday:
-                days_added += 1
-
-        return expected_date
 
 
 """

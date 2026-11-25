@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
-from citizen_frontend.services.application_submission_service import ApplicationSubmission, ApplicationSubmissionService
+from citizen_frontend.services.application_submission_service import Application, ApplicationSubmission
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ VALID_FORM_SUBMISSION = {
     "declaration": "on",
 }
 
-mock_application = ApplicationSubmission(
+mock_application = Application(
     email=VALID_FORM_SUBMISSION["email"],
     files={
         "application_upload": VALID_FORM_SUBMISSION["application_upload"],
@@ -50,13 +50,13 @@ mock_application = ApplicationSubmission(
     authority=TEST_AUTHORITY,
     customisation=TEST_CUSTOMISATION_NO_FEE,
     interaction=TEST_LICENCE.licence_interactions[0],
-    is_supporting_documents_online=False,
+    are_supporting_documents_online=False,
 )
 
 
 @pytest.fixture
 def application_submission_service(mock_s3, mock_s3_client, mock_licence_application_repo):
-    service = ApplicationSubmissionService(mock_application)
+    service = ApplicationSubmission(mock_application)
     yield service
 
 
@@ -80,7 +80,7 @@ def test_application_form_submission_happy_path(
 
     expected_application_reference_number = f"{TEST_AUTHORITY.url_slug}-1"
     mocker.patch(
-        "citizen_frontend.controllers.application_form_controller.ApplicationSubmissionService.submit_form",
+        "citizen_frontend.controllers.application_form_controller.ApplicationSubmission.submit",
     ).return_value = expected_application_reference_number
 
     expected_redirect_url = reverse("application_uploaded", query={"id": expected_application_reference_number})
@@ -209,9 +209,7 @@ def test_licence_application_form_submission_throws_500_response_on_error(
     mock_get_licence_interaction_context,
     mock_find_published_customisation_with_no_fee,
 ):
-    mock_call = mocker.patch(
-        "citizen_frontend.controllers.application_form_controller.ApplicationSubmissionService.submit_form"
-    )
+    mock_call = mocker.patch("citizen_frontend.controllers.application_form_controller.ApplicationSubmission.submit")
     mock_call.side_effect = LicenceSubmissionError("Failed to upload document")
 
     response = session_client.post(
