@@ -63,7 +63,7 @@ def generate_application_form(
                 will_post = form.cleaned_data.get("will_submit_by_post")
                 are_supporting_documents_online = not published_customisation.is_postal_allowed or not will_post
 
-                application_submission = Application(
+                application = Application(
                     files=request.FILES,
                     email=form.cleaned_data.get("email"),
                     authority=authority,
@@ -72,7 +72,7 @@ def generate_application_form(
                     interaction=interaction,
                     are_supporting_documents_online=are_supporting_documents_online,
                 )
-                application_reference = ApplicationSubmission(application_submission).submit()
+                application_reference = ApplicationSubmission(application).submit()
 
                 application_references = request.session.get("applicationReferenceNumbers", [])
                 application_references.append(application_reference)
