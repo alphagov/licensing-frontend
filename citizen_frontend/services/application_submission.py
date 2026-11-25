@@ -2,7 +2,6 @@ import datetime
 import logging
 import uuid
 from dataclasses import dataclass
-from typing import Any
 
 from common.enums.countries import Countries
 from common.models.authority import Authority
@@ -77,6 +76,7 @@ class ApplicationSubmission:
                 application_submission=self.application,
                 application_document=application_document,
                 supporting_documents=supporting_documents,
+                expected_processing_date=self.expected_processing_date,
             )
             return application_reference
         except (DataIntegrityError, DocumentDBError, DocumentStorageError) as e:
@@ -146,7 +146,7 @@ class ApplicationSubmission:
 
     def _calculate_expected_processing_date(
         self,
-    ) -> datetime.timedelta | Any:
+    ) -> datetime.date:
 
         processing_days = (
             self.application.customisation.number_of_days_to_process

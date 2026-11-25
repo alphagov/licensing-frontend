@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from citizen_frontend.exceptions import DocumentStorageError, LicenceSubmissionError
-from citizen_frontend.services.application_submission_service import Application, ApplicationSubmission
+from citizen_frontend.services.application_submission import Application, ApplicationSubmission
 
 
 @pytest.fixture

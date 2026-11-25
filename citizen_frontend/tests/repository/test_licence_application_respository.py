@@ -14,7 +14,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.db import DatabaseError
 
 from citizen_frontend.exceptions import DataIntegrityError, DocumentDBError
-from citizen_frontend.services.application_submission_service import Application
+from citizen_frontend.services.application_submission import Application
 
 MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 

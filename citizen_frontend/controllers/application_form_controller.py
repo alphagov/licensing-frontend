@@ -9,7 +9,7 @@ from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
-from citizen_frontend.services.application_submission_service import Application, ApplicationSubmission
+from citizen_frontend.services.application_submission import Application, ApplicationSubmission
 from citizen_frontend.views import display_licence_must_be_applied_for_locally, display_licence_unavailable_online
 
 logger = logging.getLogger(__name__)

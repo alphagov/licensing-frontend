@@ -19,7 +19,7 @@ from citizen_frontend.exceptions import (
     DocumentStorageError,
     LicenceSubmissionError,
 )
-from citizen_frontend.services.application_submission_service import Application, ApplicationSubmission
+from citizen_frontend.services.application_submission import Application, ApplicationSubmission
 
 MOCK_PDF_CONTENT = b"%PDF-1.4 fake pdf content"
 
@@ -73,7 +73,7 @@ def ni_application_submission(mock_application, mock_uuid, mocker, mock_s3_servi
     yield service
 
 
-def test_application_upload_service_uploads_submitted_forms_to_s3(
+def test_application_submission_uploads_submitted_forms_to_s3(
     mock_s3, application_submission, mock_uuid, mock_s3_client
 ):
     mock_file_upload = SimpleUploadedFile(
@@ -89,7 +89,7 @@ def test_application_upload_service_uploads_submitted_forms_to_s3(
     assert file["Body"].read() == MOCK_PDF_CONTENT
 
 
-def test_application_handles_supported_documents(application_submission, mocker, mock_uuid):
+def test_upload_supporting_documents_uploads(application_submission, mocker, mock_uuid):
     mocker.patch.object(application_submission, "_upload_document")
     mock_object_creation = mocker.patch.object(application_submission, "_create_supporting_document_entry_objects")
 
@@ -126,13 +126,13 @@ def test_create_application_document_returns_expected_object(application_submiss
     assert actual._id == expected_object._id
 
 
-def test_application_upload_service_virus_scans_files_before_uploading():
+def test_application_submission_virus_scans_files_before_uploading_on_submit():
     # TODO separate ticket
     pass
 
 
 @pytest.mark.parametrize("error", [DataIntegrityError, DocumentDBError])
-def test_application_upload_service_handles_application_licence_repository_errors(
+def test_submit_handles_application_licence_repository_errors(
     application_submission, mock_s3, mock_licence_application_repo, error, mocker
 ):
     mocker.patch.object(
@@ -145,9 +145,7 @@ def test_application_upload_service_handles_application_licence_repository_error
         application_submission.submit()
 
 
-def test_application_upload_service_handles_document_storage_errors(
-    application_submission, mock_s3, mock_licence_application_repo, mocker
-):
+def test_submit_handles_document_storage_errors(application_submission, mock_s3, mock_licence_application_repo, mocker):
     mocker.patch.object(
         application_submission.licence_application_repository,
         "create_new_licence_application",
@@ -158,9 +156,7 @@ def test_application_upload_service_handles_document_storage_errors(
         application_submission.submit()
 
 
-def test_handle_submission_creates_new_entry_in_licence_applications(
-    application_submission, mock_s3, mock_uuid, mocker
-):
+def test_submit_creates_new_entry_in_licence_applications(application_submission, mock_s3, mock_uuid, mocker):
 
     application_submission.application.are_supporting_documents_online = True
 
@@ -194,10 +190,11 @@ def test_handle_submission_creates_new_entry_in_licence_applications(
         application_document=expected_application_document.return_value,
         supporting_documents=supporting_docs.return_value,
         application_submission=application_submission.application,
+        expected_processing_date=application_submission.expected_processing_date,
     )
 
 
-def test_handle_submission_creates_new_entry_in_licence_applications_no_fee_posted_documents():
+def test_submit_creates_new_entry_in_licence_applications_no_fee_posted_documents():
     pass
 
 
