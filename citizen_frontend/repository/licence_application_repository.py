@@ -2,6 +2,7 @@ import datetime
 import logging
 
 from common.models.licence_application import ApplicationStatus, LicenceApplication, Service, SupportingDocument
+from common.models.shared_models import PaymentAmount
 from django.core.exceptions import ValidationError
 from django.db import DatabaseError, connection
 from pymongo import ReturnDocument
@@ -62,7 +63,7 @@ class LicenceApplicationRepository:
                 service=service,
                 has_tacit_consent=application_submission.customisation.has_tacit_consent,
                 is_fee_required=application_submission.customisation.is_fee_required,
-                required_payment_amount=application_submission.customisation.fixed_fee_amount,
+                required_payment_amount=PaymentAmount(),
                 supporting_documents=supporting_documents,
                 has_variable_fee=application_submission.customisation.is_fee_required and not has_fixed_fee_amount,
                 application_status=ApplicationStatus(),

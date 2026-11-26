@@ -7,7 +7,12 @@ prepare:
 
 start:
 	mise exec -- docker compose up -d
+	AWS_ACCESS_KEY_ID=test \
+	AWS_SECRET_ACCESS_KEY=test \
+	AWS_DEFAULT_REGION=us-east-1 \
+	aws --endpoint-url=http://localhost:4566 s3 mb s3://test-bucket
 	nohup mise exec -- docker compose watch > /dev/null 2>&1 &
+
 
 watch:
 	mise exec -- docker compose up --watch

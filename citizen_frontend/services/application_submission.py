@@ -103,7 +103,6 @@ class ApplicationSubmission:
 
         return supporting_document_object_entries
 
-    #   TODO is this method necessary?
     def _upload_document(self, document: SimpleUploadedFile, path: str):
         self.document_store.store_file(path=path, file=document.file, content_type=document.content_type)
 
