@@ -3,7 +3,7 @@ from enum import StrEnum
 
 import clamd
 
-from citizen_frontend.exceptions import VirusScannerUnavailableError
+from citizen_frontend.exceptions import FileTooLargeException, VirusScannerUnavailableError
 
 
 class ScanResult(StrEnum):
@@ -20,13 +20,18 @@ class VirusScanner:
         self.is_available = self.ping()
 
     def scan_file(self, stream):
-        if not self.is_available:
-            raise VirusScannerUnavailableError("Unable to connect to Virus Scanner")
+        try:
+            if not self.is_available:
+                raise VirusScannerUnavailableError("Unable to connect to Virus Scanner")
 
-        result = self.connection.instream(stream)["stream"]
-        if ScanResult.CLEAN in result:
-            return ScanResult.CLEAN
-        return ScanResult.INFECTED
+            result = self.connection.instream(stream)["stream"]
+            if ScanResult.CLEAN in result:
+                return ScanResult.CLEAN
+            return ScanResult.INFECTED
+        except clamd.BufferTooLongError as e:
+            raise FileTooLargeException("File is too large to virus scan") from e
+        except clamd.ConnectionError as e:
+            raise VirusScannerUnavailableError("A connection error occurred") from e
 
     def ping(self):
         response = self.connection.ping()

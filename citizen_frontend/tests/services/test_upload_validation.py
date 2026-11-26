@@ -1,9 +1,14 @@
 import tempfile
 
+import clamd
 import pytest
 
-from citizen_frontend.exceptions import VirusScannerUnavailableError
+from citizen_frontend.exceptions import FileTooLargeException, VirusScannerUnavailableError
 from citizen_frontend.services.upload_validation import ScanResult, VirusScanner
+
+"""
+These tests run against a ClamAV container running in Docker, ensure container is up and running
+"""
 
 
 def test_virus_scanner_connection_ping():
@@ -34,3 +39,23 @@ def test_scan_files_returns_infected_when_scanning_infected_file():
         file.seek(0)
         result = scanner.scan_file(file)
     assert result == ScanResult.INFECTED
+
+
+def test_scan_files_handles_buffer_too_long_exception(mocker):
+    scanner = VirusScanner()
+    mocker.patch.object(scanner.connection, "instream", side_effect=clamd.BufferTooLongError())
+
+    with pytest.raises(FileTooLargeException):
+        with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as f:
+            scanner.scan_file(f)
+
+
+def test_scan_files_handles_connection_exception(mocker):
+    scanner = VirusScanner()
+    mocker.patch.object(scanner.connection, "instream", side_effect=clamd.ConnectionError())
+
+    with pytest.raises(VirusScannerUnavailableError) as e:
+        with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as f:
+            scanner.scan_file(f)
+
+        assert e.value.args[0] == "A connection error occurred"

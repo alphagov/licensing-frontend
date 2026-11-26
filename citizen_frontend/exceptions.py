@@ -39,3 +39,7 @@ class FormNotPublishedException(Exception):
 
 class VirusScannerUnavailableError(Exception):
     pass
+
+
+class FileTooLargeException(Exception):
+    pass
