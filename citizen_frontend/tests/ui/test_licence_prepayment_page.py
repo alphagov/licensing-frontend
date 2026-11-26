@@ -1,10 +1,33 @@
 import pytest
-from conftest import TEST_AUTHORITY, TEST_LICENCE
+from conftest import (
+    TEST_AUTHORITY,
+    TEST_CUSTOMISATION_FIXED_FEE,
+    TEST_INTERACTION,
+    TEST_LICENCE,
+    TEST_LICENCE_APPLICATION,
+)
+
+
+@pytest.fixture(autouse=True)
+def setup_prepayment_page(session_client, mock_get_details_return_values):
+    pass
 
 
 @pytest.fixture
 def test_licence_application_prepayment_page_url(live_server):
-    return f"{live_server}/apply-for-a-licence/uploaded"
+    return f"{live_server}/apply-for-a-licence/uploaded?id=ApplicationRef1"
+
+
+@pytest.fixture
+def mock_get_details_return_values(mock_get_details):
+    mock_get_details.return_value = (
+        TEST_LICENCE_APPLICATION,
+        TEST_LICENCE,
+        TEST_AUTHORITY,
+        TEST_INTERACTION,
+        TEST_CUSTOMISATION_FIXED_FEE,
+    )
+    return mock_get_details
 
 
 def test_page_has_correct_headings(get_dom_parser, test_licence_application_prepayment_page_url):
@@ -38,5 +61,4 @@ def test_page_references_correct_payment_provider(get_dom_parser, test_licence_a
 def test_page_has_button_to_continue_to_provider(get_dom_parser, test_licence_application_prepayment_page_url):
     dom = get_dom_parser(test_licence_application_prepayment_page_url)
     button_text = dom.get_by_test_id("pay-button").get_text()
-
     assert "Continue to WorldPay website" in button_text
