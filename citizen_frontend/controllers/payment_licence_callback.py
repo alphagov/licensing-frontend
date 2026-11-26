@@ -10,7 +10,7 @@ def payment_licence_callback(request):
     if payment_status == "cancelled":
         return render(request, "citizen_frontend/licence_submission_cancelled_page.html", context)
     else:
-        return render(request, "citizen_frontend/licence_submission_sucess_page.html", context)
+        return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
 
 def mock_payment_response_status():
