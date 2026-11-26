@@ -1,20 +1,12 @@
-# from citizen_frontend.services.upload_validation import UploadValidationService
+import tempfile
+
 import pytest
 
 from citizen_frontend.exceptions import VirusScannerUnavailableError
-from citizen_frontend.services.upload_validation import VirusScanner
-
-#
-# def test_service_validates_file_mime_type():
-#     service = UploadValidationService()
-#     service._validate_mime_type()
+from citizen_frontend.services.upload_validation import ScanResult, VirusScanner
 
 
-# File mimetype validation could happen on the form class inside .clean() METHOD
-# Start on virus scanning,
-
-
-def test_clam_av_ping():
+def test_virus_scanner_connection_ping():
     scanner = VirusScanner()
     assert scanner.ping()
 
@@ -24,4 +16,21 @@ def test_scan_files_throws_error_scanner_unavailable():
     scanner.is_available = False
 
     with pytest.raises(VirusScannerUnavailableError):
-        scanner.scan_file()
+        with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as f:
+            scanner.scan_file(f)
+
+
+def test_scan_files_returns_ok_result_when_scanning_clean_file():
+    scanner = VirusScanner()
+    with open("citizen_frontend/tests/resources/Fish_Dealers_Licence.pdf", "rb") as f:
+        result = scanner.scan_file(f)
+    assert result == ScanResult.CLEAN
+
+
+def test_scan_files_returns_infected_when_scanning_infected_file():
+    scanner = VirusScanner()
+    with tempfile.TemporaryFile(mode="w+b") as file:
+        file.write(b"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR" + b"-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*")
+        file.seek(0)
+        result = scanner.scan_file(file)
+    assert result == ScanResult.INFECTED
