@@ -30,16 +30,16 @@ def application_uploaded(request):
     if customisation is None:
         raise Http404("No customisation found")
 
-    if customisation.is_fee_required:
-        if application.required_payment_amount and application.required_payment_amount.pence > 0:
-            context = mock_prepayment_context()
-            return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
-        else:
-            context = mock_provide_fee_context()
-            return render(request, "citizen_frontend/licence_application_provide_fee_amount_page.html", context)
-    else:
+    if not customisation.is_fee_required:
         context = licence_submission_success_page(application, licence, authority, customisation)
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
+
+    if application.required_payment_amount and application.required_payment_amount.pence > 0:
+        context = mock_prepayment_context()
+        return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
+    else:
+        context = mock_provide_fee_context()
+        return render(request, "citizen_frontend/licence_application_provide_fee_amount_page.html", context)
 
 
 def get_details(application_ref):
