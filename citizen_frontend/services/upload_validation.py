@@ -1,6 +1,7 @@
 import os
-import socket
 from enum import Enum, StrEnum
+
+import clamd
 
 from citizen_frontend.exceptions import VirusScannerUnavailableError
 
@@ -50,7 +51,7 @@ class ScanResult(StrEnum):
 class VirusScanner:
     def __init__(self):
         self.host = os.getenv("VIRUS_SCANNER_HOST")
-        self.port = os.getenv("VIRUS_SCANNER_PORT")
+        self.port = int(os.getenv("VIRUS_SCANNER_PORT"))
         self.is_available = self.ping()
 
     def scan_file(self):
@@ -58,7 +59,11 @@ class VirusScanner:
             raise VirusScannerUnavailableError("Unable to connect to Virus Scanner")
 
     def ping(self):
-        with socket.create_connection((self.host, self.port), timeout=5) as sock:
-            sock.sendall(b"zPING\0")
-            response = sock.recv(1024)
-            return response == b"PONG\0"
+        cd = clamd.ClamdNetworkSocket(host=self.host, port=self.port)
+        response = cd.ping()
+        return response == "PONG"
+
+        # with socket.create_connection((self.host, self.port), timeout=5) as sock:
+        #     sock.sendall(b"zPING\0")
+        #     response = sock.recv(1024)
+        #     return response == b"PONG\0"
