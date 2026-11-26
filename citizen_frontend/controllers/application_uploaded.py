@@ -35,7 +35,7 @@ def application_uploaded(request):
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
     if application.required_payment_amount and application.required_payment_amount.pence > 0:
-        context = mock_prepayment_context()
+        context = licence_prepayment_page(licence, authority, customisation)
         return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
     else:
         context = mock_provide_fee_context()
@@ -58,6 +58,16 @@ def get_details(application_ref):
         application.service.interaction_sub_id,
     )
     return application, licence, authority, interaction, customisation
+
+
+def licence_prepayment_page(licence: Licence, authority: Authority, customisation: Customisation, payment: Payment):
+    return {
+        "licence_name": licence.name,
+        "authority": authority,
+        "payment": payment,
+        "published_customisation": customisation,
+        "step": "3",
+    }
 
 
 def licence_submission_success_page(
