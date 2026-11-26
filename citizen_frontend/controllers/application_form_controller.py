@@ -1,6 +1,6 @@
 import logging
 
-from django.http import Http404, JsonResponse
+from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -87,10 +87,12 @@ def generate_application_form(
         context.update({"form": form})
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
-    except exceptions.LicenceSubmissionError as e:
+    except exceptions.LicenceSubmissionError("Failed to submit application") as e:
         logger.error("Failed to submit licence application")
         logger.error(e)
-        return JsonResponse({"error": str(e)}, status=500)
+        return render(
+            request=request, template_name="citizen_frontend/error.html", context={"message": e.args[0]}, status=500
+        )
     except Exception as e:
         logger.error(e)
         raise Http404("Incorrect licence, or authority does not exist") from e
