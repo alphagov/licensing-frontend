@@ -1,8 +1,7 @@
 import zipfile
 
 import magic
-
-from citizen_frontend.exceptions import InvalidFileUploadException
+from django.core.exceptions import ValidationError
 
 OFFICE_CONTENT_TO_MIME = {
     "word/document.xml": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -30,7 +29,7 @@ accepted_mime_types = [
 ]
 
 
-def is_accepted_mime_type(file_bytes) -> bool:
+def is_accepted_mime_type(file_bytes) -> None:
     file_bytes.seek(0)
 
     if zipfile.is_zipfile(file_bytes):
@@ -40,9 +39,8 @@ def is_accepted_mime_type(file_bytes) -> bool:
         detected_mime_type = magic.from_buffer(sample, mime=True)
 
     if detected_mime_type not in accepted_mime_types:
-        raise InvalidFileUploadException("File is not accepted")
+        raise ValidationError("File is not accepted")
     file_bytes.seek(0)
-    return True
 
 
 def detect_ooxml(file_bytes):
@@ -51,4 +49,4 @@ def detect_ooxml(file_bytes):
         for key, value in OFFICE_CONTENT_TO_MIME.items():
             if key in entries:
                 return value
-        raise InvalidFileUploadException("File is not accepted")
+        raise ValidationError("File is not accepted")

@@ -39,7 +39,3 @@ class FormNotPublishedException(Exception):
 
 class LicenceSubmissionError(Exception):
     pass
-
-
-class InvalidFileUploadException(Exception):
-    pass
