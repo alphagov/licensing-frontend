@@ -8,3 +8,11 @@ def test_is_accepted_mime_type_returns_true_simple_file_mimetype():
     test_file = SimpleUploadedFile(name="application.pdf", content_type="application/pdf", content=expected_content)
 
     assert is_accepted_mime_type(test_file)
+
+
+def test_is_accepted_mime_type_returns_true_ooxml_file():
+    pass
+
+
+def test_is_accepted_mime_type_returns_false_zip_file():
+    pass
