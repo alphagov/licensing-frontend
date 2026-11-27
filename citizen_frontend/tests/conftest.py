@@ -421,6 +421,7 @@ TEST_DEPARTMENT = Department(
 )
 
 TEST_LICENCE_APPLICATION = LicenceApplication(
+    _id=TEST_OBJECT_ID,
     applicant_email="test@email.com",
     authority=TEST_AUTHORITY.full_name,
     licence=TEST_LICENCE.url_slug,
