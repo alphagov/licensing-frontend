@@ -1,0 +1,2 @@
+def test_create_new_payment_calls_database_with_correct_method_and_args(mock_payment_repository):
+    pass

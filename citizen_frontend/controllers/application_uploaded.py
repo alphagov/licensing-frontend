@@ -12,6 +12,7 @@ import citizen_frontend.repository.interaction_customisation_repository as inter
 import citizen_frontend.services.licence_lookup_service as licence_lookup_service
 from citizen_frontend.repository.department_repository import DepartmentRepository
 from citizen_frontend.repository.licence_application_repository import LicenceApplicationRepository
+from citizen_frontend.repository.payment_repository import PaymentRepository
 
 
 @never_cache
@@ -35,7 +36,8 @@ def application_uploaded(request):
         return render(request, "citizen_frontend/licence_submission_success_page.html", context)
 
     if application.required_payment_amount and application.required_payment_amount.pence > 0:
-        context = licence_prepayment_page(licence, authority, customisation)
+        payment = create_payment(licence, customisation, application)
+        context = licence_prepayment_page(licence, authority, customisation, payment)
         return render(request, "citizen_frontend/licence_application_prepayment_page.html", context)
     else:
         context = mock_provide_fee_context()
@@ -100,6 +102,12 @@ def licence_submission_success_page(
             }
         )
     return context
+
+
+def create_payment(licence: Licence, customisation: Customisation, application: LicenceApplication):
+    payment_repo = PaymentRepository()
+    payment = payment_repo.create_new_payment(licence, customisation, application)
+    return payment
 
 
 def get_department(authority: Authority):

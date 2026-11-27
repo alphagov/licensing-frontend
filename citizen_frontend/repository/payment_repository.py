@@ -5,5 +5,5 @@ class PaymentRepository:
     def __innit__(self):
         self.model = Payment
 
-    def create_payment(self, licence, customisation, application):
+    def create_new_payment(self, licence, customisation, application):
         pass
