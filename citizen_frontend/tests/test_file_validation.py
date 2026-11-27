@@ -5,7 +5,7 @@ import pytest
 from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 
-from citizen_frontend.forms.file_validation import is_accepted_mime_type
+from citizen_frontend.forms.file_validation import validate_accepted_mime_type
 
 
 @pytest.fixture
@@ -39,15 +39,15 @@ def test_is_accepted_mime_type_returns_true_simple_file_mimetype():
     expected_content = b"%PDF-1.4 fake pdf content"
     test_file = SimpleUploadedFile(name="application.pdf", content_type="application/pdf", content=expected_content)
 
-    assert is_accepted_mime_type(test_file) is None
+    assert validate_accepted_mime_type(test_file) is None
 
 
 def test_is_accepted_mime_type_returns_true_ooxml_file(valid_docx_bytes):
     test_file = SimpleUploadedFile(name="test.docx", content_type="application/octet-stream", content=valid_docx_bytes)
-    assert is_accepted_mime_type(test_file) is None
+    assert validate_accepted_mime_type(test_file) is None
 
 
 def test_is_accepted_mime_type_raises_error_zip_file(sample_zip_bytes):
     with pytest.raises(ValidationError) as e:
-        is_accepted_mime_type(sample_zip_bytes)
+        validate_accepted_mime_type(sample_zip_bytes)
     assert e.value.args[0] == "File is not accepted"

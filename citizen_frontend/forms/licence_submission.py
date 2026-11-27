@@ -8,6 +8,7 @@ from django.core.validators import FileExtensionValidator
 from django.template.loader import render_to_string
 
 from citizen_frontend.enums.accepted_file_extension import SupportedDocumentFileExtensions
+from citizen_frontend.forms.file_validation import validate_accepted_mime_type
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -37,7 +38,7 @@ class ApplicationSubmissionForm(forms.Form):
     application_upload = forms.FileField(
         help_text="Please attach the completed application form below.",
         error_messages={"required": "Please provide filled Application form in PDF format"},
-        validators=[FileExtensionValidator(allowed_extensions=["pdf"])],
+        validators=[FileExtensionValidator(allowed_extensions=["pdf"]), validate_accepted_mime_type],
         label="Application Form",
         widget=forms.FileInput(
             attrs={
@@ -106,7 +107,10 @@ class ApplicationSubmissionForm(forms.Form):
                 widget=forms.FileInput(
                     attrs={"data-testid": f"supporting-document-upload-{index}", "class": "govuk-file-upload"}
                 ),
-                validators=[FileExtensionValidator(allowed_extensions=accepted_file_extensions)],
+                validators=[
+                    FileExtensionValidator(allowed_extensions=accepted_file_extensions),
+                    validate_accepted_mime_type,
+                ],
             )
 
             fieldset_additions.append(f"supporting_document_{index}")

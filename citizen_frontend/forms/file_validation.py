@@ -29,18 +29,18 @@ accepted_mime_types = [
 ]
 
 
-def is_accepted_mime_type(file_bytes) -> None:
-    file_bytes.seek(0)
+def validate_accepted_mime_type(file_object) -> None:
+    file_object.seek(0)
 
-    if zipfile.is_zipfile(file_bytes):
-        detected_mime_type = detect_ooxml(file_bytes)
+    if zipfile.is_zipfile(file_object):
+        detected_mime_type = detect_ooxml(file_object)
     else:
-        sample = file_bytes.read(4096)
+        sample = file_object.read(4096)
         detected_mime_type = magic.from_buffer(sample, mime=True)
 
     if detected_mime_type not in accepted_mime_types:
         raise ValidationError("File is not accepted")
-    file_bytes.seek(0)
+    file_object.seek(0)
 
 
 def detect_ooxml(file_bytes):
