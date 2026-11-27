@@ -35,11 +35,3 @@ class FormNotFoundException(Exception):
 
 class FormNotPublishedException(Exception):
     pass
-
-
-class VirusScannerUnavailableError(Exception):
-    pass
-
-
-class FileTooLargeException(Exception):
-    pass
