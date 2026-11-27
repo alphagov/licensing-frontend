@@ -30,6 +30,7 @@ class S3Service(DocumentStorage):
 
     def store_file(self, path: str, file: BinaryIO, content_type: str | None):
         try:
+            logger.info("Uploading file to S3.")
             extra_args = {"ContentType": content_type} if content_type else {}
             self.client.upload_fileobj(file, Bucket=self.bucket_name, Key=path, ExtraArgs=extra_args)
         except ClientError as e:
@@ -38,6 +39,7 @@ class S3Service(DocumentStorage):
 
     def get_file(self, key: str):
         try:
+            logger.info("Getting file from S3.")
             response = self.client.get_object(Bucket=self.bucket_name, Key=key)
             return response["Body"]
 

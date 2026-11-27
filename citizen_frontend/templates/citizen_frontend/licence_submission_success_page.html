@@ -22,7 +22,7 @@
 
     <h2 class="govuk-heading-s">What happens next?</h2>
     <p class="govuk-body" data-testid="what-next">
-        {{ application.authority }} has been notified of your application.
+        {{ authority.full_name }} has been notified of your application.
         {% if application.has_supporting_documents_online %}
             Assuming the form
             {% if has_supporting_documents %}

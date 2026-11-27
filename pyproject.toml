@@ -10,6 +10,7 @@ dependencies = [
     "requests>=2.34.2",
     "whitenoise>=6.12.0",
     "boto3>=1.44.1",
+    "govuk-bank-holidays>=0.19",
 ]
 
 [dependency-groups]
@@ -21,6 +22,7 @@ dev = [
     "pytest-playwright>=0.8.0",
     "ruff>=0.15.22",
     "moto[s3]>=5.2.5",
+    "freezegun>=1.5.5",
 ]
 
 [tool.ruff]
