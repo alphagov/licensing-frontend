@@ -32,9 +32,12 @@ services:
 
   citizen_frontend:
     depends_on:
-      - document_db
-      - ministack
-      - clamav
+      clamav:
+        condition: service_healthy
+      document_db:
+        condition: service_started
+      ministack:
+        condition: service_started
     build:
       context: .
       dockerfile: Dockerfile
@@ -55,7 +58,8 @@ services:
       AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
       S3_BUCKET: ${S3_BUCKET:-test-bucket}
       S3_ENDPOINT_URL: http://ministack:4566
-      VIRUS_SCANNER_ENDPOINT: http://clamav:3310
+      VIRUS_SCANNER_HOST: http://clamav
+      VIRUS_SCANNER_PORT: 3310
     ports:
       - ${CITIZEN_FRONTEND_PORT:-8000}:${CITIZEN_FRONTEND_PORT:-8000}
     develop:
