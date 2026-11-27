@@ -68,7 +68,7 @@ def licence_submission_success_page(
         has_supporting_documents and customisation.all_supporting_documents_are_mandatory
     )
     processing_days = customisation.format_processing_days
-    department = get_department(authority)
+    department = get_department(customisation)
 
     context = {
         "licence_name": licence.name,
@@ -92,9 +92,9 @@ def licence_submission_success_page(
     return context
 
 
-def get_department(authority: Authority):
+def get_department(customisation: Customisation):
     department_repo = DepartmentRepository()
-    department = department_repo.get_department_from_authority_slug(authority.url_slug)
+    department = department_repo.get_department_by_id(customisation.department)
     return department
 
 

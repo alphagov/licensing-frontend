@@ -12,6 +12,7 @@ dependencies = [
     "boto3>=1.44.1",
     "clamd>=1.0.2",
     "python-magic>=0.4.27",
+    "govuk-bank-holidays>=0.19",
 ]
 
 [dependency-groups]
@@ -23,6 +24,7 @@ dev = [
     "pytest-playwright>=0.8.0",
     "ruff>=0.15.22",
     "moto[s3]>=5.2.5",
+    "freezegun>=1.5.5",
 ]
 
 [tool.ruff]

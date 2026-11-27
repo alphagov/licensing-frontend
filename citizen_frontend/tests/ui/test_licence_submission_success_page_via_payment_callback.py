@@ -139,11 +139,12 @@ def test_page_has_application_reference(
 def test_page_has_notified_authority(get_dom_parser, test_payment_callback_success_url, mock_payment_callback_context):
     mock_payment_callback_context.return_value = {
         "application": TEST_LICENCE_APPLICATION,
+        "authority": TEST_AUTHORITY,
     }
     dom = get_dom_parser(test_payment_callback_success_url)
     what_next_text = dom.get_by_test_id("what-next").get_text()
 
-    assert TEST_LICENCE_APPLICATION.authority in what_next_text
+    assert TEST_AUTHORITY.full_name in what_next_text
 
 
 def test_page_references_online_supporting_documents_when_all_are_required(
@@ -251,11 +252,12 @@ def test_page_has_instructions_for_posting_supporting_documents_when_not_provide
     application_with_posted_docs.has_supporting_documents_online = False
     mock_payment_callback_context.return_value = {
         "application": application_with_posted_docs,
+        "authority": TEST_AUTHORITY,
     }
     dom = get_dom_parser(test_payment_callback_success_url)
     what_next_text = dom.get_by_test_id("what-next").get_text()
 
-    assert application_with_posted_docs.authority in what_next_text
+    assert TEST_AUTHORITY.full_name in what_next_text
     assert "You must now send in any supporting documentation to the address below." in what_next_text
 
 
