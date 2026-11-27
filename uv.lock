@@ -430,6 +430,7 @@ name = "licensing-common"
 version = "0.1.0"
 source = { virtual = "licensing_common" }
 dependencies = [
+    { name = "clamd" },
     { name = "django" },
     { name = "django-mongodb-backend" },
     { name = "pymongo" },
@@ -437,6 +438,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "clamd", specifier = ">=1.0.2" },
     { name = "django", specifier = ">=5.2.16" },
     { name = "django-mongodb-backend", specifier = ">=5.2.3" },
     { name = "pymongo", specifier = ">=4.17.0" },
@@ -461,6 +463,7 @@ dependencies = [
     { name = "gunicorn" },
     { name = "licensing-common" },
     { name = "pydantic" },
+    { name = "python-magic" },
     { name = "requests" },
     { name = "whitenoise" },
 ]
@@ -484,6 +487,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=26.2.0" },
     { name = "licensing-common", virtual = "licensing_common" },
     { name = "pydantic", specifier = ">=2.13.4" },
+    { name = "python-magic", specifier = ">=0.4.27" },
     { name = "requests", specifier = ">=2.34.2" },
     { name = "whitenoise", specifier = ">=6.12.0" },
 ]
@@ -889,6 +893,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/4c/81/58c70036dffeccb7fe7d79d6260c69f7a28272bbd3909c29a01ea9422744/python_discovery-1.4.4.tar.gz", hash = "sha256:5cad33982d412c1f3ffb8f9ca4ea292c9680bca3942451d30b69c37fce53a4a3", size = 72212, upload-time = "2026-07-08T23:06:50.691Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/9d/ae/84bc0d2440c95772272bb6f4b3d09ccf08b2898fce89b3d4f969a9fc74e9/python_discovery-1.4.4-py3-none-any.whl", hash = "sha256:abebe9120b43453b68c908acfb1e72a19d1a959ed2cb620ad38fc57d08056dbe", size = 34181, upload-time = "2026-07-08T23:06:49.402Z" },
+]
+
+[[package]]
+name = "python-magic"
+version = "0.4.27"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/db/0b3e28ac047452d079d375ec6798bf76a036a08182dbb39ed38116a49130/python-magic-0.4.27.tar.gz", hash = "sha256:c1ba14b08e4a5f5c31a302b7721239695b2f0f058d125bd5ce1ee36b9d9d3c3b", size = 14677, upload-time = "2022-06-07T20:16:59.508Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/73/9f872cb81fc5c3bb48f7227872c28975f998f3e7c2b1c16e95e6432bbb90/python_magic-0.4.27-py2.py3-none-any.whl", hash = "sha256:c212960ad306f700aa0d01e5d7a325d20548ff97eb9920dcd29513174f0294d3", size = 13840, upload-time = "2022-06-07T20:16:57.763Z" },
 ]
 
 [[package]]
