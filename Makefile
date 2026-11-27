@@ -6,6 +6,7 @@ prepare:
 	playwright install
 
 start:
+	mise exec -- docker compose build --no-cache
 	mise exec -- docker compose up -d
 	AWS_ACCESS_KEY_ID=test \
 	AWS_SECRET_ACCESS_KEY=test \

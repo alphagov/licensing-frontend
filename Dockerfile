@@ -1,6 +1,6 @@
 FROM python:3.14-slim-bookworm@sha256:86f975aca15cf04a40b399eebede9aea7c82eae084d1f1a0a6ef6bcaae871a30 AS builder
 
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates libmagic
+RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates
 
 ADD https://astral.sh/uv/install.sh /uv-installer.sh
 
@@ -26,6 +26,9 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 ENV PATH="/app/.venv/bin:$PATH"
 
 FROM python:3.14-slim-bookworm@sha256:86f975aca15cf04a40b399eebede9aea7c82eae084d1f1a0a6ef6bcaae871a30
+
+RUN apt-get update && apt-get install -y --no-install-recommends libmagic1 \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd --system --gid 999 nonroot \
  && useradd --system --gid 999 --uid 999 --create-home nonroot

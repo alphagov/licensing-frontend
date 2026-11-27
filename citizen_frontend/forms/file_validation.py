@@ -2,6 +2,7 @@ import zipfile
 
 import magic
 from django.core.exceptions import ValidationError
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 OFFICE_CONTENT_TO_MIME = {
     "word/document.xml": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -29,7 +30,7 @@ accepted_mime_types = [
 ]
 
 
-def validate_accepted_mime_type(file_object) -> None:
+def validate_accepted_mime_type(file_object: SimpleUploadedFile) -> None:
     file_object.seek(0)
 
     if zipfile.is_zipfile(file_object):
@@ -39,14 +40,14 @@ def validate_accepted_mime_type(file_object) -> None:
         detected_mime_type = magic.from_buffer(sample, mime=True)
 
     if detected_mime_type not in accepted_mime_types:
-        raise ValidationError("File is not accepted")
+        raise ValidationError(f"File: {file_object.name} is not of an accepted file type")
     file_object.seek(0)
 
 
-def detect_ooxml(file_bytes):
-    with zipfile.ZipFile(file_bytes, "r") as zf:
+def detect_ooxml(file_object):
+    with zipfile.ZipFile(file_object, "r") as zf:
         entries = set(zf.namelist())
         for key, value in OFFICE_CONTENT_TO_MIME.items():
             if key in entries:
                 return value
-        raise ValidationError("File is not accepted")
+        raise ValidationError(f"File: {file_object.name} is not of an accepted file type")
