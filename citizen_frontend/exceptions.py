@@ -35,3 +35,7 @@ class FormNotFoundException(Exception):
 
 class FormNotPublishedException(Exception):
     pass
+
+
+class InvalidFileUploadException(Exception):
+    pass
