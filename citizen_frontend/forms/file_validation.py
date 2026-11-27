@@ -7,15 +7,17 @@ from citizen_frontend.exceptions import InvalidFileUploadException
 OFFICE_CONTENT_TO_MIME = {
     "word/document.xml": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "ppt/presentation.xml": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "xl/workbook.xml": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "xl/workbook.xml": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 }
 
 accepted_mime_types = [
     "application/pdf",
     "image/png",
     "image/jpeg",
-    "image/giftext/plain",
+    "image/gif",
+    "text/plain",
     "text/rtf",
+    "application/rtf",
     "application/msexcel",
     "application/mspowerpoint",
     "application/msword",
@@ -24,7 +26,7 @@ accepted_mime_types = [
     "application/vnd.ms-word",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
 ]
 
 
@@ -49,6 +51,4 @@ def detect_ooxml(file_bytes):
         for key, value in OFFICE_CONTENT_TO_MIME.items():
             if key in entries:
                 return value
-            else:
-                raise InvalidFileUploadException("File is not accepted")
-        return None
+        raise InvalidFileUploadException("File is not accepted")
