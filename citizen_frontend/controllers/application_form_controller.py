@@ -4,8 +4,8 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-import citizen_frontend.exceptions as exceptions
 from citizen_frontend.api.utils import INTERACTION_WORD_MAPPING
+from citizen_frontend.exceptions import LicenceSubmissionError
 from citizen_frontend.forms.licence_submission import ApplicationSubmissionForm
 from citizen_frontend.repository import interaction_customisation_repository
 from citizen_frontend.services import licence_lookup_service
@@ -87,12 +87,16 @@ def generate_application_form(
         context.update({"form": form})
 
         return render(request, "citizen_frontend/licence_submission_page.html", context)
-    except exceptions.LicenceSubmissionError("Failed to submit application") as e:
+    except LicenceSubmissionError as e:
         logger.error("Failed to submit licence application")
         logger.error(e)
         return render(
-            request=request, template_name="citizen_frontend/error.html", context={"message": e.args[0]}, status=500
+            request=request,
+            template_name="citizen_frontend/error.html",
+            context={"message": "Failed to submit application"},
+            status=500,
         )
+    # TODO do we want a decorator to catch unhandled exceptions and what should we return
     except Exception as e:
         logger.error(e)
         raise Http404("Incorrect licence, or authority does not exist") from e
