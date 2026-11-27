@@ -10,11 +10,29 @@ from citizen_frontend.forms.file_validation import is_accepted_mime_type
 
 @pytest.fixture
 def sample_zip_bytes() -> io.BytesIO:
-    buf = io.BytesIO()
-    with zipfile.ZipFile(buf, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         zf.writestr("notes.txt", "hello from memory")
-    buf.seek(0)
-    return buf
+    buffer.seek(0)
+    return buffer
+
+
+def build_ooxml_bytes(entries: dict[str, bytes]) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for filename, content in entries.items():
+            zf.writestr(filename, content)
+    return buffer.getvalue()
+
+
+@pytest.fixture
+def valid_docx_bytes() -> bytes:
+    return build_ooxml_bytes(
+        {
+            "[Content_Types].xml": b"<Types></Types>",
+            "word/document.xml": b"<w:document></w:document>",
+        }
+    )
 
 
 def test_is_accepted_mime_type_returns_true_simple_file_mimetype():
@@ -24,8 +42,9 @@ def test_is_accepted_mime_type_returns_true_simple_file_mimetype():
     assert is_accepted_mime_type(test_file)
 
 
-def test_is_accepted_mime_type_returns_true_ooxml_file():
-    pass
+def test_is_accepted_mime_type_returns_true_ooxml_file(valid_docx_bytes):
+    test_file = SimpleUploadedFile(name="test.docx", content_type="application/octet-stream", content=valid_docx_bytes)
+    assert is_accepted_mime_type(test_file)
 
 
 def test_is_accepted_mime_type_raises_error_zip_file(sample_zip_bytes):
@@ -35,4 +54,18 @@ def test_is_accepted_mime_type_raises_error_zip_file(sample_zip_bytes):
 
 
 def test_is_accepted_mime_type_raises_error_when_file_is_not_allowed():
+    # Same as above really
     pass
+
+
+# def test_invalid_ooxml_raises_validation_error_directly():
+#   mismatched_upload = SimpleUploadedFile(
+#       "spreadsheet_as_doc.docx",
+#       build_ooxml_bytes({
+#           "[Content_Types].xml": b"<Types></Types>",
+#           "xl/workbook.xml": b"<workbook></workbook>",
+#       }),
+#   )
+#
+#   with pytest.raises(ValidationError):
+#     validate_document_upload(mismatched_upload, {".docx"})
