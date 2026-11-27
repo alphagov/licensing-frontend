@@ -46,7 +46,6 @@ class ApplicationSubmission:
         self.supporting_document_files = {
             key: file for key, file in self.application.files.items() if key.startswith("supporting_document_")
         }
-        # TODO extract to enum? no to live in __init__?
         self.divisions = {
             Countries.ENGLAND.value: "england-and-wales",
             Countries.NORTHERN_IRELAND.value: "northern-ireland",
@@ -143,6 +142,7 @@ class ApplicationSubmission:
             ),
         )
 
+    # TODO these should probably live on the interaction customisation model
     def _calculate_expected_processing_date(
         self,
     ) -> datetime.date:
